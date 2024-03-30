@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/example/public_html/
+    - index.html $DEPLOYPATH
+    - index2.html $DEPLOYPATH
+    - -R assets $DEPLOYPATH
