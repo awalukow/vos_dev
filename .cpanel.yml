@@ -2,6 +2,7 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/voih2656/public_html/
-    - index.html $DEPLOYPATH
-    - index2.html $DEPLOYPATH
-    - -R assets $DEPLOYPATH
+    #- index.html $DEPLOYPATH
+    #- index2.html $DEPLOYPATH
+    #- -R assets $DEPLOYPATH
+    - - /bin/cp -r * $DEPLOYPATH
