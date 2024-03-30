@@ -5,4 +5,4 @@ deployment:
     #- index.html $DEPLOYPATH
     #- index2.html $DEPLOYPATH
     #- -R assets $DEPLOYPATH
-    - - /bin/cp -r * $DEPLOYPATH
+    - /bin/cp -r * $DEPLOYPATH
