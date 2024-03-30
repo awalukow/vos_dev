@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/voih2656/public_html/developer.voiceofsoulchoirindonesia.com/
-    - /bin/cp -R * $DEPLOYPATH
+    - export DEPLOYPATH=/home/voih2656/public_html/
+    - /bin/cp -R $DEPLOYPATH
