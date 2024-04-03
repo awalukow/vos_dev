@@ -10,18 +10,18 @@
     
     <link href="https://fonts.googleapis.com/css?family=Crimson+Text:400,400i,600|Montserrat:200,300,400, 600, 700" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{asset('assets/css/bootstrap/bootstrap.css')}}">
-    <link rel="stylesheet" href="{{asset('assets/fonts/ionicons/css/ionicons.min.css')}}">
-    <link rel="stylesheet" href="{{asset('assets/css/magnific-popup.css')}}">
+    <link rel="stylesheet" href="assets/css/bootstrap/bootstrap.css">
+    <link rel="stylesheet" href="assets/fonts/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="assets/css/magnific-popup.css">
 
-    <link rel="stylesheet" href="{{asset('assets/fonts/fontawesome/css/font-awesome.min.css')}}">
+    <link rel="stylesheet" href="assets/fonts/fontawesome/css/font-awesome.min.css">
     
     
-    <link rel="stylesheet" href="{{asset('assets/css/slick.css')}}">
+    <link rel="stylesheet" href="assets/css/slick.css">
 
-    <link rel="stylesheet" href="{{asset('assets/css/helpers.css')}}">
-    <link rel="stylesheet" href="{{asset('assets/css/style.css')}}">
-    <link rel="stylesheet" href="{{asset('assets/css/restaurant.css')}}">
+    <link rel="stylesheet" href="assets/css/helpers.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/restaurant.css">
   </head>
   <body data-spy="scroll" data-target="#pb-navbar" data-offset="200">
     
@@ -32,8 +32,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark pb_navbar pb_scrolled-light" id="pb-navbar">
       <div class="container">
         <a class="navbar-brand d-xl-none d-lg-none d-md-block d-sm-block" href="/">
-          <img src="{{asset('assets/images/logo-light.png')}}" alt="VOS Logo" class="light" height="30px" width="43px">
-          <img src="{{asset('assets/images/logo-dark.png')}}" alt="VOS Logo" class="dark">
+          <img src="assets/images/logo-light.png" alt="VOS Logo" class="light" height="30px" width="43px">
+          <img src="assets/images/logo-dark.png" alt="VOS Logo" class="dark">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#probootstrap-navbar" aria-controls="probootstrap-navbar" aria-expanded="false" aria-label="Toggle navigation">
           <span><i class="ion-navicon"></i></span>
@@ -45,8 +45,8 @@
             <li class="nav-item"><a class="nav-link text-uppercase pb_letter-spacing-2" href="#section-menu">Our Musics</a></li>
             <li class="nav-item logo-center d-xl-block d-lg-block d-md-none d-sm-none d-none">
               <a class="nav-link text-uppercase pb_letter-spacing-2" href="index.html">
-                <img src="{{asset('assets/images/logo-light.png')}}" alt="VOS Logo" class="light" height="30px" width="43px">
-                <img src="{{asset('assets/images/logo-dark.png')}}" alt="VOS Logo" class="dark">
+                <img src="assets/images/logo-light.png" alt="VOS Logo" class="light" height="30px" width="43px">
+                <img src="assets/images/logo-dark.png" alt="VOS Logo" class="dark">
               </a>
             </li>
             <li class="nav-item"><a class="nav-link text-uppercase pb_letter-spacing-2" href="#section-gallery">Gallery</a></li>
@@ -58,7 +58,7 @@
     </nav>
     <!-- END nav -->
 
-    <section class="pb_cover_v1 cover-bg-black cover-bg-opacity-4 text-center" style="background-image: url({{asset('assets/images/img1.jpg')}})" id="section-home">
+    <section class="pb_cover_v1 cover-bg-black cover-bg-opacity-4 text-center" style="background-image: url(assets/images/img1.jpg)" id="section-home">
       <div class="container">
         <div class="row align-items-center justify-content-center">
           <div class="col-md-9  order-md-1">
@@ -78,10 +78,10 @@
           <div class="col-lg-8 mb-5">
             <div class="row">
               <div class="col">
-                <p><img src="{{asset('assets/images/img-profile-1.jpg')}}" alt="Instant Image" class="img-fluid"></p>
+                <p><img src="assets/images/img-profile-1.jpg" alt="Instant Image" class="img-fluid"></p>
               </div>
               <div class="col">
-                <p><img src="{{asset('assets/images/img-profile-2.jpg')}}" alt="Instant Image" class="img-fluid"></p>
+                <p><img src="assets/images/img-profile-2.jpg" alt="Instant Image" class="img-fluid"></p>
               </div>
             </div>
           </div>
@@ -203,7 +203,7 @@
     </section>
     <!-- END section -->
 
-    <section class="pb_md_py_cover text-center cover-bg-black cover-bg-opacity-4" style="background-image: url({{asset('assets/images/restaurant/1900x1200/img_1.jpg')}})" id="section-home">
+    <section class="pb_md_py_cover text-center cover-bg-black cover-bg-opacity-4" style="background-image: url(assets/images/restaurant/1900x1200/img_1.jpg)" id="section-home">
       <div class="container">
         <div class="row align-items-center justify-content-center">
           <div class="col-md-9  order-md-1">
@@ -226,51 +226,51 @@
           <div class="col">
             <div class="card-columns">
               <div class="card border-0 mb-4">
-                <a href="{{asset('assets/images/imgs/image-1.jpg')}}" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="{{asset('assets/images/imgs/image-1.jpg')}}" alt="Image caption here">
+                <a href="assets/images/imgs/image-1.jpg" class="pb_hover-zoom image-popup">
+                  <img class="img-fluid" src="assets/images/imgs/image-1.jpg" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
-                <a href="{{asset('assets/images/imgs/image-2.jpg')}}" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="{{asset('assets/images/imgs/image-2.jpg')}}" alt="Image caption here">
+                <a href="assets/images/imgs/image-2.jpg" class="pb_hover-zoom image-popup">
+                  <img class="img-fluid" src="assets/images/imgs/image-2.jpg" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
-                <a href="{{asset('assets/images/imgs/image-3.jpg')}}" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="{{asset('assets/images/imgs/image-3.jpg')}}" alt="Image caption here">
+                <a href="assets/images/imgs/image-3.jpg" class="pb_hover-zoom image-popup">
+                  <img class="img-fluid" src="assets/images/imgs/image-3.jpg" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
-                <a href="{{asset('assets/images/imgs/image-4.jpg')}}" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="{{asset('assets/images/imgs/image-4.jpg')}}" alt="Image caption here">
+                <a href="assets/images/imgs/image-4.jpg" class="pb_hover-zoom image-popup">
+                  <img class="img-fluid" src="assets/images/imgs/image-4.jpg" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
-                <a href="{{asset('assets/images/imgs/image-5.jpg')}}" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="{{asset('assets/images/imgs/image-5.jpg')}}" alt="Image caption here">
+                <a href="assets/images/imgs/image-5.jpg" class="pb_hover-zoom image-popup">
+                  <img class="img-fluid" src="assets/images/imgs/image-5.jpg" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
-                <a href="{{asset('assets/images/imgs/image-6.jpg')}}" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="{{asset('assets/images/imgs/image-6.jpg')}}" alt="Image caption here">
+                <a href="assets/images/imgs/image-6.jpg" class="pb_hover-zoom image-popup">
+                  <img class="img-fluid" src="assets/images/imgs/image-6.jpg" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
-                <a href="{{asset('assets/images/imgs/image-7.jpg')}}" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="{{asset('assets/images/imgs/image-7.jpg')}}" alt="Image caption here">
+                <a href="assets/images/imgs/image-7.jpg" class="pb_hover-zoom image-popup">
+                  <img class="img-fluid" src="assets/images/imgs/image-7.jpg" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               
               <div class="card border-0 mb-4">
-                <a href="{{asset('assets/images/imgs/image-8.jpg')}}" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="{{asset('assets/images/imgs/image-8.jpg')}}" alt="Image caption here">
+                <a href="assets/images/imgs/image-8.jpg" class="pb_hover-zoom image-popup">
+                  <img class="img-fluid" src="assets/images/imgs/image-8.jpg" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
@@ -293,7 +293,7 @@
               <div class="media-body">
                 <div class="quote pb_text-black">&ldquo;</div>
                 <blockquote class="mb-5 pb_font-20">Konser tahunan berjudul "30 Days Before Christmas" dengan tema natal, dan juga membawakan lagu-lagu sekuler dari berbagai komposer. Konser tersebut juga merupakan konser ucapan syukur HUT Voice of Soul ke 18 Tahun.</blockquote>
-                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="{{asset('assets/images/persons/concert-1.jpg')}}" alt="Generic placeholder image">
+                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="assets/images/persons/concert-1.jpg" alt="Generic placeholder image">
                 <h3 class="heading">30 Days Before Christmas Concert</h3>
                 <p class="subheading">Jakarta, 2023</p>
               </div>
@@ -304,7 +304,7 @@
               <div class="media-body">
                 <div class="quote pb_text-black">&ldquo;</div>
                 <blockquote class="mb-5 pb_font-20">Rimini International Choral Competition (RICC) - 13th edition yang diorganisir oleh Musica Ficta, Music Association Rimini dan diselenggarakan pada bulan September di kota Rimini, Italia adalah lomba terakhir yang diikuti sebelum masa pandemi global.</blockquote>
-                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="{{asset('assets/images/persons/rimini-1.jpg')}}" alt="Generic placeholder image">
+                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="assets/images/persons/rimini-1.jpg" alt="Generic placeholder image">
                 <h3 class="heading">Rimini International Choral Competition</h3>
                 <p class="subheading">Italy, 2019</p>
                 
@@ -317,7 +317,7 @@
               <div class="media-body">
                 <div class="quote pb_text-black">&ldquo;</div>
                 <blockquote class="mb-5 pb_font-20">Tahun 2016 VOS kembali berpartisipasi di ajang lomba paduan suara internasional, untuk kedua kalinya di Busan Choral Festival & Competition (BCFC) 12th edition yang diselenggarakan di kota Busan, Korea Selatan pada bulan Oktober.</blockquote>
-                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="{{asset('assets/images/persons/busan-1.jpg')}}" alt="Generic placeholder image">
+                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="assets/images/persons/busan-1.jpg" alt="Generic placeholder image">
                 <h3 class="heading">2016 Busan Choral Festival & Competition</h3>
                 <p class="subheading">Korea, 2016</p>
                 
@@ -328,7 +328,7 @@
       </div>
     </section>
     <!-- END section -->
-    <section class="pb_md_py_cover text-center cover-bg-black cover-bg-opacity-4" style="background-image: url({{asset('assets/images/restaurant/1900x1200/img_1.jpg)')}}" id="section-home">
+    <section class="pb_md_py_cover text-center cover-bg-black cover-bg-opacity-4" style="background-image: url(assets/images/restaurant/1900x1200/img_1.jpg)" id="section-home">
       <div class="container">
         <div class="row align-items-center justify-content-center">
           <div class="col-md-9  order-md-1">
@@ -351,7 +351,7 @@
         <div class="row">
           <div class="card-deck">
             <div class="card border-0">
-              <img class="card-img-top" src="{{asset('assets/images/vos-logo.jpg')}}" alt="Image caption here">
+              <img class="card-img-top" src="assets/images/vos-logo.jpg" alt="Image caption here">
               <div class="card-body pb_p-40">
                 <small class="text-uppercase pb_color-dark-opacity-3 font-weight-bold">May 18th, 2024</small>
                 <h4 class="card-title"><a href="#" class="te`xt-danger">Konser Gibeon Bermazmur</a></h4>
@@ -359,7 +359,7 @@
               </div>
             </div>
             <div class="card border-0">
-              <img class="card-img-top" src="{{asset('assets/images/ticc.jpg')}}" alt="Image caption here">
+              <img class="card-img-top" src="assets/images/ticc.jpg" alt="Image caption here">
               <div class="card-body pb_p-40">
                 <small class="text-uppercase pb_color-dark-opacity-3 font-weight-bold">July, 2024</small>
                 <h4 class="card-title"><a href="#" class="text-danger">2024 Tokyo International Choir Competition</a></h4>
@@ -397,24 +397,24 @@
     <div id="pb_loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#FDA04F"/></svg></div>
     
 
-    <script src="{{asset('assets/js/jquery.min.js')}}"></script>
+    <script src="assets/js/jquery.min.js"></script>
     
-    <script src="{{asset('assets/js/popper.min.js')}}"></script>
-    <script src="{{asset('assets/js/bootstrap.min.js')}}"></script>
-    <script src="{{asset('assets/js/slick.min.js')}}"></script>
-    <script src="{{asset('assets/js/jquery.mb.YTPlayer.min.js')}}"></script>
+    <script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/slick.min.js"></script>
+    <script src="assets/js/jquery.mb.YTPlayer.min.js"></script>
 
-    <script src="{{asset('assets/js/jquery.waypoints.min.js')}}"></script>
-    <script src="{{asset('assets/js/jquery.easing.1.3.js')}}"></script>
+    <script src="assets/js/jquery.waypoints.min.js"></script>
+    <script src="assets/js/jquery.easing.1.3.js"></script>
     
-    <script src="{{asset('assets/js/jquery.magnific-popup.min.js')}}"></script>
-    <script src="{{asset('assets/js/magnific-popup-options.js')}}"></script>
+    <script src="assets/js/jquery.magnific-popup.min.js"></script>
+    <script src="assets/js/magnific-popup-options.js"></script>
   
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
-    <script src="{{asset('assets/js/google-map.js')}}"></script>
+    <script src="assets/js/google-map.js"></script>
 
-    <script src="{{asset('assets/js/main.js')}}"></script>
+    <script src="assets/js/main.js"></script>
     
   </body>
 </html>
