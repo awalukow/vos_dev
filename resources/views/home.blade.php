@@ -341,37 +341,31 @@
       </div>
     </section>
     <!-- END section -->
-    <section class="pb_section bg-light" id="section-events">
-      <div class="container">
+    <!-- BEGIN section -->
+<section class="pb_section bg-light" id="section-events">
+    <div class="container">
         <div class="row justify-content-center mb-5">
-          <div class="col-md-10 text-center">
-            <h2 class="mb-4 text-uppercase pb_letter-spacing-2">Events</h2>
-          </div>
+            <div class="col-md-10 text-center">
+                <h2 class="mb-4 text-uppercase pb_letter-spacing-2">Events</h2>
+            </div>
         </div>
         <div class="row">
-          <div class="card-deck">
-            <div class="card border-0">
-              <img class="card-img-top" src="assets/images/vos-logo.jpg" alt="Image caption here">
-              <div class="card-body pb_p-40">
-                <small class="text-uppercase pb_color-dark-opacity-3 font-weight-bold">May 18th, 2024</small>
-                <h4 class="card-title"><a href="#" class="te`xt-danger">Konser Gibeon Bermazmur</a></h4>
-                <p class="card-text">Konser VOS untuk membantu pelayanan dan pembangunan GPIB Gibeon melalui puji-pujian gereja</p>
-              </div>
+            <div class="card-deck">
+                @foreach($events as $event)
+                <div class="card border-0">
+                    <img class="card-img-top" src="assets/images/{{ $event->event_image }}" alt="{{ $event->event_imageCaptionUrl }}">
+                    <div class="card-body pb_p-40">
+                        <small class="text-uppercase pb_color-dark-opacity-3 font-weight-bold">{{ $event->program_date->format('M dS, Y') }}</small>
+                        <h4 class="card-title"><a href="#" class="text-danger">{{ $event->event_name }}</a></h4>
+                        <p class="card-text">{{ $event->event_detail }}</p>
+                    </div>
+                </div>
+                @endforeach
             </div>
-            <div class="card border-0">
-              <img class="card-img-top" src="assets/images/ticc.jpg" alt="Image caption here">
-              <div class="card-body pb_p-40">
-                <small class="text-uppercase pb_color-dark-opacity-3 font-weight-bold">July, 2024</small>
-                <h4 class="card-title"><a href="#" class="text-danger">2024 Tokyo International Choir Competition</a></h4>
-                <p class="card-text">Kompetisi paduan suara Internasional yang akan dilaksanakan pertengahan tahun 2024 di Tokyo, Jepang.</p>
-              </div>
-            </div>
-          </div>
-          </div>
         </div>
-      </div>
-    </section>
-    <!-- END section -->
+    </div>
+</section>
+<!-- END section -->
 
     <footer class="pb_footer bg-light" role="contentinfo">
       <div class="container">

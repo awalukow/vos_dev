@@ -16,11 +16,16 @@ return new class extends Migration
         Schema::create('schedule', function ($table) {
             $table->increments('id');
             $table->datetime('program_date');
+            $table->datetime('program_until');
+            $table->string('event_name');
+            $table->string('event_detail');
+            $table->string('event_image');
+            $table->string('event_imageCaptionUrl');
             $table->integer('rowstatus');
             $table->string('createdBy');
-            $table->timestamp('createdDate');
+            $table->timestamp('createdDate')->nullable();
             $table->string('modifiedBy');
-            $table->timestamp('modifiedDate');
+            $table->timestamp('modifiedDate')->nullable();
         });
     }
 
