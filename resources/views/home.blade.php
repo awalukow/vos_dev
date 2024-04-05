@@ -381,7 +381,7 @@
         </div>
         <div class="row">
           <div class="col text-center">
-            <p>&copy; 2023 <a href="">Voice of Soul Choir</a>. All Rights Reserved. Designed by <a href="">Axcellent Christian</a></p>
+            <p>&copy; 2024 <a href="">Voice of Soul Choir</a>. All Rights Reserved. Designed by <a href="">Axcellent Christian</a></p>
           </div>
         </div>
       </div>
