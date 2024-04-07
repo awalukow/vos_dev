@@ -49,6 +49,7 @@
             </li>
             <li class="nav-item"><a class="nav-link text-uppercase pb_letter-spacing-2" href="#section-gallery">Gallery</a></li>
             <li class="nav-item"><a class="nav-link text-uppercase pb_letter-spacing-2" href="#section-events">Events</a></li>
+            <li class="nav-item"><a class="nav-link text-uppercase pb_letter-spacing-2" href="#regular-service">Schedule</a></li>
             <!--<li class="nav-item"><a class="nav-link text-uppercase pb_letter-spacing-2" href="#section-contact">Contact</a></li>-->
           </ul>
         </div>
@@ -364,6 +365,43 @@
     </div>
 </section>
 <!-- END section -->
+
+<!-- BEGIN section -->
+<section class="pb_section bg-light" id="regular-service">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-10 text-center">
+                <h2 class="mb-4 text-uppercase pb_letter-spacing-2">Upcoming Schedule</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Location</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($services as $service)
+                            <tr>
+                                <td>{{ $service->event_name }}</td>
+                                <td>{{ $service->event_detail }}</td>
+                                <td>{{ $service->program_date->format('M dS, Y') }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- END section -->
+
 
     <footer class="pb_footer bg-light" role="contentinfo">
       <div class="container">

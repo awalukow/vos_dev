@@ -12,4 +12,7 @@ class ScheduleModel extends Model
     protected $casts = [
         'program_date' => 'datetime',
     ];
+    protected $isService = [
+        'isSundayService' => 'boolean',
+    ];
 }

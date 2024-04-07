@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('event_detail');
             $table->string('event_image');
             $table->string('event_imageCaptionUrl');
+            $table->boolean('isSundayService');
             $table->integer('rowstatus');
             $table->string('createdBy');
             $table->timestamp('createdDate')->nullable();
