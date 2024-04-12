@@ -374,7 +374,7 @@
                             @endforeach
                         </tbody>
                     </table>
-                    {{ $services->links() }}
+                    <!--{{ $services->links() }}-->
                 </div>
             </div>
         </div>
