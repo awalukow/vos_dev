@@ -31,7 +31,7 @@ class HomeController extends Controller
                                ->where('isSundayService', true)
                                ->where('rowstatus', '>= 0')
                                ->orderBy('program_date')
-                               ->paginate(10);
+                               ->paginate(5);
         
         return view('home'
             , ['events' => $events]

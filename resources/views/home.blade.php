@@ -43,7 +43,7 @@
             <a href="https://www.youtube.com/watch?v=iVLhCDQK-vI" class="play popup-vimeo"><i class="ion-ios-play"></i></a>
             <h2 class="heading mb-3">Voice of Soul Choir</h2>
             <div class="sub-heading"><p class="mb-5">menjadi paduan suara yang mempunyai kapabilitas dan integritas dalam memuliakan Tuhan dan dengan itu menjadi berkat bagi siapapun yang mendengarkan.</p></div>
-            <p><a href="#section-events" role="button" class="btn smoothscroll pb_outline-light rounded-0 btn-xl pb_font-13 pb_letter-spacing-2 p-3">Our Upcomming Events</a></p>
+            <p><a href="#section-events" role="button" class="btn smoothscroll pb_outline-light rounded-0 btn-xl pb_font-13 pb_letter-spacing-2 p-3">Our Upcoming Events</a></p>
           </div>  
         </div>
       </div>
