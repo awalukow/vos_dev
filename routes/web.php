@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\DocumentValidationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +19,10 @@ Route::get('/', function () {
 });
 
 Route::get('/', [HomeController::class, 'index']);
+
+//Route::get('/verify', 'DocumentValidationController@showDocumentValidation');
+//Route::get('/verify', [DocumentValidationController::class, 'showDocumentValidation_old']);
+Route::get('/verify/{id}', [DocumentValidationController::class, 'showDocumentValidation']);
 
 
 

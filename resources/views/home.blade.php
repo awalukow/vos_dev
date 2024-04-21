@@ -1,5 +1,6 @@
 @extends('commonTemplate')
 @section('content')
+<title>Home &mdash; Voice of Soul Choir</title>
   <body data-spy="scroll" data-target="#pb-navbar" data-offset="200">
     
 
