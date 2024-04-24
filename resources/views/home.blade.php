@@ -369,7 +369,7 @@
                             @foreach($services as $service)
                             <tr>
                                 <td>{{ $service->event_name }}</td>
-                                <td>{{ $service->event_detail }}</td>
+                                <td><a href="{{ $service->event_location }}" target="_blank">{{ $service->event_detail }}</a></td>
                                 <td>{{ $service->program_date->format('M dS, Y') }}</td>
                             </tr>
                             @endforeach
