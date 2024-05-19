@@ -320,7 +320,7 @@
       </div>
     </section>
     <!-- END section -->
-    <!-- BEGIN section -->
+<!-- BEGIN section -->
 <section class="pb_section bg-light" id="section-events">
     <div class="container">
         <div class="row justify-content-center mb-5">
@@ -334,7 +334,9 @@
                 <div class="card border-0">
                     <img class="card-img-top" src="assets/images/{{ $event->event_image }}" alt="{{ $event->event_imageCaptionUrl }}">
                     <div class="card-body pb_p-40">
-                        <small class="text-uppercase pb_color-dark-opacity-3 font-weight-bold">{{ $event->program_date->format('M dS, Y') }}</small>
+                        <small class="text-uppercase pb_color-dark-opacity-3 font-weight-bold">
+                            {{ $event->program_date ? $event->program_date->format('M dS, Y') : 'Coming Soon' }}
+                        </small>
                         <h4 class="card-title"><a href="#" class="text-danger">{{ $event->event_name }}</a></h4>
                         <p class="card-text">{{ $event->event_detail }}</p>
                     </div>
@@ -344,6 +346,7 @@
         </div>
     </div>
 </section>
+  
 <!-- END section -->
 
 <!-- BEGIN section -->
