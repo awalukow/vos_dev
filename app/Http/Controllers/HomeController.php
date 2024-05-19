@@ -20,7 +20,7 @@ class HomeController extends Controller
     {
         $today = Carbon::now();
         
-        $events = ScheduleModel::where('program_date', '>=', $today)
+        $events = ScheduleModel::where('program_until', '>=', $today)
                                ->where('isSundayService', false)
                                ->where('rowstatus', '>= 0')
                                ->orderBy('program_date')
