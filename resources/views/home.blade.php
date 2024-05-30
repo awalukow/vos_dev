@@ -295,10 +295,10 @@
               
               <div class="media-body">
                 <div class="quote pb_text-black">&ldquo;</div>
-                <blockquote class="mb-5 pb_font-20">Tahun 2016 VOS kembali berpartisipasi di ajang lomba paduan suara internasional, untuk kedua kalinya di Busan Choral Festival & Competition (BCFC) 12th edition yang diselenggarakan di kota Busan, Korea Selatan pada bulan Oktober.</blockquote>
-                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="assets/images/persons/busan-1.jpg" alt="Generic placeholder image">
-                <h3 class="heading">2016 Busan Choral Festival & Competition</h3>
-                <p class="subheading">Korea, 2016</p>
+                <blockquote class="mb-5 pb_font-20">Sebuah konser yang bertujuan untuk membantu ekonomi pembangunan gereja-gereja di Indonesia. Menjadi salah satu konser rutin VOS, dan merupakan perwujudan misi VOS dalam memuliakan Tuhan dan membangun gerejaNya. 100% hasil konser menjadi bagian dari kas pembangunan gereja</blockquote>
+                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="assets/images/persons/gibeon-bermazmur.jpg" alt="Generic placeholder image">
+                <h3 class="heading">Gibeon Bermazmur</h3>
+                <p class="subheading">Jakarta, 2024</p>
                 
               </div>
             </div>
