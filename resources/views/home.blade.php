@@ -206,50 +206,50 @@
             <div class="card-columns">
               <div class="card border-0 mb-4">
                 <a href="assets/images/imgs/image-1.jpg" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="assets/images/imgs/image-1.jpg" alt="Image caption here">
+                  <img class="img-fluid" src="assets/images/imgs/image-1.jpg" loading="lazy" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
                 <a href="assets/images/imgs/image-2.jpg" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="assets/images/imgs/image-2.jpg" alt="Image caption here">
+                  <img class="img-fluid" src="assets/images/imgs/image-2.jpg" loading="lazy" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
                 <a href="assets/images/imgs/image-3.jpg" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="assets/images/imgs/image-3.jpg" alt="Image caption here">
+                  <img class="img-fluid" src="assets/images/imgs/image-3.jpg" loading="lazy" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
                 <a href="assets/images/imgs/image-4.jpg" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="assets/images/imgs/image-4.jpg" alt="Image caption here">
+                  <img class="img-fluid" src="assets/images/imgs/image-4.jpg" loading="lazy" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
                 <a href="assets/images/imgs/image-5.jpg" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="assets/images/imgs/image-5.jpg" alt="Image caption here">
+                  <img class="img-fluid" src="assets/images/imgs/image-5.jpg" loading="lazy" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
                 <a href="assets/images/imgs/image-6.jpg" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="assets/images/imgs/image-6.jpg" alt="Image caption here">
+                  <img class="img-fluid" src="assets/images/imgs/image-6.jpg" loading="lazy" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               <div class="card border-0 mb-4">
                 <a href="assets/images/imgs/image-7.jpg" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="assets/images/imgs/image-7.jpg" alt="Image caption here">
+                  <img class="img-fluid" src="assets/images/imgs/image-7.jpg" loading="lazy" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
               
               <div class="card border-0 mb-4">
                 <a href="assets/images/imgs/image-8.jpg" class="pb_hover-zoom image-popup">
-                  <img class="img-fluid" src="assets/images/imgs/image-8.jpg" alt="Image caption here">
+                  <img class="img-fluid" src="assets/images/imgs/image-8.jpg" loading="lazy" alt="Image caption here">
                   <i class="ion-ios-search-strong icon"></i>
                 </a>
               </div>
