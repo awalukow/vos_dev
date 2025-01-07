@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ScheduleModel;
+use App\Models\PastEventsModel;
 use Illuminate\Support\Carbon;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -36,10 +37,16 @@ class HomeController extends Controller
                                ->where('rowstatus', '>= 0')
                                ->orderBy('program_date')
                                ->paginate(5);
+
+        $pastEvents = PastEventsModel::where('rowstatus', '>= 0')
+                                    ->take(3)
+                                    ->orderBy('eventDate')
+                                    ->get();
         
-        return view('home'
-            , ['events' => $events]
-            , ['services' => $services]
-        );
+        return view('home', [
+            'events' => $events,
+            'services' => $services,
+            'pastEvents' => $pastEvents
+        ]);           
     }
 }

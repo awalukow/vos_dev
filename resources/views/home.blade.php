@@ -41,7 +41,7 @@
       <div class="container">
         <div class="row align-items-center justify-content-center">
           <div class="col-md-9  order-md-1">
-            <a href="https://www.youtube.com/watch?v=iVLhCDQK-vI" class="play popup-vimeo"><i class="ion-ios-play"></i></a>
+            <a href="https://www.youtube.com/watch?v=7aFMaUN5We4" class="play popup-vimeo"><i class="ion-ios-play"></i></a>
             <h2 class="heading mb-3">Voice of Soul Choir</h2>
             <div class="sub-heading"><p class="mb-5">menjadi paduan suara yang mempunyai kapabilitas dan integritas dalam memuliakan Tuhan dan dengan itu menjadi berkat bagi siapapun yang mendengarkan.</p></div>
             <p><a href="#section-events" role="button" class="btn smoothscroll pb_outline-light rounded-0 btn-xl pb_font-13 pb_letter-spacing-2 p-3">Our Upcoming Events</a></p>
@@ -267,46 +267,24 @@
           </div>
         </div>
         <div class="row">
+        @foreach($pastEvents as $pastEvent)
           <div class="col-md">
             <div class="media d-block text-center testimonial_v1 pb_quote_v1">
               <div class="media-body">
                 <div class="quote pb_text-black">&ldquo;</div>
-                <blockquote class="mb-5 pb_font-20">Konser tahunan berjudul "30 Days Before Christmas" dengan tema natal, dan juga membawakan lagu-lagu sekuler dari berbagai komposer. Konser tersebut juga merupakan konser ucapan syukur HUT Voice of Soul ke 18 Tahun.</blockquote>
-                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="assets/images/persons/concert-1.jpg" alt="Generic placeholder image">
-                <h3 class="heading">30 Days Before Christmas Concert</h3>
-                <p class="subheading">Jakarta, 2023</p>
+                <blockquote class="mb-5 pb_font-20">{{ $pastEvent->eventDescription }}</blockquote>
+                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="assets/images/persons/{{ $pastEvent->eventImage }}" alt="Generic placeholder image">
+                <h3 class="heading">{{ $pastEvent->eventName }}</h3>
+                <p class="subheading">{{ $pastEvent->eventDate }}</p>
               </div>
             </div>
           </div>
-          <div class="col-md">
-            <div class="media d-block text-center testimonial_v1 pb_quote_v1">
-              <div class="media-body">
-                <div class="quote pb_text-black">&ldquo;</div>
-                <blockquote class="mb-5 pb_font-20">Rimini International Choral Competition (RICC) - 13th edition yang diorganisir oleh Musica Ficta, Music Association Rimini dan diselenggarakan pada bulan September di kota Rimini, Italia adalah lomba terakhir yang diikuti sebelum masa pandemi global.</blockquote>
-                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="assets/images/persons/rimini-1.jpg" alt="Generic placeholder image">
-                <h3 class="heading">Rimini International Choral Competition</h3>
-                <p class="subheading">Italy, 2019</p>
-                
-              </div>
-            </div>
-          </div>
-          <div class="col-md">
-            <div class="media d-block text-center testimonial_v1 pb_quote_v1">
-              
-              <div class="media-body">
-                <div class="quote pb_text-black">&ldquo;</div>
-                <blockquote class="mb-5 pb_font-20">Sebuah konser yang bertujuan untuk membantu ekonomi pembangunan gereja-gereja di Indonesia. Menjadi salah satu konser rutin VOS, dan merupakan perwujudan misi VOS dalam memuliakan Tuhan dan membangun gerejaNya. 100% hasil konser menjadi bagian dari kas pembangunan gereja</blockquote>
-                <img class="d-flex text-center mx-auto mb-3 rounded-circle" src="assets/images/persons/gibeon-bermazmur.jpg" alt="Generic placeholder image">
-                <h3 class="heading">Gibeon Bermazmur</h3>
-                <p class="subheading">Jakarta, 2024</p>
-                
-              </div>
-            </div>
-          </div>
+          @endforeach
         </div>
       </div>
     </section>
     <!-- END section -->
+    <!--
     <section class="pb_md_py_cover text-center cover-bg-black cover-bg-opacity-4" style="background-image: url(assets/images/restaurant/1900x1200/img_1.jpg)" id="section-home">
       <div class="container">
         <div class="row align-items-center justify-content-center">
@@ -319,6 +297,7 @@
         </div>
       </div>
     </section>
+-->
     <!-- END section -->
 <!-- BEGIN section -->
 <section class="pb_section bg-light" id="section-events">
