@@ -111,7 +111,7 @@
                             <h3 class="pb_font-18 font-weight-bold">Savior Like a Shephard Lead Us</h3>
                             <p class="mb-0">Dorothy A. Thrupp (1836), Attr Henry F. Lyte (1836)</p>
                           </div>
-                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=sJcG2uefj8o" target="_blank">PLAY</a></div>
+                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=sJcG2uefj8o" class="play popup-vimeo">PLAY</a></div>
                         </div>  
                       </li>
                       <li>
@@ -120,7 +120,7 @@
                             <h3 class="pb_font-18 font-weight-bold">You Are My All In All</h3>
                             <p class="mb-0">Voice of Soul Recording During COVID-19 Pandemic</p>
                           </div>
-                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=hWXRZDkzPpg" target="_blank">PLAY</a>
+                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=hWXRZDkzPpg" class="play popup-vimeo">PLAY</a>
                         </div>
                       </li>
                       <li>
@@ -129,7 +129,7 @@
                             <h3 class="pb_font-18 font-weight-bold">The Prayer</h3>
                             <p class="mb-0">written by David Foster, Carole Bayer Sager, Alberto Testa and Tony Renis.</p>
                           </div>
-                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=uwJrtf9pNpQ" target="_blank">PLAY</a>
+                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=uwJrtf9pNpQ" class="play popup-vimeo">PLAY</a>
                         </div>
                       </li>
                     </ul>
@@ -147,7 +147,7 @@
                             <h3 class="pb_font-18 font-weight-bold">The Prayer</h3>
                             <p class="mb-0">written by David Foster, Carole Bayer Sager, Alberto Testa and Tony Renis.</p>
                           </div>
-                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=uwJrtf9pNpQ" target="_blank">PLAY</a>
+                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=uwJrtf9pNpQ" class="play popup-vimeo">PLAY</a>
                         </div>
                       </li>
                      <li>
@@ -156,7 +156,7 @@
                             <h3 class="pb_font-18 font-weight-bold">Sing Noel / Go, Tell it On the Mountain</h3>
                             <p class="mb-0">arranged by David Hamilton, solo by Jelia Lolindu.</p>
                           </div>
-                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=iVLhCDQK-vI" target="_blank">PLAY</a>
+                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=iVLhCDQK-vI" class="play popup-vimeo">PLAY</a>
                         </div>
                       </li>
                       <li>
@@ -165,7 +165,7 @@
                             <h3 class="pb_font-18 font-weight-bold">Joy To The World with For Unto Us A Child Is Born.</h3>
                             <p class="mb-0">arranged by Jamey Ray.</p>
                           </div>
-                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=OajPZQRE9pM" target="_blank">PLAY</a>
+                          <div class="col-lg-2"><span class="price"><a href="https://www.youtube.com/watch?v=OajPZQRE9pM" class="play popup-vimeo">PLAY</a>
                         </div>
                       </li>
                     </ul>
