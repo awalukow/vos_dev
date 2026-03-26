@@ -1,0 +1,21 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+| This file shows where to add the portal require line.
+| DO NOT replace your entire web.php with this file.
+| Just add the require line at the very bottom of YOUR existing web.php.
+|
+| Your existing routes (landing page, document verification, etc.)
+| should remain exactly as they are above the require line.
+*/
+
+// ... your existing routes stay here untouched ...
+
+// ── VOS Portal ─────────────────────────────────────────────────────────────
+// ADD THIS ONE LINE at the very bottom of your routes/web.php:
+require __DIR__ . '/portal.php';

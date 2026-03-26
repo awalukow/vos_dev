@@ -311,13 +311,27 @@
             <div class="card-deck">
                 @foreach($events as $event)
                 <div class="card border-0">
+                    @if($event->event_image)
                     <img class="card-img-top" src="assets/images/{{ $event->event_image }}" alt="{{ $event->event_imageCaptionUrl }}">
+                    @endif
                     <div class="card-body pb_p-40">
                         <small class="text-uppercase pb_color-dark-opacity-3 font-weight-bold">
                             {{ $event->program_date ? $event->program_date->format('M dS, Y') : 'Coming Soon' }}
                         </small>
                         <h4 class="card-title"><a href="#" class="text-danger">{{ $event->event_name }}</a></h4>
                         <p class="card-text">{{ $event->event_detail }}</p>
+                        @if($event->location)
+                        <p class="card-text">
+                            <small>
+                                📍
+                                @if($event->maps_url)
+                                    <a href="{{ $event->maps_url }}" target="_blank" class="text-danger">{{ $event->location }}</a>
+                                @else
+                                    {{ $event->location }}
+                                @endif
+                            </small>
+                        </p>
+                        @endif
                     </div>
                 </div>
                 @endforeach
@@ -351,7 +365,17 @@
                             @foreach($services as $service)
                             <tr>
                                 <td>{{ $service->event_name }}</td>
-                                <td><a href="{{ $service->event_location }}" target="_blank">{{ $service->event_detail }}</a></td>
+                                <td>
+                                    @if($service->maps_url)
+                                        <a href="{{ $service->maps_url }}" target="_blank">
+                                            {{ $service->location ?: $service->event_detail }}
+                                        </a>
+                                    @elseif($service->location)
+                                        {{ $service->location }}
+                                    @else
+                                        {{ $service->event_detail }}
+                                    @endif
+                                </td>
                                 <td>{{ $service->program_date->format('M dS, Y') }}</td>
                             </tr>
                             @endforeach

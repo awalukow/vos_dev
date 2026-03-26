@@ -25,4 +25,4 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/verify/{id}', [DocumentValidationController::class, 'showDocumentValidation']);
 
 
-
+require __DIR__ . '/portal.php';

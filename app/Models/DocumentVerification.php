@@ -2,20 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DocumentVerification extends Model
 {
-    use HasFactory;
+    // Your existing table name (matches the migration exactly)
+    protected $table = 'DocumentVerification';
 
-    protected $table = 'DocumentVerification'; 
+    // Your table uses increments('id') with no timestamps columns,
+    // so disable Laravel's automatic created_at / updated_at handling.
+    public $timestamps = false;
 
     protected $fillable = [
         'documentName',
         'documentSignature',
         'signatureBy',
         'signatureId',
+        'hash_code',
         'documentStatus',
         'signatureStatus',
         'document_createdDate',
@@ -30,7 +33,44 @@ class DocumentVerification extends Model
         'ModifiedDate',
     ];
 
-    // You may also want to define timestamps if you have 'created_at' and 'updated_at' columns in your table
-    // If you're using 'CreatedDate' and 'ModifiedDate', you might want to disable timestamps
-    public $timestamps = false;
+    protected $casts = [
+        'documentStatus'      => 'boolean',
+        'signatureStatus'     => 'boolean',
+        'isForcedInvalidity'  => 'boolean',
+        'documentSignature'   => 'datetime',
+        'document_createdDate'=> 'datetime',
+        'document_validThru'  => 'datetime',
+        'signature_signedDate'=> 'datetime',
+        'signature_validThru' => 'datetime',
+        'CreatedDate'         => 'datetime',
+        'ModifiedDate'        => 'datetime',
+    ];
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Derive the validation status the view expects.
+     * Rules:
+     *  - isForcedInvalidity = true  → NOT VALID
+     *  - signatureStatus = false    → NOT VALID
+     *  - signature_validThru < now → NOT VALID (expired)
+     *  - otherwise                  → VALID
+     */
+    public function getValidationStatusAttribute(): string
+    {
+        if ($this->isForcedInvalidity) return 'NOT VALID';
+        if (!$this->signatureStatus)   return 'NOT VALID';
+        if ($this->signature_validThru && $this->signature_validThru->isPast()) return 'NOT VALID';
+        return 'VALID';
+    }
+
+    public function getInvalidReasonAttribute(): string
+    {
+        if ($this->isForcedInvalidity) return 'Validity has been revoked by administrator.';
+        if (!$this->signatureStatus)   return 'Signature is not valid.';
+        if ($this->signature_validThru && $this->signature_validThru->isPast()) {
+            return 'Document validity has expired on ' . $this->signature_validThru->format('d M Y') . '.';
+        }
+        return '';
+    }
 }
