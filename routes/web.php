@@ -14,6 +14,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/system/migrate', function () {
+
+    if (request('key') !== 'migratenow') {
+        abort(403, 'Unauthorized');
+    }
+
+    Artisan::call('migrate', ['--force' => true]);
+    Artisan::call('optimize:clear');
+
+    return nl2br(Artisan::output());
+
+});
+
 Route::get('/', function () {
     return view('home');
 });
