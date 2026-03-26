@@ -104,8 +104,8 @@
         <p>Here's an overview of your portal activity today.</p>
     </div>
     <div class="time-display">
-        {{ now()->format('H:i') }}
-        <small>{{ now()->format('l, d F Y') }}</small>
+        {{ now()->setTimezone('Asia/Jakarta')->format('H:i') }}
+        <small>{{ now()->setTimezone('Asia/Jakarta')->format('l, d F Y') }}</small>
     </div>
 </div>
 
