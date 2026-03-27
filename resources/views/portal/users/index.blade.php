@@ -50,7 +50,7 @@
                             </div>
                         </div>
                     </td>
-                    <td style="font-family:monospace;font-size:.85rem;color:var(--text-muted);">@{{ $u->username }}</td>
+                    <td style="font-family:monospace;font-size:.85rem;color:var(--text-muted);">{{ $u->username }}</td>
                     <td>
                         <div style="display:flex;flex-wrap:wrap;gap:.3rem;">
                             @foreach($u->roles->sortByDesc('level') as $role)

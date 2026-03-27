@@ -7,7 +7,7 @@ use App\Models\PortalUser;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
@@ -15,7 +15,6 @@ class UserController extends Controller
     private function authorizedRoles(): array
     {
         $user = Auth::guard('portal')->user();
-        // adm2 cannot assign administrator or adm2 roles
         if ($user->isAdministrator()) {
             return Role::orderByDesc('level')->pluck('name')->toArray();
         }
@@ -58,13 +57,15 @@ class UserController extends Controller
             'voice'                => ['nullable', 'in:Sopran,Alto,Tenor,Bass'],
         ]);
 
-        // Ensure no privilege escalation
         $requestedRoleNames = Role::whereIn('id', $validated['roles'])->pluck('name')->toArray();
         foreach ($requestedRoleNames as $roleName) {
             if (!in_array($roleName, $allowedRoles)) {
                 abort(403, "You cannot assign the '{$roleName}' role.");
             }
         }
+
+        // If "Generate Password" was clicked, mark as flushed
+        $isFlushed = $request->boolean('generate_password');
 
         $user = PortalUser::create([
             'name'                 => $validated['name'],
@@ -74,6 +75,7 @@ class UserController extends Controller
             'is_active'            => $request->boolean('is_active', true),
             'can_upload_documents' => $request->boolean('can_upload_documents'),
             'voice'                => $validated['voice'] ?? null,
+            'is_password_flushed'  => $isFlushed,
         ]);
 
         $user->roles()->sync($validated['roles']);
@@ -94,7 +96,6 @@ class UserController extends Controller
         $allowedRoles = $this->authorizedRoles();
         $currentUser  = Auth::guard('portal')->user();
 
-        // Prevent demoting/editing admins unless you're admin
         if ($user->isAdministrator() && !$currentUser->isAdministrator()) {
             abort(403, 'You cannot edit an Administrator account.');
         }
@@ -126,8 +127,10 @@ class UserController extends Controller
             'can_upload_documents' => $request->boolean('can_upload_documents'),
             'voice'                => $validated['voice'] ?? null,
         ];
+
         if (!empty($validated['password'])) {
-            $updateData['password'] = $validated['password'];
+            $updateData['password']            = $validated['password'];
+            $updateData['is_password_flushed'] = false; // manual password = not flushed
         }
 
         $user->update($updateData);
@@ -153,7 +156,35 @@ class UserController extends Controller
             ->with('success', "User '{$user->name}' has been removed.");
     }
 
-    /** AJAX autocomplete for username/email */
+    /**
+     * POST portal/users/{user}/reset-password
+     * Generates a random password, marks is_password_flushed = true,
+     * and returns the new password in a flash so admin can share it.
+     */
+    public function resetPassword(PortalUser $user)
+    {
+        $currentUser = Auth::guard('portal')->user();
+
+        if ($user->isAdministrator() && !$currentUser->isAdministrator()) {
+            abort(403);
+        }
+
+        // Generate a strong random password: Xxxx####
+        $newPassword = ucfirst(Str::random(6)) . rand(100, 999) . '!';
+
+        $user->update([
+            'password'            => $newPassword,
+            'is_password_flushed' => true,
+        ]);
+
+        return redirect()->route('portal.users.edit', $user)
+            ->with('reset_password', $newPassword)
+            ->with('success', "Password for '{$user->name}' has been reset. Share the new password '{$newPassword}' with them.");
+    }
+
+    /**
+     * AJAX autocomplete for username/email (signer search).
+     */
     public function search(Request $request)
     {
         $term  = $request->get('q', '');

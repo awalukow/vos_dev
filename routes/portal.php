@@ -28,6 +28,10 @@ Route::prefix('portal')->name('portal.')->group(function () {
 
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+        // Force password change (for is_password_flushed users)
+        Route::get('/password/change',  [\App\Http\Controllers\Portal\ChangePasswordController::class, 'show'])->name('password.change');
+        Route::post('/password/change', [\App\Http\Controllers\Portal\ChangePasswordController::class, 'update'])->name('password.update');
+
         // Dashboard
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -81,8 +85,8 @@ Route::prefix('portal')->name('portal.')->group(function () {
 
         // ── User search (AJAX — all roles can access for signer autocomplete) ──
         Route::get('/users/search/query', [UserController::class, 'search'])
-             ->name('users.search');
-             //->middleware('portal.role:administrator,adm2,pengurus,timker,singers');
+             ->name('users.search')
+             ->middleware('portal.role:administrator,adm2,pengurus,timker,singers');
 
         // ── User Management ───────────────────────────────────────────────
         Route::middleware('portal.role:administrator,adm2')->group(function () {
@@ -96,6 +100,7 @@ Route::prefix('portal')->name('portal.')->group(function () {
                      'update'  => 'users.update',
                      'destroy' => 'users.destroy',
                  ]);
+            Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
         });
 
         // ── Settings ──────────────────────────────────────────────────────

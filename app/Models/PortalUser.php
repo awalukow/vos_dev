@@ -16,19 +16,19 @@ class PortalUser extends Authenticatable
     protected $fillable = [
         'name', 'username', 'email', 'password',
         'avatar', 'is_active', 'can_upload_documents',
+        'voice', 'is_password_flushed',
     ];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
-        'email_verified_at'    => 'datetime',
-        'is_active'            => 'boolean',
-        'can_upload_documents' => 'boolean',
-        // NOTE: 'hashed' cast only exists in Laravel 10+.
-        // For Laravel 9, we use a mutator below instead.
+        'email_verified_at'     => 'datetime',
+        'is_active'             => 'boolean',
+        'can_upload_documents'  => 'boolean',
+        'is_password_flushed'   => 'boolean',
     ];
 
-    // Auto-hash password whenever it is set on the model
+    // Auto-hash password whenever it is set on the model (Laravel 9 compatible)
     public function setPasswordAttribute(string $value): void
     {
         $this->attributes['password'] = \Illuminate\Support\Facades\Hash::needsRehash($value)
@@ -56,7 +56,6 @@ class PortalUser extends Authenticatable
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
-    /** Returns the single highest-level role this user holds */
     public function primaryRole(): ?Role
     {
         return $this->roles()->orderByDesc('level')->first();
@@ -77,13 +76,11 @@ class PortalUser extends Authenticatable
         return $this->hasRole('adm2');
     }
 
-    /** Highest role level this user has */
     public function maxRoleLevel(): int
     {
         return $this->roles->max('level') ?? 0;
     }
 
-    /** All menu keys this user can access (based on highest role) */
     public function accessibleMenuKeys(): array
     {
         $roleIds = $this->roles->pluck('id');
