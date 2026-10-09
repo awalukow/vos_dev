@@ -29,9 +29,8 @@
     const slides = [...hero.querySelectorAll('.choir-slide')];
     const dots = [...hero.querySelectorAll('[data-slide-to]')];
     const pause = hero.querySelector('[data-slide-pause]');
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let current = 0;
-    let paused = reducedMotion.matches;
+    let paused = false;
     let hovered = false;
     let timer;
 
@@ -60,7 +59,6 @@
     // Keyboard focus stops rotation until the visitor explicitly starts it again.
     hero.addEventListener('focusin', () => { paused = true; schedule(); });
     document.addEventListener('visibilitychange', schedule);
-    reducedMotion.addEventListener('change', () => { paused = reducedMotion.matches; schedule(); });
     hero.querySelector('.choir-controls').hidden = false;
     schedule();
 })();

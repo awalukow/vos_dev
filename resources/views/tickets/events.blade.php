@@ -1,7 +1,7 @@
 @extends('tickets.layout')
 @section('title',__("Discover concerts"))
 @section('content')
-<section class="hero"><div><div class="eyebrow">{{ __("Voice of Soul · Live experiences") }}</div><h1>{{ __("Find your seat.") }}<br><em>{{ __("Feel every note.") }}</em></h1><p class="muted">{{ __("An evening of harmony. A moment to remember.") }}<br>{{ __("Discover our upcoming concerts and be part of the music.") }}</p></div><div class="hero-art" aria-hidden="true"><b>voce.</b>@foreach([55,90,65,110,80,120,90,65] as $height)<span style="height:{{ $height }}px"></span>@endforeach</div></section>
+<section class="hero"><div><div class="eyebrow">{{ __("Voice of Soul · Live experiences") }}</div><h1>{{ __("Find your experience,") }}<br><em>{{ __("Feel every note") }}</em></h1><p class="muted">{{ __("Discover our upcoming concerts and be part of the music.") }}</p></div><div class="hero-art" aria-hidden="true"><b>voce.</b>@foreach([55,90,65,110,80,120,90,65] as $height)<span style="height:{{ $height }}px"></span>@endforeach</div></section>
 <div class="section-heading"><h2>{{ __("Upcoming concerts") }}</h2><span class="muted tiny">{{ __(':count experiences to discover', ['count'=>$events->count()]) }}</span></div>
 <div class="grid">
 @forelse($events as $event)
