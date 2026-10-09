@@ -40,6 +40,7 @@ class TicketingTest extends TestCase {
         Storage::fake('local');
         (require database_path('migrations/2026_10_08_000004_create_ticket_promos.php'))->up();
         (require database_path('migrations/2026_10_09_000001_add_midtrans_payments.php'))->up();
+        (require database_path('migrations/2026_10_09_000002_add_concert_memories_and_dashboard.php'))->up();
     }
     private function customer(bool $verified=true): Customer {
         return Customer::create(['name'=>'Test Listener','dob'=>'1995-01-01','email'=>uniqid().'@example.test','phone'=>'+628123456789','password'=>Hash::make('StrongPass123!'),'email_verified_at'=>$verified?now():null]);
@@ -57,6 +58,109 @@ class TicketingTest extends TestCase {
     }
     private function reserve(TicketEvent $event,?Customer $customer=null,int $qty=1): TicketOrder {
         return app(TicketBooking::class)->reserve($customer??$this->customer(),$event,['quantities'=>[$event->classes->first()->id=>$qty]]);
+    }
+    public function test_memories_include_unpublished_past_events_but_never_removed_or_future_events(): void {
+        $past=$this->event(); $past->update(['title'=>'Past draft concert','published'=>false,'starts_at'=>now()->subDay()]);
+        $removed=$this->event(); $removed->update(['title'=>'Removed concert','starts_at'=>now()->subDay(),'RowStatus'=>-1]);
+        $response=$this->get(route('tickets.events'))->assertOk()->assertSee('Past draft concert')->assertSee('Previous Concerts')->assertSee('See Memories')->assertSee('Coming Soon')->assertDontSee('Removed concert')->assertDontSee('poster-price');
+        $this->actingAs($this->staff(),'portal');
+        $this->get(route('portal.ticketing.events.memories',$past))->assertOk();
+        $this->get(route('portal.ticketing.events.memories',$this->event()))->assertNotFound();
+        $this->get(route('portal.ticketing.events.memories',$removed))->assertNotFound();
+    }
+    public function test_memory_upload_video_validation_removal_and_public_access(): void {
+        $event=$this->event(); $event->update(['starts_at'=>now()->subDay(),'published'=>false]);
+        $this->actingAs($this->staff(),'portal');
+        $this->post(route('portal.ticketing.events.memories.save',$event),['video'=>'https://youtu.be/dQw4w9WgXcQ','photos'=>[UploadedFile::fake()->image('concert.jpg')]])->assertSessionHasNoErrors()->assertRedirect();
+        $event->refresh(); $photo=$event->memory_photos[0];
+        Storage::disk('local')->assertExists($photo);
+        $this->assertSame('dQw4w9WgXcQ',$event->memory_video);
+        $this->post(route('portal.ticketing.events.memories.save',$event),['video'=>'https://youtube.com.evil.test/watch?v=dQw4w9WgXcQ'])->assertSessionHasErrors('video');
+        $this->post(route('portal.ticketing.events.memories.save',$event),['photos'=>[UploadedFile::fake()->create('fake.svg',1,'image/svg+xml')]])->assertSessionHasErrors('photos.0');
+        auth('portal')->logout();
+        $this->get(route('tickets.memory-photo',[$event,0]))->assertOk()->assertHeader('X-Content-Type-Options','nosniff');
+        $this->get(route('tickets.memory-photo',[$event,8]))->assertNotFound();
+        $this->actingAs($this->staff(),'portal')->post(route('portal.ticketing.events.memories.save',$event),['remove'=>[0]])->assertSessionHasNoErrors();
+        Storage::disk('local')->assertMissing($photo);
+        $this->assertSame([],$event->fresh()->memory_photos); $this->assertNull($event->fresh()->memory_video);
+        $event->update(['RowStatus'=>-1]);
+        $this->get(route('tickets.memory-photo',[$event,0]))->assertNotFound();
+    }
+    public function test_dashboard_reconciles_inventory_fees_expired_and_removed_orders(): void {
+        $event=$this->event('free',20);
+        $paid=$this->reserve($event,null,2); $paid->update(['status'=>'paid','total'=>285000,'discount'=>20000,'payment_snapshot'=>['fees'=>['processing'=>5000,'platform'=>0]],'singer_name'=>'Singer One','referral_code'=>'ONE']);
+        $this->reserve($event,null,3);
+        $expired=$this->reserve($event); $expired->update(['expires_at'=>now()->subMinute()]);
+        $review=$this->reserve($event); $review->update(['status'=>'payment_review']);
+        $pending=$this->reserve($event); $pending->update(['status'=>'midtrans_pending']);
+        $removed=$this->reserve($event); $removed->update(['status'=>'paid','RowStatus'=>-1]);
+        $removedEvent=$this->event(); $this->reserve($removedEvent)->update(['status'=>'paid']); $removedEvent->update(['RowStatus'=>-1]);
+        $data=app(\App\Services\TicketReports::class)->dashboard($event->id);
+        $this->assertSame(2,$data['totals']['paid']); $this->assertSame(5,$data['totals']['unpaid']); $this->assertSame(13,$data['totals']['remaining']);
+        $this->assertSame(280000,$data['totals']['revenue']); $this->assertSame(285000,$data['totals']['receipts']); $this->assertSame(5000,$data['totals']['fees']);
+        $this->assertSame(20000,$data['totals']['discount']); $this->assertSame(1,$data['totals']['review']); $this->assertSame(1,$data['statuses']['expired']);
+        $this->assertSame('ONE',$data['referrals'][0]['code']);
+        $this->assertSame($data['totals'],app(\App\Services\TicketReports::class)->dashboard()['totals']);
+        $this->actingAs($this->staff('ticket_operator'),'portal')->get(route('portal.ticketing.dashboard',['event'=>$event->id]))->assertOk()->assertSee('Rp. 280.000')->assertSee('Top 5 Referral');
+        $this->get(route('portal.ticketing.dashboard',['event'=>$removedEvent->id]))->assertNotFound();
+    }
+    public function test_dashboard_top_five_referrals_rank_by_paid_seats(): void {
+        $event=$this->event('free',100);
+        foreach(range(1,6) as $n) { $o=$this->reserve($event,null,$n); $o->update(['status'=>'paid','singer_name'=>'Singer '.$n,'referral_code'=>'REF'.$n]); }
+        $this->reserve($event,null,10)->update(['singer_name'=>'Unpaid Singer','referral_code'=>'UNPAID']);
+        $data=app(\App\Services\TicketReports::class)->dashboard();
+        $this->assertSame(['REF6','REF5','REF4','REF3','REF2'],array_column($data['referrals'],'code'));
+    }
+    public function test_empty_dashboard_and_first_menu_are_available_to_ticket_staff(): void {
+        $parent=DB::table('portal_menus')->where('key','ticketing')->value('id');
+        $this->assertSame('ticketing.dashboard',DB::table('portal_menus')->where('parent_id',$parent)->orderBy('sort_order')->value('key'));
+        $this->actingAs($this->staff('ticket_operator'),'portal')->get(route('portal.ticketing.dashboard'))->assertOk()->assertSee('0 kursi')->assertSee('Rp. 0')->assertSee('Belum ada konser.');
+        $this->get(route('portal.ticketing.dashboard',['event'=>'invalid']))->assertSessionHasErrors('event');
+    }
+    public function test_reports_and_memory_editing_enforce_staff_permissions(): void {
+        foreach(['dashboard','dashboard.export','orders.export'] as $route) $this->get(route('portal.ticketing.'.$route))->assertRedirect(route('portal.login'));
+        $this->actingAs($this->staff('member'),'portal');
+        foreach(['dashboard','dashboard.export','orders.export'] as $route) $this->get(route('portal.ticketing.'.$route))->assertForbidden();
+        $past=$this->event(); $past->update(['starts_at'=>now()->subDay()]);
+        $this->actingAs($this->staff('ticket_operator'),'portal')->post(route('portal.ticketing.events.memories.save',$past),[])->assertForbidden();
+        $this->get(route('portal.ticketing.events.memories',$past))->assertForbidden();
+    }
+    public function test_xlsx_reports_contain_all_rows_numeric_amounts_and_literal_customer_text(): void {
+        $event=$this->event('free',40); $event->update(['title'=>'=Untrusted <concert>']);
+        $customer=$this->customer(); $customer->update(['name'=>'=HYPERLINK("bad")']);
+        for($i=0;$i<23;$i++) { $order=$this->reserve($event,$customer); $order->update(['status'=>'paid']); }
+        $order->update(['RowStatus'=>-1]); $order->items()->update(['RowStatus'=>-1]);
+        $this->actingAs($this->staff(),'portal');
+        $response=$this->get(route('portal.ticketing.orders.export'))->assertOk()->assertDownload();
+        $zip=new \ZipArchive; $path=$response->baseResponse->getFile()->getPathname(); $this->assertTrue($zip->open($path));
+        $sheet=$zip->getFromName('xl/worksheets/sheet2.xml');
+        $xml=simplexml_load_string($sheet); $this->assertNotFalse($xml);
+        $this->assertCount(24,$xml->sheetData->row); $this->assertStringContainsString('=HYPERLINK',$sheet); $this->assertStringNotContainsString('<f>',$sheet);
+        $this->assertStringContainsString('<v>150000</v>',$sheet); $this->assertStringContainsString('<v>-1</v>',$sheet);
+        $this->assertStringNotContainsString($order->items()->withoutGlobalScope('active')->first()->token,$sheet);
+        for($i=0;$i<$zip->numFiles;$i++) { $name=$zip->getNameIndex($i); if(str_ends_with($name,'.xml')||str_ends_with($name,'.rels')) $this->assertNotFalse(simplexml_load_string($zip->getFromIndex($i))); }
+        $zip->close(); unlink($path);
+        $response=$this->get(route('portal.ticketing.dashboard.export',['event'=>$event->id]))->assertOk()->assertDownload();
+        $path=$response->baseResponse->getFile()->getPathname(); $zip->open($path);
+        $this->assertStringContainsString('Ringkasan laporan',$zip->getFromName('xl/workbook.xml'));
+        $this->assertStringContainsString('Rekonsiliasi',$zip->getFromName('xl/worksheets/sheet1.xml'));
+        $this->assertStringContainsString('<v>3300000</v>',$zip->getFromName('xl/worksheets/sheet2.xml'));
+        $zip->close(); unlink($path);
+        $response=$this->get(route('portal.ticketing.orders.export',['status'=>'expired']))->assertOk();
+        $path=$response->baseResponse->getFile()->getPathname(); $zip->open($path);
+        $this->assertCount(1,simplexml_load_string($zip->getFromName('xl/worksheets/sheet2.xml'))->sheetData->row);
+        $zip->close(); unlink($path);
+    }
+    public function test_confirmation_email_is_indonesian_with_original_embedded_logo(): void {
+        $order=$this->reserve($this->event()); $order->update(['status'=>'paid']);
+        app()->setLocale('en');
+        $this->assertTrue(app(TicketDelivery::class)->tickets($order));
+        $message=Mail::getSymfonyTransport()->messages()->last()->getOriginalMessage();
+        $this->assertStringStartsWith('Tiket Anda',$message->getSubject());
+        $this->assertStringContainsString('Tiket Anda sudah siap!',$message->getHtmlBody());
+        $this->assertStringContainsString('QR pemesanan',$message->getHtmlBody());
+        $this->assertStringNotContainsString('VOS TICKETS',$message->getHtmlBody());
+        $this->assertTrue(collect($message->getAttachments())->contains(fn($attachment)=>$attachment->getMediaSubtype()==='jpeg' && base64_decode($attachment->bodyToString())===file_get_contents(public_path('assets/images/vos-logo.jpg'))));
     }
     private function midtrans(): TicketPaymentMethod {
         $method=TicketPaymentMethod::where('type','midtrans')->firstOrFail();
@@ -481,8 +585,9 @@ class TicketingTest extends TestCase {
         $this->assertDatabaseHas('ticket_orders',['id'=>$order->id,'RowStatus'=>-1,'status'=>'cancelled']);
         $this->assertDatabaseHas('ticket_order_items',['id'=>$item->id,'RowStatus'=>-1]);
         $this->get(route('tickets.orders'))->assertOk()->assertDontSee($order->booking_code);
-        $this->actingAs($this->staff(),'portal')->post(route('portal.ticketing.events.update',$event),['title'=>$event->title,'starts_at'=>'2030-10-01T19:00','location'=>'Jakarta','seating_type'=>'free','published'=>1,'classes_json'=>json_encode([['name'=>'Changed','price'=>1,'color'=>'#111111','capacity'=>999]])])->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('ticket_classes',['id'=>$item->ticket_class_id,'name'=>'Regular','price'=>150000,'capacity'=>3]);
+        $this->actingAs($this->staff(),'portal')->post(route('portal.ticketing.events.update',$event),['title'=>$event->title,'starts_at'=>'2030-10-01T19:00','location'=>'Jakarta','seating_type'=>'free','published'=>1,'classes_json'=>json_encode([['id'=>$item->ticket_class_id,'name'=>'Changed','price'=>1,'color'=>'#111111','capacity'=>999]])])->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('ticket_classes',['id'=>$item->ticket_class_id,'name'=>'Regular','price'=>1,'capacity'=>3]);
+        $this->assertDatabaseHas('ticket_order_items',['id'=>$item->id,'price'=>150000]);
     }
     public function test_row_status_migration_defaults_existing_records_to_active(): void {
         $eventId=DB::table('ticket_events')->insertGetId(['title'=>'Existing concert','starts_at'=>now()->addDay(),'location'=>'Jakarta','seating_type'=>'free']);
@@ -507,10 +612,10 @@ class TicketingTest extends TestCase {
             $this->get(route('tickets.events'))->assertOk()->assertSee($free->title)->assertSee($numbered->title)->assertDontSee($draft->title);
 
             $this->travel(1)->minutes();
-            $this->get(route('tickets.events'))->assertOk()->assertSee($free->title)->assertDontSee($numbered->title);
+            $this->get(route('tickets.events'))->assertOk()->assertSee($free->title)->assertSee($numbered->title)->assertSee('Previous Concerts');
             $this->actingAs($this->staff(),'portal')->get(route('portal.ticketing.events'))
-                ->assertOk()->assertSee($numbered->title)->assertSee('Hidden from storefront — start time reached')->assertSee('Visible on storefront');
-            $this->get(route('portal.ticketing.events.edit',$numbered))->assertOk()->assertSee('Published concerts appear on the storefront until their start time');
+                ->assertOk()->assertSee($numbered->title)->assertSee('Visible in Previous Concerts')->assertSee('Visible on storefront');
+            $this->get(route('portal.ticketing.events.edit',$numbered))->assertOk()->assertSee('Manage memories');
         } finally {
             $this->travelBack();
         }
@@ -680,12 +785,39 @@ class TicketingTest extends TestCase {
         $e=$this->event('free',1);$o=$this->reserve($e);
         app(TicketBooking::class)->cancel($o);$this->assertSame(1,$e->availability()['remaining']);
     }
-    public function test_booked_event_keeps_inventory_and_prices(): void {
+    public function test_booked_event_changes_sale_price_but_keeps_inventory_and_order_prices(): void {
         $this->actingAs($this->staff(),'portal');$e=$this->event();$o=$this->reserve($e);
-        $this->post(route('portal.ticketing.events.update',$e),['title'=>'Updated concert','starts_at'=>'2030-10-01T19:00','location'=>'Jakarta','seating_type'=>'free','published'=>1,'classes_json'=>json_encode([['name'=>'Changed','price'=>1,'color'=>'#111111','capacity'=>999]])])->assertSessionHasNoErrors();
-        $this->assertSame(150000,$e->fresh()->classes->first()->price);
+        $this->post(route('portal.ticketing.events.update',$e),['title'=>'Updated concert','starts_at'=>'2030-10-01T19:00','location'=>'Jakarta','seating_type'=>'free','published'=>1,'classes_json'=>json_encode([['id'=>$e->classes->first()->id,'name'=>'Changed','price'=>200000,'color'=>'#111111','capacity'=>999]])])->assertSessionHasNoErrors();
+        $this->assertSame(200000,$e->fresh()->classes->first()->price);
         $this->assertSame(3,$e->fresh()->classes->first()->capacity);
         $this->assertSame(150000,$o->fresh()->total);
+        $this->assertSame(150000,(int)$o->fresh()->items->first()->price);
+        $this->assertSame('Regular',$e->fresh()->classes->first()->name);
+        $this->assertSame(200000,$this->reserve($e)->total);
+    }
+    public function test_numbered_paid_tickets_keep_their_price_and_seat_after_price_changes(): void {
+        $this->actingAs($this->staff(),'portal'); $e=$this->event('numbered');
+        $venue=TicketVenue::create(['name'=>'Hall','layout'=>['version'=>1,'seats'=>[]]]);
+        $e->update(['ticket_venue_id'=>$venue->id]);
+        $seats=$e->seats()->get();
+        $o=app(TicketBooking::class)->reserve($this->customer(),$e,['seats'=>[$seats[0]->id]]);
+        $o->update(['status'=>'paid']); $original=$o->items->first()->getAttributes();
+        $this->post(route('portal.ticketing.events.update',$e),['title'=>$e->title,'starts_at'=>'2030-10-01T19:00','location'=>'Jakarta','seating_type'=>'numbered','ticket_venue_id'=>$venue->id,'published'=>1,'classes_json'=>json_encode([['id'=>$e->classes->first()->id,'price'=>100000]])])->assertSessionHasNoErrors();
+        $this->assertSame($original,$o->fresh()->items->first()->getAttributes());
+        $this->assertSame(150000,$o->fresh()->total);
+        $this->assertSame($seats->pluck('id')->all(),$e->seats()->pluck('id')->all());
+        $next=app(TicketBooking::class)->reserve($this->customer(),$e,['seats'=>[$seats[1]->id]]);
+        $this->assertSame(100000,$next->total);
+    }
+    public function test_booked_event_rejects_invalid_prices_and_foreign_classes_atomically(): void {
+        $this->actingAs($this->staff(),'portal'); $e=$this->event(); $o=$this->reserve($e);
+        $class=$e->classes->first(); $foreign=$this->event()->classes->first();
+        foreach ([['id'=>$class->id,'price'=>0],['id'=>$class->id,'price'=>1.5],['id'=>$class->id,'price'=>100000001],['id'=>$foreign->id,'price'=>200000]] as $change) {
+            $this->post(route('portal.ticketing.events.update',$e),['title'=>'Invalid change','starts_at'=>'2030-10-01T19:00','location'=>'Jakarta','seating_type'=>'free','published'=>1,'classes_json'=>json_encode([$change])])->assertSessionHasErrors();
+            $this->assertSame(150000,$class->fresh()->price);
+            $this->assertSame('A Night of Harmony',$e->fresh()->title);
+            $this->assertSame(150000,$o->fresh()->total);
+        }
     }
     public function test_deactivated_customer_cannot_access_tickets(): void {
         $c=$this->customer();$c->update(['is_active'=>false]);

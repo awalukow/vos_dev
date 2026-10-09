@@ -4,7 +4,7 @@ use Illuminate\Database\Eloquent\Model;
 class TicketEvent extends Model {
     use Concerns\HasRowStatus;
     protected $guarded = ['id'];
-    protected $casts = ['starts_at'=>'datetime','limited_seating'=>'boolean','published'=>'boolean','layout_dividers'=>'array'];
+    protected $casts = ['starts_at'=>'datetime','limited_seating'=>'boolean','published'=>'boolean','layout_dividers'=>'array','memory_photos'=>'array'];
     public function classes() { return $this->hasMany(TicketClass::class); }
     public function seats() { return $this->hasMany(TicketSeat::class); }
     public function venue() { return $this->belongsTo(TicketVenue::class, 'ticket_venue_id'); }

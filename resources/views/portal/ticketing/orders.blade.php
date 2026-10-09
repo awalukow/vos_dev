@@ -1,7 +1,7 @@
 @extends('portal.ticketing.layout')
 @section('ticket-page-title','Order List')
 @section('ticket-content')
-<div class="page-head"><h1 class="admin-title">Order List</h1><p class="muted">Find bookings and open issued tickets with their QR barcodes.</p></div>
+<div class="section-heading"><div><h1 class="admin-title">Order List</h1><p class="muted">Find bookings and open issued tickets with their QR barcodes.</p></div><a class="btn btn-primary" href="{{ route('portal.ticketing.orders.export',request()->only('q','status')) }}">Export Excel ↗</a></div><p class="tiny muted">Export includes all matching transactions across all pages, including removed records marked with RowStatus -1.</p>
 <form method="get" class="toolbar"><input name="q" value="{{ request('q') }}" placeholder="Booking code, reference, customer or referral" aria-label="Search orders"><select name="status" aria-label="Order status"><option value="">All statuses</option>@foreach(['awaiting_payment','payment_review','midtrans_pending','paid','rejected','cancelled','expired'] as $status)<option value="{{ $status }}" @selected(request('status')===$status)>{{ ucfirst(str_replace('_',' ',$status)) }}</option>@endforeach</select><button class="btn btn-primary">Search</button></form>
 <div class="table-responsive"><table>
 <thead><tr><th>Status</th><th>Event</th><th>Customer</th><th>Email</th><th>Booking code</th><th>Reference</th><th>Total</th><th>Referral</th><th>Open order</th></tr></thead>

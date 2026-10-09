@@ -7,7 +7,7 @@ Existing portal accounts remain staff accounts.
 
 ## Setup on an existing installation
 
-1. Back up the database and document storage. PHP needs GD, PDO, Fileinfo and
+1. Back up the database and document storage. PHP needs GD, PDO, Fileinfo, Zip and
    OpenSSL alongside the existing Laravel dependencies.
 2. Apply the additive ticketing schema and portal menu migrations (skip any already applied):
 
@@ -27,8 +27,9 @@ Existing portal accounts remain staff accounts.
    Configure real bank details and upload your merchant QRIS image under
    **Payment methods**. Both methods start disabled.
 6. Create a venue for numbered seating, then create the concert, classes, prices
-   and thumbnail. Publish the event to make it visible. Only concerts with a future
-   start time appear on the storefront; they are hidden once that time is reached.
+   and thumbnail. Published concerts with a future start time appear under Upcoming
+   concerts. All non-removed past concerts appear under Previous Concerts,
+   including unpublished events, without prices or purchase buttons.
    The admin events list shows storefront visibility alongside publication status.
 7. Test a complete booking in staging, including real SMTP delivery and payment
    confirmation against your bank/merchant records before issuing live tickets.
@@ -116,7 +117,8 @@ shows **Almost Sold**. **Limited Seating** is an independent admin checkbox.
 Free-seating cards show a purple **FREE SEATING** badge.
 
 After the first booking (including expired bookings), seating mode, venue,
-classes, prices and capacity are locked. Create a separate event for a new
+classes and capacity are locked. Prices can always be changed for new bookings;
+existing bookings retain their saved item prices and totals. Create a separate event for a new
 inventory arrangement. Metadata remains editable; date changes do not
 automatically email existing buyers.
 
@@ -311,3 +313,64 @@ authenticated lookup of a random nonexistent order; Midtrans's application-level
 404 confirms API access. Authentication failures, timeouts and unexpected responses
 are shown inline without exposing keys or raw provider responses. This verifies API
 access only, not QRIS enablement, the client key, merchant ID, or webhook delivery.
+
+## Concert memories, performance dashboard and Excel reports
+
+Deploy this update with:
+
+    php artisan migrate --path=database/migrations/2026_10_09_000002_add_concert_memories_and_dashboard.php
+
+This migration adds memory media fields and makes **Dashboard** the first Ticketing
+submenu for Administrator, ADM2 and Ticket Operator. It has been applied to the
+local `vos_dev` database. PHP ZipArchive is required for the native XLSX exports;
+no new Composer dependency is needed.
+
+All non-removed events move to **Previous Concerts** once their start time is
+reached, regardless of publication status. Cards show only the banner, date/time,
+concert name, location and **See Memories**. Removed events and their media URLs
+return 404. The popup supports previous/next photos and keyboard arrow controls,
+a YouTube video tab, and **Coming Soon** when no media is available. Closing the
+popup removes the video frame to stop playback. YouTube must allow embedding.
+
+In **Events → Edit**, past concerts show a **Manage memories** banner above
+The essentials. Administrators and ADM2 can add up to 30 JPG, PNG or WebP photos
+(4 MB each), remove individual photos, and save or clear a YouTube link. Uploads
+append to the existing slideshow and use private local storage served by checked
+routes. Future events cannot have memories edited. Server PHP upload limits still
+apply to the total request size. Edit and Delete are now in separate event-table
+columns, and deletion retains its confirmation prompt.
+
+The read-only dashboard defaults to all non-removed concerts, with a single-concert
+filter. Numbers are calculated from active orders over the full sales period:
+
+- **Lunas**: ticket count on paid orders, including free tickets.
+- **Belum Lunas**: tickets held by unexpired awaiting-payment orders, manual payment
+  review, or pending Midtrans payments. Expired, rejected and cancelled orders do
+  not occupy seats.
+- **Sisa Kursi**: capacity minus paid seats and active unpaid holds, floored at zero
+  separately for each concert.
+- **Nominal Terjual**: paid order totals after discounts, excluding processing and
+  platform fees. Fees and total receipts are shown separately and reconcile.
+- **Top 5 Referral**: paid seats grouped by saved referral code, ordered by seat
+  count, then ticket revenue, then code. Unreferred orders are excluded.
+
+**Export laporan** downloads an XLSX performance report with scope, timestamp,
+metric definitions, reconciliation notes, per-concert results, referral ranking
+and order statuses. It uses the same concert filter and calculations as the screen.
+**Order List → Export Excel** downloads all matching transactions across all pages,
+including removed records clearly marked with RowStatus -1, plus a separate ticket
+line-item sheet. Search and status filters apply. Amounts are numeric Excel cells;
+booking codes, telephone numbers and user-entered text remain literal strings, so
+text beginning with `=` cannot become a spreadsheet formula. Credentials, QR tokens
+and private evidence links are never exported. Reports require the ticket staff
+role and are delivered with private/no-store headers.
+
+Confirmation email subjects and content are always Bahasa Indonesia, including
+month names and promo/fee descriptions, independent of storefront language. The
+original `vos-logo.jpg` is embedded inline in place of the VOS TICKETS wordmark.
+
+Validation includes isolated SQLite/mail/storage feature tests for these flows,
+XLSX XML/row/value checks and browser checks with synthetic fixtures for the
+slideshow, video frame cleanup and Coming Soon state. No real customer email was
+sent. Provider-hosted YouTube playback and final delivery in email clients require
+normal live-service connectivity.

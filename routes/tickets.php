@@ -32,9 +32,15 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
     Route::get('/validate/{token}',[Tickets::class,'validateTicket'])->middleware('throttle:60,1')->name('validate');
     Route::get('/receipt/{reference}',[Tickets::class,'receipt'])->middleware('throttle:60,1')->name('receipt');
     Route::get('/thumbnail/{event}',function (\App\Models\TicketEvent $event) {
-        abort_unless($event->thumbnail && ($event->published || auth('portal')->check()),404);
+        abort_unless($event->thumbnail && ($event->published || $event->starts_at->lte(now()) || auth('portal')->check()),404);
         return response()->file(Storage::disk('local')->path($event->thumbnail));
     })->name('thumbnail');
+    Route::get('/memories/{event}/photos/{index}',function (\App\Models\TicketEvent $event,int $index) {
+        abort_unless($event->starts_at->lte(now()) || auth('portal')->check(),404);
+        $path=$event->memory_photos[$index]??null;
+        abort_unless($path && Storage::disk('local')->exists($path),404);
+        return response()->file(Storage::disk('local')->path($path),['X-Content-Type-Options'=>'nosniff']);
+    })->whereNumber('index')->name('memory-photo');
     Route::get('/payment-image/{method}',function (\App\Models\TicketPaymentMethod $method) {
         abort_unless($method->qr_image && ($method->active || auth('portal')->check()),404);
         return response()->file(Storage::disk('local')->path($method->qr_image));
@@ -56,6 +62,9 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
 });
 Route::prefix('portal/ticketing')->name('portal.ticketing.')->middleware('portal.auth')->group(function () {
     Route::middleware(TicketStaff::class.':review')->group(function () {
+        Route::get('/dashboard',[\App\Http\Controllers\Portal\TicketReportController::class,'dashboard'])->name('dashboard');
+        Route::get('/dashboard/export',[\App\Http\Controllers\Portal\TicketReportController::class,'exportDashboard'])->name('dashboard.export');
+        Route::get('/orders/export',[\App\Http\Controllers\Portal\TicketReportController::class,'exportOrders'])->name('orders.export');
         Route::get('/methods',[Admin::class,'methods'])->name('methods');
         Route::post('/methods/{method}',[Admin::class,'method'])->name('methods.update');
         Route::get('/promos',[\App\Http\Controllers\Portal\TicketPromoController::class,'index'])->name('promos');
@@ -77,6 +86,8 @@ Route::prefix('portal/ticketing')->name('portal.ticketing.')->middleware('portal
         Route::get('/events/create',[Admin::class,'eventForm'])->name('events.create');
         Route::post('/events',[Admin::class,'saveEvent'])->name('events.store');
         Route::get('/events/{event}/edit',[Admin::class,'eventForm'])->name('events.edit');
+        Route::get('/events/{event}/memories',[\App\Http\Controllers\Portal\TicketMemoryController::class,'edit'])->name('events.memories');
+        Route::post('/events/{event}/memories',[\App\Http\Controllers\Portal\TicketMemoryController::class,'save'])->name('events.memories.save');
         Route::post('/events/{event}',[Admin::class,'saveEvent'])->name('events.update');
         Route::delete('/events/{event}',[Admin::class,'removeEvent'])->name('events.destroy');
         Route::get('/venues',[Admin::class,'venues'])->name('venues');

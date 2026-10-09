@@ -55,7 +55,16 @@ class TicketAdminController extends Controller {
                         $created=$locked->classes()->create(['name'=>$class['name'],'color'=>$class['color'],'price'=>$class['price'],'capacity'=>$capacity]);
                         foreach ($seats as $seat) if ($seat['class']===$class['name']) $locked->seats()->create(['ticket_class_id'=>$created->id,'label'=>$seat['label'],'x'=>$seat['x'],'y'=>$seat['y']]);
                     }
-                } else $locked->fill($metadata)->save();
+                } else {
+                    try { $classes=json_decode($data['classes_json'],true,512,JSON_THROW_ON_ERROR); }
+                    catch (\JsonException $e) { throw ValidationException::withMessages(['classes'=>'Ticket classes must be valid JSON.']); }
+                    $classes=Validator::make(['classes'=>$classes],['classes'=>'required|array|min:1|max:30','classes.*.id'=>'required|integer|distinct','classes.*.price'=>'required|integer|min:1|max:100000000'])->validate()['classes'];
+                    $existing=$locked->classes()->get()->keyBy('id');
+                    if (count($classes)!==$existing->count() || collect($classes)->contains(fn($class)=>!$existing->has($class['id']))) throw ValidationException::withMessages(['classes'=>'Ticket classes are locked after the first booking. Reload the event and edit its prices.']);
+                    // Only current sale prices change; order items and totals retain their snapshots.
+                    foreach ($classes as $class) $existing->get($class['id'])->update(['price'=>$class['price']]);
+                    $locked->fill($metadata)->save();
+                }
                 TicketDelivery::audit('event.saved',(string)$locked->id,$this->actor());
             },3);
         } catch (\Throwable $e) { if ($uploaded) Storage::disk('local')->delete($uploaded); throw $e; }
@@ -106,16 +115,7 @@ class TicketAdminController extends Controller {
     }
     public function orders(Request $r) {
         $data=$r->validate(['q'=>'nullable|string|max:190','status'=>'nullable|in:awaiting_payment,payment_review,midtrans_pending,paid,rejected,cancelled,expired']);
-        $orders=TicketOrder::with(['customer','event'])
-            ->when($data['q']??null,fn($query,$term)=>$query->where(function($query) use ($term) {
-                $query->where('reference','like','%'.$term.'%')
-                    ->orWhere('booking_code','like','%'.$term.'%')->orWhere('referral_code','like','%'.$term.'%')->orWhere('singer_name','like','%'.$term.'%')
-                    ->orWhereHas('customer',fn($q)=>$q->where('name','like','%'.$term.'%')->orWhere('email','like','%'.$term.'%'));
-            }))
-            ->when($data['status']??null,function($query,$status) {
-                if ($status==='expired') $query->where(fn($q)=>$q->where('status','expired')->orWhere(fn($q)=>$q->where('status','awaiting_payment')->where('expires_at','<=',now())));
-                else { $query->where('status',$status); if ($status==='awaiting_payment') $query->where('expires_at','>',now()); }
-            })->latest()->paginate(20)->withQueryString();
+        $orders=app(\App\Services\TicketReports::class)->orders($data)->with(['customer','event'])->latest()->paginate(20)->withQueryString();
         return view('portal.ticketing.orders',compact('orders'));
     }
     public function order(TicketOrder $order) {

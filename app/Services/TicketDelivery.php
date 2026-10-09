@@ -57,7 +57,7 @@ class TicketDelivery {
         if ($order->RowStatus !== 0 || $order->status !== 'paid') return false;
         try {
             Mail::send('tickets.emails.confirmed',['order'=>$order],function ($m) use ($order) {
-                $m->to($order->customer->email)->subject('Your tickets · '.$order->event->title);
+                $m->to($order->customer->email)->subject('Tiket Anda · '.$order->event->title);
                 $m->attachData($this->qr(route('tickets.receipt',$order->reference),$order->booking_code),'booking-qr.png',['mime'=>'image/png']);
                 foreach ($order->items as $index=>$item) {
                     $m->attachData($this->qr(route('tickets.validate',$item->token),$item->booking_label),'ticket-'.($index+1).'.png',['mime'=>'image/png']);

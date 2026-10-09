@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\{Auth,Storage};
 class TicketController extends Controller {
     public function index() {
         $events=TicketEvent::with('classes')->where('published',true)->where('starts_at','>',now())->orderBy('starts_at')->get();
-        return view('tickets.events',compact('events'));
+        $previous=TicketEvent::where('starts_at','<=',now())->orderByDesc('starts_at')->get();
+        return view('tickets.events',compact('events','previous'));
     }
     public function event(TicketEvent $event) {
         abort_unless($event->published && $event->starts_at->isFuture(),404);
