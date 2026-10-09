@@ -8,6 +8,7 @@ return [
     ],
 
     'guards' => [
+        'customer' => ['driver' => 'session', 'provider' => 'customers'],
         // Your existing web guard (keep this)
         'web' => [
             'driver'   => 'session',
@@ -22,6 +23,7 @@ return [
     ],
 
     'providers' => [
+        'customers' => ['driver' => 'eloquent', 'model' => App\Models\Customer::class],
         // Your existing users provider (keep this)
         'users' => [
             'driver' => 'eloquent',

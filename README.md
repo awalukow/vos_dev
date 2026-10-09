@@ -161,3 +161,7 @@ resources/views/portal/
 routes/portal.php
 config/auth.php        ← reference only, merge manually
 ```
+
+## Ticketing
+
+Customer booking, venue design, manual payment review, and QR ticket delivery are documented in [the ticketing setup guide](docs/ticketing.md).

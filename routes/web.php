@@ -14,18 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/system/migrate', function () {
-
-    if (request('key') !== 'migratenow') {
-        abort(403, 'Unauthorized');
-    }
-
-    Artisan::call('migrate', ['--force' => true]);
-    Artisan::call('optimize:clear');
-
-    return nl2br(Artisan::output());
-
-});
+Route::post('/system/migrate', function () {
+    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    return nl2br(e(\Illuminate\Support\Facades\Artisan::output()));
+})->middleware(['portal.auth', 'portal.role:administrator']);
 
 Route::get('/', function () {
     return view('home');
@@ -39,3 +32,5 @@ Route::get('/verify/{id}', [DocumentValidationController::class, 'showDocumentVa
 
 
 require __DIR__ . '/portal.php';
+
+require __DIR__ . '/tickets.php';

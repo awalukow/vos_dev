@@ -1,4 +1,5 @@
 @extends('commonTemplate')
+@include('partials.home-slideshow')
 @section('content')
 <title>Home &mdash; Voice of Soul Choir</title>
   <body data-spy="scroll" data-target="#pb-navbar" data-offset="200">
@@ -30,6 +31,7 @@
             <li class="nav-item"><a class="nav-link text-uppercase pb_letter-spacing-2" href="#section-gallery">Gallery</a></li>
             <li class="nav-item"><a class="nav-link text-uppercase pb_letter-spacing-2" href="#section-events">Events</a></li>
             <li class="nav-item"><a class="nav-link text-uppercase pb_letter-spacing-2" href="#regular-service">Schedule</a></li>
+            <li class="nav-item"><a class="nav-link text-uppercase pb_letter-spacing-2" href="{{ route('tickets.events') }}">Tickets</a></li>
             <!--<li class="nav-item"><a class="nav-link text-uppercase pb_letter-spacing-2" href="#section-contact">Contact</a></li>-->
           </ul>
         </div>
@@ -37,16 +39,31 @@
     </nav>
     <!-- END nav -->
 
-    <section class="pb_cover_v1 cover-bg-black cover-bg-opacity-4 text-center" style="background-image: url(assets/images/img1.jpg)" id="section-home">
+    <section class="pb_cover_v1 text-center choir-slideshow" id="section-home" aria-label="Voice of Soul Choir photos" aria-roledescription="carousel">
+      <div class="choir-slides" aria-hidden="true">
+        <img class="choir-slide is-active" src="{{ asset('assets/images/img1.JPG') }}" alt="" fetchpriority="high">
+        <img class="choir-slide" src="{{ asset('assets/images/imgs/concert.jpg') }}" alt="" decoding="async">
+        <img class="choir-slide" src="{{ asset('assets/images/imgs/image-3.jpg') }}" alt="" decoding="async">
+      </div>
       <div class="container">
         <div class="row align-items-center justify-content-center">
           <div class="col-md-9  order-md-1">
             <a href="https://www.youtube.com/watch?v=7aFMaUN5We4" class="play popup-vimeo"><i class="ion-ios-play"></i></a>
             <h2 class="heading mb-3">Voice of Soul Choir</h2>
             <div class="sub-heading"><p class="mb-5">menjadi paduan suara yang mempunyai kapabilitas dan integritas dalam memuliakan Tuhan dan dengan itu menjadi berkat bagi siapapun yang mendengarkan.</p></div>
-            <p><a href="#section-events" role="button" class="btn smoothscroll pb_outline-light rounded-0 btn-xl pb_font-13 pb_letter-spacing-2 p-3">Our Upcoming Events</a></p>
+            <p><a href="{{ route('tickets.events') }}" class="btn pb_outline-light rounded-0 btn-xl pb_font-13 pb_letter-spacing-2 p-3">Buy Ticket</a></p>
           </div>  
         </div>
+      </div>
+      <div class="choir-controls" hidden>
+        <button type="button" data-slide-prev aria-label="Previous photo">&#8592;</button>
+        <div class="choir-dots" role="group" aria-label="Choose photo">
+          <button type="button" data-slide-to="0" aria-label="Photo 1 of 3" aria-current="true"></button>
+          <button type="button" data-slide-to="1" aria-label="Photo 2 of 3" aria-current="false"></button>
+          <button type="button" data-slide-to="2" aria-label="Photo 3 of 3" aria-current="false"></button>
+        </div>
+        <button type="button" data-slide-next aria-label="Next photo">&#8594;</button>
+        <button type="button" data-slide-pause aria-label="Pause slideshow">Pause</button>
       </div>
     </section>
     <!-- END section -->

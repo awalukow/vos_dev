@@ -1,0 +1,7 @@
+@extends('portal.ticketing.layout')
+@section('ticket-page-title','Venue Designer')
+@section('ticket-content')
+<div class="section-heading"><div><div class="eyebrow">Spaces for great music</div><h1 class="admin-title">Venue library.</h1></div><a class="btn btn-primary" href="{{ route('portal.ticketing.venues.create') }}">+ Design a venue</a></div>
+<p class="muted">Build rows visually, move individual seats, or import a VOS layout JSON file. Each concert receives its own copy of the arrangement.</p>
+<div class="grid">@forelse($venues as $venue)<div class="panel"><span class="badge">{{ count($venue->layout['seats']) }} seats</span><h3>{{ $venue->name }}</h3><p class="muted">{{ $venue->address }}</p><div class="actions"><a class="btn btn-secondary" href="{{ route('portal.ticketing.venues.edit',$venue) }}">Edit layout</a><a class="btn btn-secondary" href="{{ route('portal.ticketing.venues.export',$venue) }}">Export JSON</a><form method="post" action="{{ route('portal.ticketing.venues.destroy',$venue) }}" onsubmit="return confirm('Remove this venue? All linked events will be unpublished. Existing bookings will be preserved.')">@csrf @method('DELETE')<button class="btn btn-danger" type="submit">Remove venue</button></form></div></div>@empty<div class="empty" style="grid-column:1/-1"><h2>Every great night starts with a space.</h2><p class="muted">Create your first venue and arrange its seats.</p></div>@endforelse</div>
+@endsection

@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="{{asset('assets/css/helpers.css')}}">
   <link rel="stylesheet" href="{{asset('assets/css/style.css')}}">
   <link rel="stylesheet" href="{{asset('assets/css/restaurant.css')}}">
+  @stack('head')
 </head>
 
 <body>
@@ -68,6 +69,7 @@
   <script src="{{asset('assets/js/google-map.js')}}"></script>
 
   <script src="{{asset('assets/js/main.js')}}"></script>
+  @stack('scripts')
   
 </body>
 </html>

@@ -1,0 +1,23 @@
+<?php
+return [
+    'required' => ':attribute wajib diisi.',
+    'string' => ':attribute harus berupa teks.',
+    'email' => ':attribute harus berupa alamat email yang valid.',
+    'unique' => ':attribute sudah digunakan.',
+    'confirmed' => 'Konfirmasi :attribute tidak cocok.',
+    'date_format' => ':attribute harus menggunakan format :format.',
+    'before' => ':attribute harus sebelum :date.',
+    'regex' => 'Format :attribute tidak valid.',
+    'digits' => ':attribute harus terdiri dari :digits digit.',
+    'integer' => ':attribute harus berupa bilangan bulat.',
+    'array' => ':attribute harus berupa daftar.',
+    'distinct' => ':attribute tidak boleh duplikat.',
+    'in' => ':attribute yang dipilih tidak valid.',
+    'exists' => ':attribute yang dipilih tidak tersedia.',
+    'file' => ':attribute harus berupa berkas.',
+    'uploaded' => ':attribute gagal diunggah.',
+    'mimes' => ':attribute harus berupa berkas dengan tipe: :values.',
+    'min' => ['string'=>':attribute minimal :min karakter.', 'numeric'=>':attribute minimal :min.', 'array'=>':attribute minimal :min item.'],
+    'max' => ['string'=>':attribute maksimal :max karakter.', 'numeric'=>':attribute maksimal :max.', 'array'=>':attribute maksimal :max item.', 'file'=>':attribute maksimal :max kilobita.'],
+    'attributes' => ['name'=>'Nama lengkap','dob'=>'Tanggal lahir','phone'=>'Nomor telepon','email'=>'Email','password'=>'Kata sandi','otp'=>'Kode verifikasi','proof'=>'Bukti pembayaran','method'=>'Metode pembayaran','seats'=>'Kursi','quantities'=>'Jumlah tiket'],
+];

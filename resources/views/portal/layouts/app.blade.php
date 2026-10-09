@@ -533,6 +533,14 @@
         .pagination .active span { background: var(--accent); color: #09090b; border-color: var(--accent); font-weight: 600; }
         .pagination .disabled span { opacity: .35; cursor: default; }
 
+        .portal-menu-toggle, .portal-sidebar-backdrop { display: none; }
+        .main-wrap { min-width: 0; }
+        @media (max-width: 768px) {
+            .portal-menu-toggle { display: inline-flex; padding: .4rem .65rem; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); cursor: pointer; }
+            .portal-sidebar-backdrop:not([hidden]) { display: block; position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.6); border: 0; }
+            .topbar { padding: 0 1rem; }
+            .page-content { padding: 1.25rem; }
+        }
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); transition: transform .3s; }
@@ -562,7 +570,7 @@
                     ->get()
                     ->filter(fn($m) => in_array($m->key, $accessKeys));
 
-    function heroIcon(string $name): string {
+    $heroIcon = function (string $name): string {
         $icons = [
             'home'                     => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>',
             'document-check'           => '<path stroke-linecap="round" stroke-linejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12"/>',
@@ -583,7 +591,7 @@
         ];
         $path = $icons[$name] ?? '<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>';
         return '<svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">' . $path . '</svg>';
-    }
+    };
 @endphp
 
 <aside class="sidebar" id="sidebar">
@@ -596,12 +604,13 @@
     </div>
 
     <nav class="sidebar-nav">
+
         @foreach($topMenus as $menu)
             @if($menu->children->isEmpty())
                 {{-- Single item --}}
                 <a href="{{ $menu->route_name && \Route::has($menu->route_name) ? route($menu->route_name) : '#' }}"
                    class="nav-item {{ str_starts_with($currentRoute, str_replace('.', '.', $menu->route_name ?? '')) ? 'active' : '' }}">
-                    {!! heroIcon($menu->icon ?? 'home') !!}
+                    {!! $heroIcon($menu->icon ?? 'home') !!}
                     {{ $menu->label }}
                     @if($menu->key === 'docsign' && $pendingSign > 0)
                         <span class="nav-badge">{{ $pendingSign }}</span>
@@ -616,7 +625,7 @@
                 <button class="nav-item"
                         aria-expanded="{{ $isParentOpen ? 'true' : 'false' }}"
                         onclick="toggleNav(this)">
-                    {!! heroIcon($menu->icon ?? 'home') !!}
+                    {!! $heroIcon($menu->icon ?? 'home') !!}
                     {{ $menu->label }}
                     @if($menu->key === 'docsign' && $pendingSign > 0)
                         <span class="nav-badge">{{ $pendingSign }}</span>
@@ -628,7 +637,7 @@
                 <div class="nav-children {{ $isParentOpen ? 'open' : '' }}">
                     @foreach($menu->children->filter(fn($c) => in_array($c->key, $accessKeys)) as $child)
                         <a href="{{ $child->route_name && \Route::has($child->route_name) ? route($child->route_name) : '#' }}"
-                           class="nav-child-item {{ $currentRoute === $child->route_name ? 'active' : '' }}">
+                           class="nav-child-item {{ ($currentRoute === $child->route_name || str_starts_with($currentRoute, $child->route_name . '.')) ? 'active' : '' }}">
                             {{ $child->label }}
                             @if($child->key === 'docsign.list' && $pendingSign > 0)
                                 <span class="nav-badge">{{ $pendingSign }}</span>
@@ -660,9 +669,11 @@
     </div>
 </aside>
 
+<button type="button" class="portal-sidebar-backdrop" id="portal-sidebar-backdrop" aria-label="Close navigation" onclick="setPortalSidebar(false)" hidden></button>
 {{-- ══ MAIN ══ --}}
 <div class="main-wrap">
     <header class="topbar">
+        <button type="button" class="portal-menu-toggle" id="portal-menu-toggle" aria-controls="sidebar" aria-expanded="false" aria-label="Open navigation" onclick="setPortalSidebar(!document.getElementById('sidebar').classList.contains('open'))">☰</button>
         <div class="topbar-title">@yield('page-title', 'Dashboard')</div>
         <div class="topbar-actions">
             @yield('topbar-actions')
@@ -695,6 +706,16 @@ function toggleNav(btn) {
     children.classList.toggle('open', !expanded);
 }
 
+function setPortalSidebar(open) {
+    document.getElementById('sidebar').classList.toggle('open', open);
+    const toggle = document.getElementById('portal-menu-toggle');
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    document.getElementById('portal-sidebar-backdrop').hidden = !open;
+}
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') setPortalSidebar(false);
+});
 // Auto-dismiss toasts
 document.querySelectorAll('.toast').forEach(t => {
     setTimeout(() => t.remove(), 5000);

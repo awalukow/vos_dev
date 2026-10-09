@@ -90,6 +90,9 @@ Route::prefix('portal')->name('portal.')->group(function () {
 
         // ── User Management ───────────────────────────────────────────────
         Route::middleware('portal.role:administrator,adm2')->group(function () {
+            Route::get('/singers', [\App\Http\Controllers\Portal\SingerController::class, 'index'])->name('singers.index');
+            Route::post('/singers', [\App\Http\Controllers\Portal\SingerController::class, 'save'])->name('singers.store');
+            Route::post('/singers/{singer}', [\App\Http\Controllers\Portal\SingerController::class, 'save'])->name('singers.update');
             Route::resource('users', UserController::class)
                  ->names([
                      'index'   => 'users.index',

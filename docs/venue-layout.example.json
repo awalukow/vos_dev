@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "seats": [
+    {"label":"A1","class":"Premium","x":0,"y":0},
+    {"label":"A2","class":"Premium","x":1,"y":0},
+    {"label":"A3","class":"Premium","x":3,"y":0},
+    {"label":"A4","class":"Premium","x":4,"y":0},
+    {"label":"B1","class":"Regular","x":0,"y":1},
+    {"label":"B2","class":"Regular","x":1,"y":1},
+    {"label":"B3","class":"Regular","x":3,"y":1},
+    {"label":"B4","class":"Regular","x":4,"y":1}
+  ]
+}

@@ -1,0 +1,15 @@
+@extends('portal.ticketing.layout')
+@section('ticket-page-title','Payment Approvals')
+@section('ticket-content')
+<div class="page-head"><div class="eyebrow">Ticketing / Operations</div><h1 class="admin-title">Payment inbox.</h1><p class="muted">Match the amount and transaction details against your bank or merchant records before approving. Uploads alone do not prove settlement.</p></div>
+@forelse($orders as $order)
+<div class="panel"><div class="section-heading"><div><span class="badge yellow">Awaiting review</span><h3>{{ $order->event->title }}</h3><p class="tiny muted">{{ $order->customer->name }} · {{ $order->customer->email }}<br>{{ $order->reference }}<br>Submitted {{ $order->proof_uploaded_at?->timezone('Asia/Jakarta')->format('d M Y H:i') }} WIB</p></div><strong>Rp {{ number_format($order->total,0,',','.') }}</strong></div>
+<p class="tiny">{{ $order->payment_snapshot['name']??'' }} · {{ $order->items->count() }} tickets<br>@foreach($order->items as $item){{ $item->class_name }}{{ $item->seat_label?' / '.$item->seat_label:'' }}{{ !$loop->last?', ':'' }}@endforeach</p>
+<a class="btn btn-secondary" href="{{ route('portal.ticketing.proof',$order) }}" target="_blank" rel="noopener">Open payment proof ↗</a>
+<form action="{{ route('portal.ticketing.review',$order) }}" method="post">@csrf<label for="note-{{ $order->id }}">Review note (required when rejecting)</label><textarea id="note-{{ $order->id }}" name="note" rows="2" maxlength="1000"></textarea><div class="actions"><button name="decision" value="approve" class="btn btn-primary" onclick="return confirm('Confirm that this payment is received and issue the tickets?')">Approve & email tickets</button><button name="decision" value="reject" class="btn btn-danger" onclick="return confirm('Reject this payment and release the reserved tickets?')">Reject payment</button></div></form></div>
+@empty<div class="empty"><h2>All caught up.</h2><p class="muted">New payment proofs will appear here for review.</p></div>@endforelse
+{{ $orders->links('portal.components.pagination') }}
+<h2 style="margin-top:35px">Recently reviewed</h2><div class="panel table-wrap"><table><thead><tr><th>Customer / event</th><th>Total</th><th>Decision</th><th>Ticket email</th></tr></thead><tbody>
+@forelse($recent as $order)<tr><td>{{ $order->customer->name }}<div class="tiny muted">{{ $order->event->title }}<br>{{ $order->reference }}</div></td><td>Rp {{ number_format($order->total,0,',','.') }}</td><td>{{ ucfirst($order->status) }}<div class="tiny">{{ $order->review_note }}</div></td><td>@if($order->status==='paid')<div class="tiny">{{ $order->tickets_emailed_at?'Sent':'Not sent' }}</div><form method="post" action="{{ route('portal.ticketing.resend',$order) }}">@csrf<button class="btn btn-secondary">Resend tickets</button></form>@else—@endif</td></tr>@empty<tr><td colspan="4">No reviews yet.</td></tr>@endforelse
+</tbody></table></div>
+@endsection
