@@ -105,7 +105,7 @@ class TicketAdminController extends Controller {
         return redirect()->route('portal.ticketing.venues')->with('success',"Venue removed. {$count} linked event(s) unpublished; existing bookings preserved.");
     }
     public function orders(Request $r) {
-        $data=$r->validate(['q'=>'nullable|string|max:190','status'=>'nullable|in:awaiting_payment,payment_review,paid,rejected,cancelled,expired']);
+        $data=$r->validate(['q'=>'nullable|string|max:190','status'=>'nullable|in:awaiting_payment,payment_review,midtrans_pending,paid,rejected,cancelled,expired']);
         $orders=TicketOrder::with(['customer','event'])
             ->when($data['q']??null,fn($query,$term)=>$query->where(function($query) use ($term) {
                 $query->where('reference','like','%'.$term.'%')
@@ -169,10 +169,36 @@ class TicketAdminController extends Controller {
         return back()->with('manual_otp',$code)->with('otp_customer',$customer->email)->with('success','Manual code generated. It expires in 10 minutes and replaces the previous code.');
     }
     public function methods() {
-        $methods=TicketPaymentMethod::all();
+        $admin=auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2();
+        $methods=TicketPaymentMethod::when(!$admin,fn($q)=>$q->where('type','midtrans'))->get();
         return view('portal.ticketing.methods',compact('methods'));
     }
+    public function testMidtrans(TicketPaymentMethod $method, \App\Services\MidtransPayments $payments) {
+        abort_unless(auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2(),403);
+        abort_unless($method->type==='midtrans',404);
+        return redirect()->route('portal.ticketing.methods')->with('midtrans_connection',$payments->testConnection($method));
+    }
     public function method(Request $r,TicketPaymentMethod $method) {
+        $admin=auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2();
+        if ($method->type==='midtrans') {
+            abort_if(!$admin && $r->hasAny(['environment','merchant_id','server_key','client_key','name','instructions']),403);
+            $rules=['active'=>'nullable|boolean'];
+            foreach (['processing','platform'] as $fee) {
+                $rules[$fee.'_fee_type']='required|in:fixed,percent';
+                $rules[$fee.'_fee_value']='required|numeric|min:0|max:'.($r->input($fee.'_fee_type')==='percent'?'100':'10000000');
+            }
+            if ($admin) $rules+=['environment'=>'required|in:sandbox,production','merchant_id'=>'nullable|string|max:100','server_key'=>'nullable|string|max:255','client_key'=>'nullable|string|max:255'];
+            $data=$r->validate($rules);
+            if ($admin && $data['environment']!==$method->environment && empty($data['server_key'])) throw ValidationException::withMessages(['server_key'=>'Enter the matching server key when changing environments.']);
+            foreach (['server_key','client_key'] as $key) if (empty($data[$key])) unset($data[$key]);
+            $method->fill($data);
+            if ($r->boolean('active') && (!$method->server_key || !$method->merchant_id)) throw ValidationException::withMessages(['active'=>'An admin must configure the merchant ID and server key before enabling Midtrans.']);
+            $method->active=$r->boolean('active');
+            $method->save();
+            TicketDelivery::audit('payment_method.updated',(string)$method->id,$this->actor());
+            return back()->with('success','Midtrans settings updated.');
+        }
+        abort_unless($admin,403);
         $data=$r->validate(['name'=>'required|string|max:100','instructions'=>'required|string|max:3000','qr_image'=>'nullable|image|mimes:png,jpg,jpeg|max:4096']);
         unset($data['qr_image']);
         if ($r->hasFile('qr_image')) $data['qr_image']=$r->file('qr_image')->store('ticket-media','local');

@@ -21,7 +21,7 @@ class TicketPromotions {
         // Pending reservations hold usage until expiry. Submitted/paid bookings consume it permanently,
         // including soft-deleted bookings, to prevent resetting limits by deleting an order.
         $usage=TicketOrder::withoutGlobalScope('active')->where('ticket_promo_id',$promo->id)->where('id','!=',$order->id)->where(function($q) {
-            $q->whereIn('status',['payment_review','paid'])->orWhere(function($q) { $q->where('status','awaiting_payment')->where('RowStatus',0)->where('expires_at','>',now()); });
+            $q->whereIn('status',['payment_review','paid','midtrans_pending'])->orWhere(function($q) { $q->where('status','awaiting_payment')->where('RowStatus',0)->where('expires_at','>',now()); });
         })->lockForUpdate()->get();
         if ($promo->single_use && $usage->where('customer_id',$order->customer_id)->isNotEmpty()) $this->fail('This promo code has already been used by your account.');
         $applied=$order->ticket_promo_id==$promo->id && $order->promo_applied_at ? $order->promo_applied_at : now();

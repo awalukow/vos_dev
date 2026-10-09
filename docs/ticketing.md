@@ -254,3 +254,60 @@ retain the applied code and discount; editing a promo does not rewrite completed
 The promo migration was applied to the local `vos_dev` database. The automated suite
 uses isolated SQLite, storage and mail. MySQL concurrency under live load and browser
 visual layout are not covered by those tests.
+
+
+## Midtrans QRIS
+
+Run `php artisan migrate --path=database/migrations/2026_10_09_000001_add_midtrans_payments.php`.
+Midtrans is seeded **deactivated**, in sandbox mode, with both fees set to zero.
+In Ticketing → Payment Methods, administrators and ADM2 configure the environment,
+merchant ID and API keys. Blank key inputs retain saved keys; changing environments
+requires a new server key. Keys are encrypted using APP_KEY, hidden from model JSON,
+and excluded from flashed validation inputs. Keep APP_KEY backed up.
+Ticket operators can activate/deactivate Midtrans and edit its two fees; account and
+key changes are rejected server-side. Existing manual methods remain admin-managed.
+
+Processing Fee and Platform Fee each support a fixed rupiah amount or a percentage
+(0–100%). Zero disables a fee. Both apply independently to the ticket total after
+promotions, once per booking, and round to whole rupiah. Checkout shows each charge,
+its information tooltip and the final total. Fees and credentials are snapshotted
+when starting payment; subsequent settings changes do not alter pending payments.
+Free bookings continue without gateway fees.
+
+Customers choose **QRIS (Automated Check)** and continue to hosted Midtrans Snap,
+restricted to `other_qris`. Enable GoPay or ShopeePay QRIS on the merchant account.
+Copy the notification URL displayed in the portal into the Midtrans dashboard:
+`https://YOUR-DOMAIN/tickets/midtrans/notification`. Use a publicly reachable HTTPS
+site and set APP_URL correctly. No client-side redirect or query parameter confirms
+payment: notifications require a valid SHA-512 signature and the server fetches the
+current provider status, checks reference, amount and IDR currency, then confirms
+settlement once and sends tickets. Deactivation stops new checkouts but existing
+payments continue to reconcile with their original credentials.
+
+Run Laravel's scheduler every minute (`php artisan schedule:run`) for missed webhook
+recovery. `php artisan tickets:sync-midtrans` also reconciles pending payments manually.
+Customers can refresh status from their booking. Midtrans reservations retain seats
+and promo usage until confirmed paid, denied, cancelled or expired. They cannot be
+manually approved, cancelled, changed or removed while a payment is pending.
+Snap and QRIS receive a fixed 30-minute blanket expiry. A status API 404 before expiry
+means no payment method has been selected yet; inventory remains held. After expiry
+plus a five-minute reconciliation grace period, 404 releases an abandoned checkout.
+Network/authentication failures never release inventory automatically. The command
+reports unresolved bookings for follow-up. A checkout creation timeout may require
+an organizer to investigate in Midtrans; retries reuse the same order reference to
+avoid creating a second charge. Failed ticket emails can use the existing staff resend.
+
+Reference: [Midtrans Other QRIS](https://docs.midtrans.com/reference/other-qris),
+[notifications](https://docs.midtrans.com/docs/https-notification-webhooks), and
+[Snap expiry](https://docs.midtrans.com/reference/expire-a-snap-session).
+Local tests fake Midtrans HTTP responses; a merchant sandbox payment and notification
+round trip are still required before production activation.
+
+
+Administrators and ADM2 can use **Test connection** on the Midtrans settings card.
+Save settings first: the test uses only the saved environment and server key, works
+while deactivated, and does not modify settings or create a payment. It performs an
+authenticated lookup of a random nonexistent order; Midtrans's application-level
+404 confirms API access. Authentication failures, timeouts and unexpected responses
+are shown inline without exposing keys or raw provider responses. This verifies API
+access only, not QRIS enablement, the client key, merchant ID, or webhook delivery.

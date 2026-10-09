@@ -12,7 +12,7 @@ class TicketEvent extends Model {
     public function reservedItems() {
         return TicketOrderItem::whereHas('order', function ($q) {
             $q->where('ticket_event_id', $this->id)->where(function ($q) {
-                $q->whereIn('status',['paid','payment_review'])
+                $q->whereIn('status',['paid','payment_review','midtrans_pending'])
                   ->orWhere(function ($q) { $q->where('status','awaiting_payment')->where('expires_at','>',now()); });
             });
         });

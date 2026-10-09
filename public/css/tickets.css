@@ -47,3 +47,21 @@
 @media(max-width:600px){.ticket-app .booking-card{grid-template-columns:62px minmax(0,1fr);padding:20px;gap:18px}.ticket-app .booking-details h2{font-size:19px}.ticket-app .booking-date strong{font-size:28px}.ticket-app .booking-action{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap;border-left:0;border-top:1px dashed var(--line);padding:18px 0 0;text-align:left;gap:14px}.ticket-app .booking-total{font-size:17px}}
 
 .ticket-app .venue-canvas{margin:0 auto}.ticket-app .venue-divider{position:absolute;left:0;right:0;height:32px;display:flex;align-items:center;gap:18px;font-weight:700;letter-spacing:.2em}.ticket-app .venue-divider::before,.ticket-app .venue-divider::after{content:"";flex:1;border-top:6px double var(--line)}.ticket-app .venue-divider span{flex:none}
+
+.ticket-app [hidden]{display:none!important}
+.ticket-app .payment-methods{min-width:0;margin:20px 0 0;padding:0;border:0}
+.ticket-app .payment-methods legend{padding:0;margin-bottom:10px;font-size:13px;font-weight:650}
+.ticket-app .payment-method-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:12px}
+.ticket-app .payment-method-option{position:relative;min-width:0;margin:0;cursor:pointer}
+.ticket-app .payment-method-option input{position:absolute;width:1px;height:1px;opacity:0}
+.ticket-app .payment-method-card{display:flex;flex-direction:column;align-items:flex-start;gap:12px;height:100%;min-height:112px;padding:16px 38px 16px 16px;border:1px solid var(--line);border-radius:12px;background:white;transition:border-color .15s,background .15s,box-shadow .15s}
+.ticket-app .payment-method-logo{display:flex;align-items:center;height:36px}
+.ticket-app .payment-method-logo img{display:block;max-width:100%;object-fit:contain}
+.ticket-app .payment-method-name{line-height:1.45;overflow-wrap:anywhere}
+.ticket-app .payment-method-check{position:absolute;top:16px;right:14px;display:grid;place-items:center;width:19px;height:19px;border:1px solid #d9d1e2;border-radius:50%;color:transparent;font-size:12px;line-height:1}
+.ticket-app .payment-method-option:hover .payment-method-card{border-color:#b79bdc}
+.ticket-app .payment-method-option input:checked+.payment-method-card{border-color:var(--purple);background:#f7f2ff;box-shadow:0 0 0 1px var(--purple)}
+.ticket-app .payment-method-option input:checked+.payment-method-card .payment-method-check{background:var(--purple);border-color:var(--purple);color:white}
+.ticket-app .payment-method-option input:focus-visible+.payment-method-card{outline:3px solid #cba3ff;outline-offset:4px}
+@media(prefers-reduced-motion:reduce){.ticket-app .payment-method-card{transition:none}}
+.fee-info{position:relative;cursor:help;display:inline-block}.fee-info [role="tooltip"]{display:none;position:absolute;bottom:100%;left:0;width:220px;padding:10px;background:#242032;color:#fff;border-radius:8px;z-index:10;font-weight:400}.fee-info:hover [role="tooltip"],.fee-info:focus [role="tooltip"]{display:block}

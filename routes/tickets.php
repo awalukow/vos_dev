@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\{TicketAuthController as Auth,TicketController as Tickets};
 use App\Http\Controllers\Portal\TicketAdminController as Admin;
 use App\Http\Middleware\{CustomerAuthenticate,TicketStaff};
+use App\Http\Controllers\MidtransController;
+
+Route::post('/tickets/midtrans/notification',[MidtransController::class,'notification'])->name('tickets.midtrans.notification');
 
 Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\TicketLocale::class)->group(function () {
     Route::post('/language', function (\Illuminate\Http\Request $request) {
@@ -13,6 +16,7 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
     })->name('language');
     // Fixed asset routes also support this repository's root-level front controller.
     Route::get('/assets/vos-tickets-logo-v4.png',fn()=>response()->file(public_path('assets/images/vos-tickets-logo-v4.png'),['Content-Type'=>'image/png','Cache-Control'=>'public, max-age=86400']))->name('logo');
+    Route::get('/assets/payments/{logo}.svg',fn($logo)=>response()->file(public_path('assets/images/payments/'.$logo.'.svg'),['Content-Type'=>'image/svg+xml','Cache-Control'=>'public, max-age=86400']))->where('logo','qris|bank-transfer')->name('payment-logo');
     Route::get('/assets/Mitr-SemiBold.ttf',fn()=>response()->file(public_path('assets/fonts/mitr/Mitr-SemiBold.ttf'),['Content-Type'=>'font/ttf','Cache-Control'=>'public, max-age=31536000']))->name('brand-font');
     Route::get('/assets/tickets.css',fn()=>response()->file(public_path('css/tickets.css'),['Content-Type'=>'text/css','Cache-Control'=>'public, max-age=300']))->name('styles');
     Route::get('/assets/venue-designer.js',fn()=>response()->file(public_path('js/venue-designer.js'),['Content-Type'=>'application/javascript','Cache-Control'=>'public, max-age=300']))->name('designer');
@@ -36,6 +40,8 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
         return response()->file(Storage::disk('local')->path($method->qr_image));
     })->name('payment-image');
     Route::middleware(CustomerAuthenticate::class)->group(function () {
+        Route::post('/orders/{order}/midtrans',[MidtransController::class,'start'])->middleware('throttle:5,1')->name('midtrans.start');
+        Route::post('/orders/{order}/midtrans/status',[MidtransController::class,'refresh'])->middleware('throttle:10,1')->name('midtrans.refresh');
         Route::get('/events/{event}',[Tickets::class,'event'])->name('select');
         Route::post('/events/{event}/reserve',[Tickets::class,'reserve'])->middleware('throttle:10,1')->name('reserve');
         Route::get('/orders',[Tickets::class,'orders'])->name('orders');
@@ -50,6 +56,8 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
 });
 Route::prefix('portal/ticketing')->name('portal.ticketing.')->middleware('portal.auth')->group(function () {
     Route::middleware(TicketStaff::class.':review')->group(function () {
+        Route::get('/methods',[Admin::class,'methods'])->name('methods');
+        Route::post('/methods/{method}',[Admin::class,'method'])->name('methods.update');
         Route::get('/promos',[\App\Http\Controllers\Portal\TicketPromoController::class,'index'])->name('promos');
         Route::post('/promos',[\App\Http\Controllers\Portal\TicketPromoController::class,'save'])->name('promos.store');
         Route::post('/promos/{promo}',[\App\Http\Controllers\Portal\TicketPromoController::class,'save'])->name('promos.update');
@@ -63,6 +71,7 @@ Route::prefix('portal/ticketing')->name('portal.ticketing.')->middleware('portal
         Route::post('/payments/{order}/resend',[Admin::class,'resend'])->middleware('throttle:5,1')->name('resend');
     });
     Route::middleware(TicketStaff::class)->group(function () {
+        Route::post('/methods/{method}/test-midtrans',[Admin::class,'testMidtrans'])->middleware('throttle:5,1,midtrans-connection')->name('methods.test-midtrans');
         Route::delete('/orders/{order}',[Admin::class,'removeOrder'])->name('orders.destroy');
         Route::get('/events',[Admin::class,'events'])->name('events');
         Route::get('/events/create',[Admin::class,'eventForm'])->name('events.create');
@@ -80,7 +89,5 @@ Route::prefix('portal/ticketing')->name('portal.ticketing.')->middleware('portal
         Route::get('/customers',[Admin::class,'customers'])->name('customers');
         Route::post('/customers/{customer}',[Admin::class,'customer'])->name('customers.update');
         Route::post('/customers/{customer}/otp',[Admin::class,'otp'])->middleware('throttle:10,1')->name('customers.otp');
-        Route::get('/methods',[Admin::class,'methods'])->name('methods');
-        Route::post('/methods/{method}',[Admin::class,'method'])->name('methods.update');
     });
 });

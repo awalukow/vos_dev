@@ -31,6 +31,8 @@ class Handler extends ExceptionHandler
      * @var array<int, string>
      */
     protected $dontFlash = [
+        'server_key',
+        'client_key',
         'current_password',
         'password',
         'password_confirmation',

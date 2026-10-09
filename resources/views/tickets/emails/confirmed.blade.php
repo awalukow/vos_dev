@@ -4,6 +4,9 @@
 <p>Hello {{ $order->customer->name }}, your payment has been approved.</p><h2>{{ $order->event->title }}</h2>
 <p>{{ $order->event->starts_at->timezone('Asia/Jakarta')->format('d F Y, H:i') }} WIB<br>{{ $order->event->location }}</p>
 <p>Booking code: <strong>{{ $order->booking_code }}</strong><br>Referral: {{ $order->singer_name ?? "No singer referral" }} @if($order->referral_code)({{ $order->referral_code }})@endif<br>Booking reference: {{ $order->reference }}<br>Total paid: Rp {{ number_format($order->total,0,',','.') }}</p>
+@foreach(['processing'=>'Processing Fee','platform'=>'Platform Fee'] as $fee=>$label)
+@if(($order->payment_snapshot['fees'][$fee]??0)>0)<p>{{ $label }}: Rp {{ number_format($order->payment_snapshot['fees'][$fee],0,',','.') }}</p>@endif
+@endforeach
 <p><a href="{{ route('tickets.order',$order) }}">Open your booking and tickets</a></p>
 @include('tickets._promo-summary')
 <h3>Booking QR · {{ $order->booking_code }}</h3><img width="150" style="height:auto" alt="Booking QR" src="{{ $message->embedData(app(\App\Services\TicketDelivery::class)->qr(route('tickets.receipt',$order->reference),$order->booking_code), 'booking-inline.png', 'image/png') }}">

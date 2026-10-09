@@ -39,6 +39,7 @@ class TicketingTest extends TestCase {
         if ($this->getName() !== 'test_row_status_migration_defaults_existing_records_to_active') (require database_path('migrations/2026_10_08_000003_add_ticket_row_status.php'))->up();
         Storage::fake('local');
         (require database_path('migrations/2026_10_08_000004_create_ticket_promos.php'))->up();
+        (require database_path('migrations/2026_10_09_000001_add_midtrans_payments.php'))->up();
     }
     private function customer(bool $verified=true): Customer {
         return Customer::create(['name'=>'Test Listener','dob'=>'1995-01-01','email'=>uniqid().'@example.test','phone'=>'+628123456789','password'=>Hash::make('StrongPass123!'),'email_verified_at'=>$verified?now():null]);
@@ -56,6 +57,208 @@ class TicketingTest extends TestCase {
     }
     private function reserve(TicketEvent $event,?Customer $customer=null,int $qty=1): TicketOrder {
         return app(TicketBooking::class)->reserve($customer??$this->customer(),$event,['quantities'=>[$event->classes->first()->id=>$qty]]);
+    }
+    private function midtrans(): TicketPaymentMethod {
+        $method=TicketPaymentMethod::where('type','midtrans')->firstOrFail();
+        $method->update(['active'=>true,'merchant_id'=>'merchant-test','server_key'=>'SB-server-secret','client_key'=>'SB-client-secret','processing_fee_type'=>'percent','processing_fee_value'=>2.5,'platform_fee_value'=>5000]);
+        return $method;
+    }
+    private function fakeMidtrans(): void {
+        \Illuminate\Support\Facades\Http::fake(['*/snap/v1/transactions'=>\Illuminate\Support\Facades\Http::response(['redirect_url'=>'https://app.sandbox.midtrans.com/snap/v2/test-token'])]);
+    }
+    /** @dataProvider midtransConnectionResponses */
+    public function test_midtrans_connection_reports_provider_results(int $httpStatus, $body, bool $ok): void {
+        $method=$this->midtrans(); $method->update(['active'=>false]);
+        $before=$method->fresh()->getAttributes();
+        \Illuminate\Support\Facades\Http::fake(['*'=>\Illuminate\Support\Facades\Http::response($body,$httpStatus)]);
+        $this->actingAs($this->staff(),'portal')->post(route('portal.ticketing.methods.test-midtrans',$method),['server_key'=>'unsaved-key','environment'=>'production'])
+            ->assertRedirect(route('portal.ticketing.methods'))->assertSessionHas('midtrans_connection.ok',$ok);
+        $this->get(route('portal.ticketing.methods'))->assertOk()->assertSee('Test connection')->assertSee('role="status"',false)->assertDontSee('SB-server-secret');
+        \Illuminate\Support\Facades\Http::assertSent(fn($r)=>$r->method()==='GET' && str_starts_with($r->url(),'https://api.sandbox.midtrans.com/v2/connection-test-') && $r->hasHeader('Authorization','Basic '.base64_encode('SB-server-secret:')));
+        $this->assertSame($before,$method->fresh()->getAttributes());
+        $this->assertSame(0,TicketOrder::count());
+    }
+    public static function midtransConnectionResponses(): array {
+        return [
+            'application not found'=>[200,['status_code'=>'404'],true],
+            'http not found'=>[404,['status_code'=>'404'],true],
+            'bad credentials'=>[401,['status_code'=>'401'],false],
+            'application auth failure'=>[200,['status_code'=>'401'],false],
+            'generic not found'=>[404,'Not found',false],
+            'provider outage'=>[503,['status_code'=>'404'],false],
+            'malformed response'=>[200,'Not JSON',false],
+        ];
+    }
+    public function test_midtrans_connection_requires_admin_and_a_saved_key(): void {
+        $method=TicketPaymentMethod::where('type','midtrans')->firstOrFail();
+        \Illuminate\Support\Facades\Http::fake();
+        $this->actingAs($this->staff('ticket_operator'),'portal')->get(route('portal.ticketing.methods'))->assertOk()->assertDontSee('Test connection');
+        $this->post(route('portal.ticketing.methods.test-midtrans',$method))->assertForbidden();
+        $this->actingAs($this->staff(),'portal')->post(route('portal.ticketing.methods.test-midtrans',$method))->assertSessionHas('midtrans_connection.ok',false);
+        $this->post(route('portal.ticketing.methods.test-midtrans',TicketPaymentMethod::where('type','transfer')->first()))->assertNotFound();
+        \Illuminate\Support\Facades\Http::assertNothingSent();
+    }
+    public function test_midtrans_connection_handles_timeout_and_production_environment(): void {
+        $method=$this->midtrans(); $method->update(['environment'=>'production']);
+        \Illuminate\Support\Facades\Http::fake(function($request) {
+            $this->assertStringStartsWith('https://api.midtrans.com/v2/connection-test-',$request->url());
+            throw new \Illuminate\Http\Client\ConnectionException('Internal details must not be exposed');
+        });
+        $this->actingAs($this->staff('adm2'),'portal')->post(route('portal.ticketing.methods.test-midtrans',$method))
+            ->assertSessionHas('midtrans_connection.ok',false)
+            ->assertSessionHas('midtrans_connection.message','Could not reach Midtrans. Check network connectivity and try again.');
+    }
+    public function test_midtrans_defaults_disabled_and_operator_permissions_are_enforced(): void {
+        $method=TicketPaymentMethod::where('type','midtrans')->firstOrFail();
+        $this->assertFalse($method->active);
+        $operator=$this->staff('ticket_operator');
+        $this->actingAs($operator,'portal')->get(route('portal.ticketing.methods'))->assertOk()->assertSee('QRIS (Automated Check)')->assertDontSee('name="server_key"',false);
+        $fees=['processing_fee_type'=>'percent','processing_fee_value'=>2.5,'platform_fee_type'=>'fixed','platform_fee_value'=>5000];
+        $this->post(route('portal.ticketing.methods.update',$method),$fees+['server_key'=>'injected'])->assertForbidden();
+        $this->post(route('portal.ticketing.methods.update',$method),$fees+['active'=>1])->assertSessionHasErrors('active');
+        $method=$this->midtrans();
+        $this->post(route('portal.ticketing.methods.update',$method),$fees)->assertSessionHasNoErrors();
+        $this->assertFalse($method->fresh()->active);
+        $this->post(route('portal.ticketing.methods.update',TicketPaymentMethod::where('type','transfer')->first()),['name'=>'Changed'])->assertForbidden();
+        $this->assertNotSame('SB-server-secret',DB::table('ticket_payment_methods')->where('id',$method->id)->value('server_key'));
+        $this->assertStringNotContainsString('SB-server-secret',$method->toJson());
+    }
+    public function test_midtrans_checkout_snapshots_fees_and_is_idempotent(): void {
+        $method=$this->midtrans(); $this->fakeMidtrans();
+        $order=$this->reserve($this->event());
+        $this->actingAs($order->customer,'customer')->withSession(['ticket_locale'=>'en'])->get(route('tickets.order',$order))->assertOk()->assertSee('Processing Fee')->assertSee('158.750');
+        $url=app(\App\Services\MidtransPayments::class)->start($order,158750);
+        $this->assertSame('https://app.sandbox.midtrans.com/snap/v2/test-token',$url);
+        $order->refresh();
+        $this->assertSame(158750,$order->total);
+        $this->assertSame(['processing'=>3750,'platform'=>5000],$order->payment_snapshot['fees']);
+        $this->assertSame('midtrans_pending',$order->status);
+        $method->update(['active'=>false,'server_key'=>'changed']);
+        $this->assertSame($url,app(\App\Services\MidtransPayments::class)->start($order,158750));
+        \Illuminate\Support\Facades\Http::assertSentCount(1);
+        \Illuminate\Support\Facades\Http::assertSent(fn($r)=>$r['transaction_details']['gross_amount']===158750 && $r['enabled_payments']===['other_qris']);
+        $this->assertSame('SB-server-secret',$order->gateway_credentials['server_key']);
+        $this->actingAs($order->customer,'customer')->get(route('tickets.order',$order))->assertOk()->assertSee('Complete your QRIS payment')->assertDontSee('Upload payment proof');
+    }
+    public function test_midtrans_rejects_changed_quotes_and_foreign_customers(): void {
+        $this->midtrans(); $this->fakeMidtrans(); $order=$this->reserve($this->event());
+        $this->actingAs($this->customer(),'customer')->post(route('tickets.midtrans.start',$order),['expected_total'=>158750])->assertForbidden();
+        $this->actingAs($order->customer,'customer')->post(route('tickets.midtrans.start',$order),['expected_total'=>150000])->assertSessionHasErrors('payment');
+        $this->assertSame('awaiting_payment',$order->fresh()->status);
+        \Illuminate\Support\Facades\Http::assertNothingSent();
+    }
+    public function test_midtrans_dashboard_probe_requires_valid_signature_and_does_not_create_payments(): void {
+        $method=$this->midtrans();
+        $method->update(['active'=>false]);
+        \Illuminate\Support\Facades\Http::fake();
+        $this->mock(TicketDelivery::class,function($mock){$mock->shouldNotReceive('tickets');});
+        $body=['order_id'=>'payment_notif_test_merchant-test_'.\Illuminate\Support\Str::uuid(),
+            'merchant_id'=>'merchant-test','status_code'=>'200','gross_amount'=>'105000.00'];
+        $body['signature_key']=hash('sha512',$body['order_id'].$body['status_code'].$body['gross_amount'].'SB-server-secret');
+        $this->postJson(route('tickets.midtrans.notification'),$body)->assertOk()->assertExactJson(['received'=>true,'test'=>true]);
+        $this->postJson(route('tickets.midtrans.notification'),array_merge($body,['signature_key'=>str_repeat('0',128)]))->assertForbidden();
+        $this->postJson(route('tickets.midtrans.notification'),array_merge($body,['merchant_id'=>'another-merchant']))->assertForbidden();
+        $body['order_id']='unknown-real-order';
+        $body['signature_key']=hash('sha512',$body['order_id'].$body['status_code'].$body['gross_amount'].'SB-server-secret');
+        $this->postJson(route('tickets.midtrans.notification'),$body)->assertNotFound();
+        $this->assertSame(0,TicketOrder::count());
+        $this->assertSame(0,DB::table('ticket_audit_logs')->count());
+        \Illuminate\Support\Facades\Http::assertNothingSent();
+    }
+    public function test_midtrans_webhook_confirms_once_using_current_provider_status(): void {
+        $method=$this->midtrans(); $this->fakeMidtrans(); $order=$this->reserve($this->event());
+        app(\App\Services\MidtransPayments::class)->start($order,158750);
+        $method->update(['active'=>false,'server_key'=>'new-key']);
+        $body=['order_id'=>$order->reference,'status_code'=>'200','gross_amount'=>'158750.00'];
+        $body['signature_key']=hash('sha512',$body['order_id'].$body['status_code'].$body['gross_amount'].'SB-server-secret');
+        $this->postJson(route('tickets.midtrans.notification'),array_merge($body,['signature_key'=>str_repeat('0',128)]))->assertForbidden();
+        \Illuminate\Support\Facades\Http::fake(['*/status'=>\Illuminate\Support\Facades\Http::response($body+['transaction_status'=>'settlement','payment_type'=>'qris','currency'=>'IDR','fraud_status'=>'accept'])]);
+        $this->mock(TicketDelivery::class,function($mock){$mock->shouldReceive('tickets')->once()->andReturn(true);});
+        $this->postJson(route('tickets.midtrans.notification'),$body)->assertOk();
+        $this->postJson(route('tickets.midtrans.notification'),$body)->assertOk();
+        $this->assertSame('paid',$order->fresh()->status);
+        $this->assertSame(1,DB::table('ticket_audit_logs')->where('action','payment.midtrans_confirmed')->count());
+    }
+    public function test_midtrans_json_refresh_confirms_payment_without_webhook(): void {
+        $this->midtrans(); $this->fakeMidtrans(); $order=$this->reserve($this->event());
+        app(\App\Services\MidtransPayments::class)->start($order,158750);
+        \Illuminate\Support\Facades\Http::fake(['*/status'=>\Illuminate\Support\Facades\Http::response([
+            'order_id'=>$order->reference,'gross_amount'=>'158750.00','currency'=>'IDR',
+            'transaction_status'=>'settlement','payment_type'=>'qris','fraud_status'=>'accept',
+        ])]);
+        $this->mock(TicketDelivery::class,function($mock){$mock->shouldReceive('tickets')->once()->andReturn(true);});
+        $this->actingAs($this->customer(),'customer')->postJson(route('tickets.midtrans.refresh',$order))->assertForbidden();
+        $this->actingAs($order->customer,'customer')->postJson(route('tickets.midtrans.refresh',$order))->assertOk()->assertExactJson(['status'=>'paid']);
+        $this->postJson(route('tickets.midtrans.refresh',$order))->assertOk()->assertExactJson(['status'=>'paid']);
+        $this->assertSame(1,DB::table('ticket_audit_logs')->where('action','payment.midtrans_confirmed')->count());
+    }
+    public function test_midtrans_json_refresh_retries_after_network_failure_without_releasing_booking(): void {
+        $this->midtrans(); $this->fakeMidtrans(); $order=$this->reserve($this->event());
+        app(\App\Services\MidtransPayments::class)->start($order,158750);
+        $attempts=0;
+        \Illuminate\Support\Facades\Http::fake(['*/status'=>function() use(&$attempts,$order){
+            if (++$attempts===1) throw new \Illuminate\Http\Client\ConnectionException('timeout');
+            return \Illuminate\Support\Facades\Http::response([
+                'order_id'=>$order->reference,'gross_amount'=>'158750.00','currency'=>'IDR','transaction_status'=>'pending',
+            ]);
+        }]);
+        $this->actingAs($order->customer,'customer')->postJson(route('tickets.midtrans.refresh',$order))->assertStatus(503);
+        $this->assertSame('midtrans_pending',$order->fresh()->status);
+        $this->postJson(route('tickets.midtrans.refresh',$order))->assertOk()->assertExactJson(['status'=>'midtrans_pending']);
+        $this->post(route('tickets.midtrans.refresh',$order))->assertRedirect(route('tickets.order',$order));
+    }
+    public function test_midtrans_holds_inventory_until_verified_terminal_status(): void {
+        $this->midtrans(); $this->fakeMidtrans(); $event=$this->event('free',1); $order=$this->reserve($event);
+        $payments=app(\App\Services\MidtransPayments::class); $payments->start($order,158750);
+        $order->refresh()->update(['expires_at'=>now()->subMinute()]);
+        $this->assertSame(1,$event->reservedItems()->count());
+        $this->actingAs($order->customer,'customer')->post(route('tickets.cancel',$order))->assertSessionHasErrors();
+        $this->post(route('tickets.promo',$order),['promo_code'=>''])->assertSessionHasErrors();
+        $payments->applyStatus($order,['order_id'=>$order->reference,'gross_amount'=>'158750.00','currency'=>'IDR','transaction_status'=>'expire']);
+        $this->assertSame('expired',$order->fresh()->status);
+        $this->assertSame(0,$event->reservedItems()->count());
+    }
+    public function test_midtrans_amount_mismatch_does_not_issue_tickets(): void {
+        $this->midtrans(); $this->fakeMidtrans(); $order=$this->reserve($this->event());
+        app(\App\Services\MidtransPayments::class)->start($order,158750);
+        \Illuminate\Support\Facades\Http::fake(['*/status'=>\Illuminate\Support\Facades\Http::response(['order_id'=>$order->reference,'gross_amount'=>'1.00','transaction_status'=>'settlement','payment_type'=>'qris','currency'=>'IDR'])]);
+        $this->actingAs($order->customer,'customer')->post(route('tickets.midtrans.refresh',$order))->assertStatus(422);
+        $this->assertSame('midtrans_pending',$order->fresh()->status);
+    }
+    public function test_midtrans_admin_can_save_keys_without_exposing_or_flashing_them(): void {
+        $method=$this->midtrans();
+        $this->actingAs($this->staff(),'portal')->get(route('portal.ticketing.methods'))->assertOk()->assertDontSee('SB-server-secret')->assertDontSee('SB-client-secret');
+        $data=['environment'=>'sandbox','merchant_id'=>'merchant-test','server_key'=>'replacement-secret','client_key'=>'replacement-client','active'=>1,'processing_fee_type'=>'percent','processing_fee_value'=>1.25,'platform_fee_type'=>'fixed','platform_fee_value'=>1000];
+        $this->post(route('portal.ticketing.methods.update',$method),$data)->assertSessionHasNoErrors();
+        $this->assertSame('replacement-secret',$method->fresh()->server_key);
+        $data['processing_fee_value']=-1;
+        $this->post(route('portal.ticketing.methods.update',$method),$data)->assertSessionHasErrors()->assertSessionMissing('_old_input.server_key')->assertSessionMissing('_old_input.client_key');
+        $this->actingAs($this->staff('member'),'portal')->get(route('portal.ticketing.methods'))->assertForbidden();
+    }
+    public function test_midtrans_timeout_keeps_inventory_and_abandoned_checkout_expires_safely(): void {
+        $this->midtrans(); $order=$this->reserve($this->event());
+        \Illuminate\Support\Facades\Http::fake(['*/snap/v1/transactions'=>function(){throw new \Illuminate\Http\Client\ConnectionException('timeout');}]);
+        $this->actingAs($order->customer,'customer')->post(route('tickets.midtrans.start',$order),['expected_total'=>158750])->assertSessionHasErrors('payment');
+        $this->assertSame('midtrans_pending',$order->fresh()->status);
+        $this->assertSame(1,$order->event->reservedItems()->count());
+        \Illuminate\Support\Facades\Http::fake(['*/status'=>\Illuminate\Support\Facades\Http::response(['status_code'=>'404'],404)]);
+        app(\App\Services\MidtransPayments::class)->sync($order->fresh());
+        $this->assertSame('midtrans_pending',$order->fresh()->status);
+        $order->update(['expires_at'=>now()->subMinutes(6)]);
+        $this->artisan('tickets:sync-midtrans')->assertExitCode(0);
+        $this->assertSame('expired',$order->fresh()->status);
+        $this->assertSame(0,$order->event->reservedItems()->count());
+    }
+    public function test_midtrans_fees_apply_after_discounts_and_manual_proof_is_rejected(): void {
+        $method=$this->midtrans(); $this->fakeMidtrans(); $order=$this->reserve($this->event());
+        \App\Models\TicketPromo::create(['code'=>'HALF','type'=>'percent','value'=>50]);
+        app(\App\Services\TicketPromotions::class)->apply($order,'HALF');
+        app(\App\Services\MidtransPayments::class)->start($order,81875);
+        $this->assertSame(75000,$order->fresh()->payment_snapshot['subtotal']);
+        $this->assertSame(1875,$order->fresh()->payment_snapshot['fees']['processing']);
+        $other=$this->reserve($this->event());
+        $this->expectException(ValidationException::class);
+        app(TicketBooking::class)->submitProof($other,$method,'proof.png');
     }
     public function test_login_returns_to_concert_list_instead_of_saved_payment_page(): void {
         $customer=$this->customer(); $order=$this->reserve($this->event(),$customer);
@@ -538,8 +741,8 @@ class TicketingTest extends TestCase {
     public function test_operator_sidebar_contains_payment_approvals_and_orders(): void {
         $this->actingAs($this->staff('ticket_operator'),'portal');
         $response=$this->get(route('portal.ticketing.payments'))->assertOk();
-        $response->assertSee('Payment Approvals')->assertSee('Order List')->assertSee('id="sidebar"',false);
-        foreach (['events','venues','customers','methods'] as $page) $response->assertDontSee(route('portal.ticketing.'.$page),false);
+        $response->assertSee('Payment Approvals')->assertSee('Order List')->assertSee('Payment Methods')->assertSee('id="sidebar"',false);
+        foreach (['events','venues','customers'] as $page) $response->assertDontSee(route('portal.ticketing.'.$page),false);
     }
     public function test_ticket_navigation_obeys_portal_menu_permissions(): void {
         $staff=$this->staff();$this->actingAs($staff,'portal');

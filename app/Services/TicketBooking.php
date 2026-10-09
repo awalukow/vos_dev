@@ -59,6 +59,7 @@ class TicketBooking {
             $order = TicketOrder::lockForUpdate()->findOrFail($order->id);
             $method = TicketPaymentMethod::lockForUpdate()->findOrFail($method->id);
             if (!$method->active) $this->fail('This payment method has been disabled.');
+            if ($method->type==='midtrans') $this->fail('Use the Midtrans checkout for automated QRIS payments.');
             if ($order->status !== 'awaiting_payment' || !$order->expires_at || $order->expires_at->isPast()) $this->fail('This reservation is no longer available. Please make a new booking.');
             $singer=$singerId ? PortalSinger::lockForUpdate()->find($singerId) : null;
             if ($singerId && (!$singer || !$singer->active)) throw ValidationException::withMessages(['singer_id'=>__('Please select an active singer.')]);
@@ -108,6 +109,7 @@ class TicketBooking {
         DB::transaction(function () use ($order,$actor) {
             TicketEvent::withoutGlobalScope('active')->lockForUpdate()->findOrFail($order->ticket_event_id);
             $order=TicketOrder::lockForUpdate()->findOrFail($order->id);
+            if ($order->status==='midtrans_pending') $this->fail('Resolve the Midtrans payment before removing this booking.');
             $order->update(['RowStatus'=>-1]);
             $order->items()->update(['RowStatus'=>-1]);
             TicketDelivery::audit('booking.removed',$order->reference,$actor,['status'=>$order->status]);

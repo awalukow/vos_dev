@@ -194,5 +194,16 @@
     "Confirm your free tickets without uploading payment proof.": "Konfirmasi tiket gratis tanpa mengunggah bukti pembayaran.",
     "This booking requires payment.": "Pemesanan ini memerlukan pembayaran.",
     "Your tickets are confirmed.": "Tiket Anda telah dikonfirmasi.",
-    "Your tickets are confirmed, but email delivery failed. Open My tickets to view them.": "Tiket Anda telah dikonfirmasi, tetapi pengiriman email gagal. Buka Tiket saya untuk melihatnya."
+    "Your tickets are confirmed, but email delivery failed. Open My tickets to view them.": "Tiket Anda telah dikonfirmasi, tetapi pengiriman email gagal. Buka Tiket saya untuk melihatnya.",
+    "Processing Fee": "Biaya Pemrosesan",
+    "Platform Fee": "Biaya Platform",
+    "The fee added for processing the payment.": "Biaya tambahan untuk memproses pembayaran.",
+    "The added fee for the platform.": "Biaya tambahan untuk platform.",
+    "Complete your payment before": "Selesaikan pembayaran sebelum",
+    "Total including fees": "Total termasuk biaya",
+    "Continue to Midtrans →": "Lanjut ke Midtrans →",
+    "Complete your QRIS payment": "Selesaikan pembayaran QRIS Anda",
+    "Your tickets remain reserved while Midtrans checks your payment. Confirmation is automatic once payment is received.": "Tiket Anda tetap dipesan selama Midtrans memeriksa pembayaran. Pembayaran dikonfirmasi otomatis setelah diterima.",
+    "Refresh payment status": "Perbarui status pembayaran",
+    "midtrans pending": "menunggu pembayaran Midtrans"
 }

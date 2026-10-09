@@ -5,18 +5,45 @@
 <div class="page-head"><a class="tiny muted" href="{{ route('tickets.orders') }}">{{ __("← My tickets") }}</a><h1>{{ $order->status==='paid'?__("You’re on the guest list."):__("Your concert, one step closer.") }}</h1><span class="badge">{{ __(str_replace('_',' ',$expired?'expired':$order->status)) }}</span></div>
 <div class="split"><div>
 @if($order->status==='awaiting_payment' && !$expired)
-<section class="panel"><div class="eyebrow">{{ __("03 · Complete your payment") }}</div><h2 style="margin-top:12px">{{ __("Make it official.") }}</h2><div class="notice">{{ __('Pay and upload proof before') }} <strong>{{ $order->expires_at->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') }} WIB</strong>{{ __('. After that, your tickets are released.') }}</div>
+<section class="panel"><div class="eyebrow">{{ __("03 · Complete your payment") }}</div><h2 style="margin-top:12px">{{ __("Make it official.") }}</h2><div class="notice">{{ __('Complete your payment before') }} <strong>{{ $order->expires_at->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') }} WIB</strong>{{ __('. After that, your tickets are released.') }}</div>
 @if($methods->isEmpty() && $order->total>0)<div class="notice error">{{ __("No payment methods are currently available. Please contact the organizer.") }}</div>
 @else
-<form method="post" action="{{ $order->total===0?route('tickets.free',$order):route('tickets.proof',$order) }}" enctype="multipart/form-data">@csrf
+<form id="payment-form" method="post" action="{{ $order->total===0?route('tickets.free',$order):route('tickets.proof',$order) }}" enctype="multipart/form-data">@csrf
 <label for="singer-id">{{ __('Singer name') }}</label><select name="singer_id" id="singer-id"><option value="">{{ __('No singer referral') }}</option>@foreach($singers as $singer)<option value="{{ $singer->id }}" @selected((string)old('singer_id',$order->portal_singer_id)===(string)$singer->id)>{{ $singer->name }}</option>@endforeach</select>
 @if($order->total>0)
-<label for="payment-method">{{ __("Payment method") }}</label><select name="method" id="payment-method" required>@foreach($methods as $method)<option value="{{ $method->id }}" @selected((string)old('method')===(string)$method->id)>{{ $method->name }}</option>@endforeach</select>
-@foreach($methods as $method)<div class="payment-details notice" data-method="{{ $method->id }}"><strong>{{ $method->name }}</strong><p style="white-space:pre-line">{{ $method->instructions }}</p>@if($method->type==='qris' && $method->qr_image)<img class="qr-image" src="{{ route('tickets.payment-image',$method) }}" alt="{{ __('Merchant QRIS payment code') }}">@endif<p class="tiny">{{ __('Transfer exactly') }} <strong>Rp {{ number_format($order->total,0,',','.') }}</strong> {{ __('and use your booking reference where possible.') }}</p></div>@endforeach
-<label for="proof">{{ __("Upload payment proof") }}</label><input type="file" id="proof" name="proof" accept="image/jpeg,image/png,application/pdf" required><p class="tiny muted">{{ __("JPG, PNG or PDF, up to 5 MB. Staff verify receipt before issuing tickets.") }}</p><button class="btn">{{ __("Submit for approval →") }}</button>@else<button class="btn">{{ __('Confirm free tickets') }}</button>@endif</form>
+@php($selectedMethod=$methods->firstWhere('id',old('method'))?->id ?? $methods->first()->id)
+<fieldset class="payment-methods" id="payment-methods">
+<legend>{{ __("Payment method") }}</legend>
+<div class="payment-method-grid">
+@foreach($methods as $method)
+<label class="payment-method-option">
+<input type="radio" name="method" value="{{ $method->id }}" data-gateway="{{ $method->type }}" required @checked((string)$selectedMethod===(string)$method->id)>
+<span class="payment-method-card">
+<span class="payment-method-logo"><img src="{{ route('tickets.payment-logo',['logo'=>in_array($method->type,['qris','midtrans'])?'qris':'bank-transfer']) }}" alt="" width="80" height="36"></span>
+<span class="payment-method-name">{{ $method->name }}</span>
+<span class="payment-method-check" aria-hidden="true">✓</span>
+</span>
+</label>
+@endforeach
+</div>
+</fieldset>
+@foreach($methods as $method)<div class="payment-details notice" data-method="{{ $method->id }}"><strong>{{ $method->name }}</strong><p style="white-space:pre-line">{{ $method->instructions }}</p>@if($method->type==='qris' && $method->qr_image)<img class="qr-image" src="{{ route('tickets.payment-image',$method) }}" alt="{{ __('Merchant QRIS payment code') }}">@endif
+@if($method->type==='midtrans')
+@php($fees=$method->fees($order->total))
+<div class="quoted-fees">@include('tickets._payment-fees',['fees'=>$fees])</div>
+<p><strong>{{ __('Total including fees') }}: Rp {{ number_format($order->total+array_sum($fees),0,',','.') }}</strong></p>
+<input type="hidden" name="expected_total" value="{{ $order->total+array_sum($fees) }}">
+@else
+<p class="tiny">{{ __('Transfer exactly') }} <strong>Rp {{ number_format($order->total,0,',','.') }}</strong> {{ __('and use your booking reference where possible.') }}</p>@endif</div>@endforeach
+<div id="manual-proof"><label for="proof">{{ __("Upload payment proof") }}</label><input type="file" id="proof" name="proof" accept="image/jpeg,image/png,application/pdf" required><p class="tiny muted">{{ __("JPG, PNG or PDF, up to 5 MB. Staff verify receipt before issuing tickets.") }}</p><button class="btn">{{ __("Submit for approval →") }}</button></div><button class="btn" id="midtrans-pay" hidden>{{ __("Continue to Midtrans →") }}</button>@else<button class="btn">{{ __('Confirm free tickets') }}</button>@endif</form>
 @endif
 <form class="actions" action="{{ route('tickets.cancel',$order) }}" method="post">@csrf<button class="link-button" onclick="return confirm(this.dataset.confirm)" data-confirm="{{ __('Cancel this reservation and release your tickets?') }}">{{ __("Cancel reservation") }}</button></form>
 </section>
+@elseif($order->status==='midtrans_pending')
+<div class="panel"><h2>{{ __('Complete your QRIS payment') }}</h2><p>{{ __('Your tickets remain reserved while Midtrans checks your payment. Confirmation is automatic once payment is received.') }}</p>
+<form method="post" action="{{ route('tickets.midtrans.start',$order) }}">@csrf<input type="hidden" name="expected_total" value="{{ $order->total }}"><button class="btn">{{ __('Continue to Midtrans →') }}</button></form>
+<form class="actions" method="post" action="{{ route('tickets.midtrans.refresh',$order) }}">@csrf<button class="btn secondary">{{ __('Refresh payment status') }}</button></form>
+</div>
 @elseif($order->status==='payment_review')
 <div class="panel"><h2>{{ __("We’re checking your payment.") }}</h2><p class="muted">{{ __("Your tickets remain reserved. Once approved, your QR tickets will appear here and arrive by email.") }}</p><p class="tiny">{{ __('Submitted') }} {{ $order->proof_uploaded_at?->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') }} WIB. {{ __('Payment method') }}: {{ $order->payment_snapshot['name']??'' }}</p><a class="btn secondary" href="{{ route('tickets.order',$order) }}">{{ __("Refresh status") }}</a></div>
 @elseif($order->status==='paid')
@@ -27,7 +54,8 @@
 @endif
 </div><aside class="panel summary"><div class="eyebrow">{{ __("Booking details") }}</div><h3>{{ $order->event->title }}</h3><p class="muted tiny">{{ $order->event->location }}<br>{{ $order->event->starts_at->timezone('Asia/Jakarta')->translatedFormat('d M Y · H:i') }} WIB</p>
 @include('tickets._booking-items')
-<div class="row"><strong>{{ __("Total") }}</strong><strong>Rp {{ number_format($order->total,0,',','.') }}</strong></div><p>{{ __("Booking code") }}: <strong>{{ $order->booking_code }}</strong><br>{{ __("Referral") }}: {{ $order->singer_name ?? __("No singer referral") }} @if($order->referral_code)({{ $order->referral_code }})@endif</p>@if($order->discount)<div class="notice success">{{ __('Promo Code') }}: <strong>{{ $order->promo_snapshot['code'] }}</strong><br>{{ __('Discount') }}: −Rp {{ number_format($order->discount,0,',','.') }}@if($order->promo_snapshot['free_tickets']??0)<br>{{ __('Free tickets') }}: {{ $order->promo_snapshot['free_tickets'] }}@endif</div>@endif
+<div id="summary-fees">@include('tickets._payment-fees',['fees'=>$order->payment_snapshot['fees']??[]])</div>
+<div class="row"><strong>{{ __("Total") }}</strong><strong id="summary-total">Rp {{ number_format($order->total,0,',','.') }}</strong></div><p>{{ __("Booking code") }}: <strong>{{ $order->booking_code }}</strong><br>{{ __("Referral") }}: {{ $order->singer_name ?? __("No singer referral") }} @if($order->referral_code)({{ $order->referral_code }})@endif</p>@if($order->discount)<div class="notice success">{{ __('Promo Code') }}: <strong>{{ $order->promo_snapshot['code'] }}</strong><br>{{ __('Discount') }}: −Rp {{ number_format($order->discount,0,',','.') }}@if($order->promo_snapshot['free_tickets']??0)<br>{{ __('Free tickets') }}: {{ $order->promo_snapshot['free_tickets'] }}@endif</div>@endif
 @if($order->status==='awaiting_payment' && !$expired)
 <form class="promo-form" method="post" action="{{ route('tickets.promo',$order) }}">@csrf
 <label for="promo-code">{{ __('Promo Code') }}</label>
@@ -46,7 +74,65 @@
 @endsection
 @push('scripts')
 <script>
-const method=document.getElementById('payment-method');
-if(method){const show=()=>document.querySelectorAll('.payment-details').forEach(p=>p.hidden=p.dataset.method!==method.value);method.addEventListener('change',show);show();}
+const methods=document.getElementById('payment-methods');
+if(methods){
+    const form=document.getElementById('payment-form');
+    const manualAction=form.action;
+    const show=()=>{
+        const method=methods.querySelector('input[name="method"]:checked');
+        const automated=method.dataset.gateway==='midtrans';
+        document.querySelectorAll('.payment-details').forEach(p=>p.hidden=p.dataset.method!==method.value);
+        document.getElementById('manual-proof').hidden=automated;
+        document.getElementById('proof').required=!automated;
+        document.getElementById('proof').disabled=automated;
+        document.getElementById('midtrans-pay').hidden=!automated;
+        form.action=automated?@json(route('tickets.midtrans.start',$order)):manualAction;
+        const selected=document.querySelector('.payment-details[data-method="'+method.value+'"]');
+        document.getElementById('summary-fees').innerHTML=automated?selected.querySelector('.quoted-fees').innerHTML:'';
+        const total=automated?Number(selected.querySelector('[name="expected_total"]').value):@json($order->total);
+        document.getElementById('summary-total').textContent='Rp '+new Intl.NumberFormat('id-ID').format(total);
+    };
+    methods.addEventListener('change',show);show();
+}
+@if($order->status==='midtrans_pending')
+// Reconcile with Midtrans on arrival, including when its webhook is delayed.
+(() => {
+    let timer;
+    let checking=false;
+    let stopped=false;
+    const checkPayment=async()=>{
+        clearTimeout(timer);
+        if(checking || stopped || document.hidden) return;
+        checking=true;
+        let delay=10000;
+        try {
+            const response=await fetch(@json(route('tickets.midtrans.refresh',$order)),{
+                method:'POST',
+                credentials:'same-origin',
+                headers:{'Accept':'application/json','X-CSRF-TOKEN':@json(csrf_token())}
+            });
+            if(response.redirected || [401,403,419].includes(response.status)) {
+                stopped=true;
+            } else if(response.ok) {
+                const data=await response.json();
+                if(typeof data.status==='string' && data.status!=='midtrans_pending') {
+                    stopped=true;
+                    window.location.reload();
+                }
+            } else {
+                delay=30000;
+            }
+        } catch(error) {
+            delay=30000;
+        } finally {
+            checking=false;
+            if(!stopped && !document.hidden) timer=setTimeout(checkPayment,delay);
+        }
+    };
+    document.addEventListener('visibilitychange',checkPayment);
+    window.addEventListener('pageshow',checkPayment);
+    checkPayment();
+})();
+@endif
 </script>
 @endpush
