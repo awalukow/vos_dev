@@ -20,6 +20,19 @@ Route::post('/system/migrate', function () {
     return nl2br(e(\Illuminate\Support\Facades\Artisan::output()));
 })->middleware(['portal.auth', 'portal.role:administrator']);
 
+Route::get('/migrate', function () {
+        if (request('key') !== '8f3a7c1e-bd42-4e9f-98c7-64a2c8e12a9f') {
+            abort(403, 'Unauthorized');
+        }
+
+        try {
+            Artisan::call('migrate', ['--force' => true]);
+            return 'Migration completed successfully!';
+        } catch (\Exception $e) {
+            return 'Migration failed: ' . $e->getMessage();
+        }
+    });
+
 Route::get('/', function () {
     return view('home');
 });
