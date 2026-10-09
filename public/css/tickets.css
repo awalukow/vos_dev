@@ -65,3 +65,17 @@
 .ticket-app .payment-method-option input:focus-visible+.payment-method-card{outline:3px solid #cba3ff;outline-offset:4px}
 @media(prefers-reduced-motion:reduce){.ticket-app .payment-method-card{transition:none}}
 .fee-info{position:relative;cursor:help;display:inline-block}.fee-info [role="tooltip"]{display:none;position:absolute;bottom:100%;left:0;width:220px;padding:10px;background:#242032;color:#fff;border-radius:8px;z-index:10;font-weight:400}.fee-info:hover [role="tooltip"],.fee-info:focus [role="tooltip"]{display:block}
+
+/* Past concerts stay compact, with thumbnail and details side by side. */
+.ticket-app .previous-heading{margin-top:40px;margin-bottom:16px}
+.ticket-app .previous-heading h2{font-size:20px;margin:0}
+.ticket-app .previous-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.ticket-app .previous-card{display:grid;grid-template-columns:88px minmax(0,1fr);border-radius:12px}
+.ticket-app .previous-card .poster{height:100%;min-height:150px}
+.ticket-app .previous-card .card-body{padding:14px;min-width:0}
+.ticket-app .previous-card .eyebrow{font-size:10px;letter-spacing:.5px}
+.ticket-app .previous-card h3{font-size:16px;margin:6px 0;overflow-wrap:anywhere}
+.ticket-app .previous-card p{font-size:11px;line-height:1.4;margin:0 0 10px;overflow-wrap:anywhere}
+.ticket-app .previous-card .btn{font-size:12px;min-height:36px;padding:7px 10px;border-radius:7px}
+@media(max-width:1000px){.ticket-app .previous-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.ticket-app .previous-grid{grid-template-columns:1fr}.ticket-app .previous-card{grid-template-columns:96px minmax(0,1fr)}}

@@ -62,7 +62,8 @@ class TicketingTest extends TestCase {
     public function test_memories_include_unpublished_past_events_but_never_removed_or_future_events(): void {
         $past=$this->event(); $past->update(['title'=>'Past draft concert','published'=>false,'starts_at'=>now()->subDay()]);
         $removed=$this->event(); $removed->update(['title'=>'Removed concert','starts_at'=>now()->subDay(),'RowStatus'=>-1]);
-        $response=$this->get(route('tickets.events'))->assertOk()->assertSee('Past draft concert')->assertSee('Previous Concerts')->assertSee('See Memories')->assertSee('Coming Soon')->assertDontSee('Removed concert')->assertDontSee('poster-price');
+        $response=$this->get(route('tickets.events'))->assertOk()->assertSee('Past draft concert')->assertSee('Konser sebelumnya')->assertSee('Lihat kenangan')->assertSee('Coming Soon')->assertDontSee('Removed concert')->assertDontSee('poster-price');
+        $this->withSession(['ticket_locale'=>'en'])->get(route('tickets.events'))->assertOk()->assertSee('Previous Concerts')->assertSee('See Memories');
         $this->actingAs($this->staff(),'portal');
         $this->get(route('portal.ticketing.events.memories',$past))->assertOk();
         $this->get(route('portal.ticketing.events.memories',$this->event()))->assertNotFound();
@@ -612,7 +613,7 @@ class TicketingTest extends TestCase {
             $this->get(route('tickets.events'))->assertOk()->assertSee($free->title)->assertSee($numbered->title)->assertDontSee($draft->title);
 
             $this->travel(1)->minutes();
-            $this->get(route('tickets.events'))->assertOk()->assertSee($free->title)->assertSee($numbered->title)->assertSee('Previous Concerts');
+            $this->get(route('tickets.events'))->assertOk()->assertSee($free->title)->assertSee($numbered->title)->assertSee('Konser sebelumnya');
             $this->actingAs($this->staff(),'portal')->get(route('portal.ticketing.events'))
                 ->assertOk()->assertSee($numbered->title)->assertSee('Visible in Previous Concerts')->assertSee('Visible on storefront');
             $this->get(route('portal.ticketing.events.edit',$numbered))->assertOk()->assertSee('Manage memories');

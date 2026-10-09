@@ -15,11 +15,11 @@
 @if($availability['remaining']>0)<a class="btn" href="{{ route('tickets.select',$event) }}">{{ __("Purchase ↗") }}</a>@else<button class="btn" disabled>{{ __("Sold out") }}</button>@endif</div></div></article>
 @empty<div class="empty" style="grid-column:1/-1"><h2>{{ __("The next great evening is on its way.") }}</h2><p class="muted">{{ __("Our upcoming concerts will appear here when booking opens.") }}</p><a class="btn secondary" href="/">{{ __("Explore the choir") }}</a></div>@endforelse
 </div>
-<div class="section-heading" style="margin-top:64px"><div><div class="eyebrow">Voice of Soul · Our story</div><h2>Previous Concerts</h2></div><span class="muted tiny">{{ $previous->count() }} concerts</span></div>
-<div class="grid">
+<div class="section-heading previous-heading"><h2>{{ __('Previous Concerts') }}</h2><span class="muted tiny">{{ __(':count concerts', ['count'=>$previous->count()]) }}</span></div>
+<div class="previous-grid">
 @forelse($previous as $event)
-<article class="card"><div class="poster">@if($event->thumbnail)<img src="{{ route('tickets.thumbnail',$event) }}" alt="{{ $event->title }}" loading="lazy">@endif</div><div class="card-body"><div class="eyebrow">{{ $event->starts_at->timezone('Asia/Jakarta')->translatedFormat('d M Y · H:i') }} WIB</div><h3>{{ $event->title }}</h3><p class="muted tiny">{{ $event->location }}</p><button class="btn secondary" type="button" data-memories="{{ $event->id }}">See Memories ↗</button></div></article>
-@empty<p class="muted">Belum ada konser sebelumnya.</p>@endforelse
+<article class="card previous-card"><div class="poster">@if($event->thumbnail)<img src="{{ route('tickets.thumbnail',$event) }}" alt="{{ $event->title }}" loading="lazy">@endif</div><div class="card-body"><div class="eyebrow">{{ $event->starts_at->timezone('Asia/Jakarta')->translatedFormat('d M Y · H:i') }} WIB</div><h3>{{ $event->title }}</h3><p class="muted tiny">{{ $event->location }}</p><button class="btn secondary" type="button" data-memories="{{ $event->id }}">{{ __('See Memories') }} ↗</button></div></article>
+@empty<p class="muted tiny">{{ __('No previous concerts yet.') }}</p>@endforelse
 </div>
 <dialog id="concert-memories" aria-labelledby="memory-title" style="width:min(900px,94vw);max-height:92vh;border:0;border-radius:20px;padding:24px;background:#171322;color:#fff">
 <div style="display:flex;justify-content:space-between;align-items:center;gap:20px"><h2 id="memory-title"></h2><button type="button" class="btn secondary" id="memory-close" aria-label="Close memories">✕</button></div>
