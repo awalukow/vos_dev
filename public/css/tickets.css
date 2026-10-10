@@ -79,3 +79,10 @@
 .ticket-app .previous-card .btn{font-size:12px;min-height:36px;padding:7px 10px;border-radius:7px}
 @media(max-width:1000px){.ticket-app .previous-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.ticket-app .previous-grid{grid-template-columns:1fr}.ticket-app .previous-card{grid-template-columns:96px minmax(0,1fr)}}
+.ticket-app .auth-quotes{margin-top:28px}
+.ticket-app .auth-quote{margin:0;min-height:340px}
+.ticket-app .auth-quote h2{font-size:clamp(26px,3vw,36px);line-height:1.25;overflow-wrap:break-word}
+.ticket-app .auth-quote #music-attribution{display:block;font-size:14px;line-height:1.6;margin-top:20px}
+.ticket-app .auth-story .quote-toggle{color:#d8c8e9;font-size:12px;margin-top:18px}
+.ticket-app .quote-toggle[hidden]{display:none}
+@media(max-width:600px){.ticket-app .auth-quote{min-height:280px}.ticket-app .auth-quote h2{font-size:26px}}

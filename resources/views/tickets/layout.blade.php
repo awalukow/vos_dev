@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="{{ app()->getLocale() }}">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><title>@yield('title','VOS Tickets') · Voice of Soul</title><link rel="stylesheet" href="{{ route('tickets.styles',['v'=>substr(hash_file('sha256',public_path('css/tickets.css')),0,12)]) }}">@stack('head')</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><title>@yield('title','VOS Tickets') · Voice of Soul</title><link rel="icon" type="image/png" href="{{ route('tickets.favicon') }}"><link rel="stylesheet" href="{{ route('tickets.styles',['v'=>substr(hash_file('sha256',public_path('css/tickets.css')),0,12)]) }}">@stack('head')</head>
 <body class="ticket-app"><div class="shell">
 <nav class="topnav" aria-label="{{ __('Main navigation') }}">
 <a class="brand" href="{{ route('tickets.events') }}" aria-label="Voice of Soul Choir tickets"><span class="brand-logo"><img src="{{ route('tickets.logo') }}" alt="" width="76" height="76"></span><span class="brand-wordmark"><span>VOICE OF SOUL</span><!--<span>CHOIR</span>>--><small>CONCERT TICKETS</small></span></a>

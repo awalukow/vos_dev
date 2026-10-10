@@ -1,7 +1,21 @@
 @extends('tickets.layout')
 @section('title',$mode==='register'?__("Create your account"):($mode==='verify'?__('Verify your email'):__('Welcome back')))
 @section('content')
-<div class="auth-wrap"><aside class="auth-story"><div class="eyebrow" style="color:#d6b6ff">{{ __("Your next live experience") }}</div><div><h2>{{ __("Good music.") }}<br>{{ __("Great company.") }}<br>{{ __("Your seat awaits.") }}</h2><p>{{ __("One account for every unforgettable evening with Voice of Soul.") }}</p></div></aside>
+@php
+    $musicQuotes = collect(config('music_quotes'))->map(fn ($quote) => [
+        'text' => __($quote['quote']),
+        'attribution' => '- '.$quote['author'].', '.__($quote['occupation']),
+    ])->values()->all();
+    $quoteIndex = array_rand($musicQuotes);
+@endphp
+<div class="auth-wrap"><aside class="auth-story"><div class="eyebrow" style="color:#d6b6ff">{{ __("Your next live experience") }}</div>
+<div class="auth-quotes">
+    <blockquote class="auth-quote">
+        <h2 id="music-quote">“{{ $musicQuotes[$quoteIndex]['text'] }}”</h2>
+        <p id="music-attribution">{{ $musicQuotes[$quoteIndex]['attribution'] }}</p>
+    </blockquote>
+    <button type="button" id="music-quote-toggle" class="link-button quote-toggle" hidden>{{ __('Pause quotes') }}</button>
+</div></aside>
 <div class="auth-form">
 @if($mode==='verify')
 <h2>{{ __("Check your inbox") }}</h2><p class="muted">{{ __('Enter the six-digit code sent to :email. It expires in 10 minutes.', ['email'=>auth('customer')->user()->email]) }}</p>
@@ -34,4 +48,26 @@
 
 @push('scripts')
 @include('tickets._customer-inputs')
+<script>
+(() => {
+    const quotes = {{ Illuminate\Support\Js::from($musicQuotes) }};
+    let current = {{ $quoteIndex }};
+    let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const toggle = document.getElementById('music-quote-toggle');
+    const updateToggle = () => {
+        toggle.textContent = paused ? {{ Illuminate\Support\Js::from(__('Resume quotes')) }} : {{ Illuminate\Support\Js::from(__('Pause quotes')) }};
+    };
+    if (quotes.length < 2) return;
+    toggle.hidden = false;
+    updateToggle();
+    toggle.addEventListener('click', () => { paused = !paused; updateToggle(); });
+    window.setInterval(() => {
+        if (paused || document.hidden) return;
+        // Pick any other quote, keeping the text and its attribution together.
+        current = (current + 1 + Math.floor(Math.random() * (quotes.length - 1))) % quotes.length;
+        document.getElementById('music-quote').textContent = '“' + quotes[current].text + '”';
+        document.getElementById('music-attribution').textContent = quotes[current].attribution;
+    }, 12000);
+})();
+</script>
 @endpush

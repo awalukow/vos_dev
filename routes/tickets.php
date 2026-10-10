@@ -15,7 +15,8 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
         return back();
     })->name('language');
     // Fixed asset routes also support this repository's root-level front controller.
-    Route::get('/assets/vos-logo.jpg',fn()=>response()->file(public_path('assets/images/vos-logo.jpg'),['Content-Type'=>'image/jpeg','Cache-Control'=>'public, max-age=86400']))->name('logo');
+    Route::get('/assets/vos-logo.png',fn()=>response()->file(public_path('assets/images/vos-logo.png'),['Content-Type'=>'image/png','Cache-Control'=>'public, max-age=86400']))->name('logo');
+    Route::get('/assets/vos-tickets-logo-v4.png',fn()=>response()->file(public_path('assets/images/vos-tickets-logo-v4.png'),['Content-Type'=>'image/png','Cache-Control'=>'public, max-age=86400']))->name('favicon');
     Route::get('/assets/payments/{logo}.svg',fn($logo)=>response()->file(public_path('assets/images/payments/'.$logo.'.svg'),['Content-Type'=>'image/svg+xml','Cache-Control'=>'public, max-age=86400']))->where('logo','qris|bank-transfer')->name('payment-logo');
     Route::get('/assets/Mitr-SemiBold.ttf',fn()=>response()->file(public_path('assets/fonts/mitr/Mitr-SemiBold.ttf'),['Content-Type'=>'font/ttf','Cache-Control'=>'public, max-age=31536000']))->name('brand-font');
     Route::get('/assets/tickets.css',fn()=>response()->file(public_path('css/tickets.css'),['Content-Type'=>'text/css','Cache-Control'=>'public, max-age=300']))->name('styles');
