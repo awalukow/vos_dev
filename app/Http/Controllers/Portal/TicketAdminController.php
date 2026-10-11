@@ -20,7 +20,7 @@ class TicketAdminController extends Controller {
         return view('portal.ticketing.event-form',compact('event','venues'));
     }
     public function saveEvent(Request $r,?TicketEvent $event=null) {
-        $data=$r->validate(['title'=>'required|string|max:190','description'=>'nullable|string|max:5000','starts_at'=>'required|date','location'=>'required|string|max:255','seating_type'=>'required|in:free,numbered','ticket_venue_id'=>'nullable|exists:ticket_venues,id','thumbnail'=>'nullable|image|mimes:jpeg,jpg,png,webp|max:4096','classes_json'=>'required|string|max:20000']);
+        $data=$r->validate(['title'=>'required|string|max:190','description'=>'nullable|string|max:5000','starts_at'=>'required|date','location'=>'required|string|max:255','maps_url'=>['nullable','url','max:1000','regex:~^https://~i'],'seating_type'=>'required|in:free,numbered','ticket_venue_id'=>'nullable|exists:ticket_venues,id','thumbnail'=>'nullable|image|mimes:jpeg,jpg,png,webp|max:4096','classes_json'=>'required|string|max:20000']);
         $event=$event ?? new TicketEvent;
         $uploaded=$r->hasFile('thumbnail')?$r->file('thumbnail')->store('ticket-media','local'):null;
         try {
@@ -30,6 +30,7 @@ class TicketAdminController extends Controller {
                 if ($r->boolean('published') && $data['seating_type']==='numbered' && empty($data['ticket_venue_id'])) throw ValidationException::withMessages(['ticket_venue_id'=>'This event needs an available venue before it can be published. Events with bookings and a removed venue must remain unpublished.']);
                 if ($hasOrders && ($locked->seating_type!==$data['seating_type'] || (int)$locked->ticket_venue_id!==(int)($data['ticket_venue_id']??0))) throw ValidationException::withMessages(['seating_type'=>'Seating and venue are locked after the first booking. Create a new event for a different arrangement.']);
                 $metadata=['title'=>$data['title'],'description'=>$data['description']??null,'starts_at'=>\Carbon\Carbon::parse($data['starts_at'],'Asia/Jakarta')->utc(),'location'=>$data['location'],'limited_seating'=>$r->boolean('limited_seating'),'published'=>$r->boolean('published')];
+                $metadata['maps_url']=array_key_exists('maps_url',$data) ? $data['maps_url'] : ($locked->location===$data['location'] ? $locked->maps_url : null);
                 if ($uploaded) $metadata['thumbnail']=$uploaded;
                 if ($r->boolean('published') && !$uploaded && !$locked->thumbnail) throw ValidationException::withMessages(['thumbnail'=>'Add a thumbnail before publishing.']);
                 if (!$hasOrders) {

@@ -68,7 +68,7 @@ span.flatpickr-weekday{color:#6b6b7b!important;background:transparent!important}
 .maps-preview a:hover { text-decoration: underline; }
 </style>
 
-<form method="POST" action="{{ $action }}" id="scheduleForm">
+<form method="POST" action="{{ $action }}" id="scheduleForm" enctype="multipart/form-data">
     <p class="muted">Konser yang sudah dipublikasikan di Ticketing otomatis tampil di Events dan Upcoming Schedule pada halaman utama. Tidak perlu membuat jadwal kedua untuk menampilkannya di halaman utama.</p>
     @csrf
     @if($isEdit) @method('PUT') @endif
@@ -158,6 +158,19 @@ span.flatpickr-weekday{color:#6b6b7b!important;background:transparent!important}
                           placeholder="Additional notes…">{{ old('event_detail', $schedule?->event_detail) }}</textarea>
             </div>
 
+            <div class="form-group">
+                <label class="form-label" for="event_image">Upload Gambar <span id="image-required">{{ old('event_type', $schedule?->event_type) === 'Konser' && !$schedule?->event_image ? '*' : '' }}</span></label>
+                @if($schedule?->image_url)
+                <div><img src="{{ $schedule->image_url }}" alt="Gambar kegiatan saat ini" style="max-width:240px;max-height:160px;object-fit:contain;margin-bottom:.5rem;"></div>
+                @endif
+                <input type="file" name="event_image" id="event_image" accept="image/jpeg,image/png,image/webp"
+                       class="form-control {{ $errors->has('event_image') ? 'is-invalid' : '' }}"
+                       @if(old('event_type', $schedule?->event_type) === 'Konser' && !$schedule?->event_image) required @endif
+                       aria-describedby="event-image-help">
+                <div id="event-image-help" style="font-size:.75rem;color:var(--text-muted);margin-top:.35rem;">Wajib untuk Konser, opsional untuk Pelayanan. JPG, PNG, atau WebP, maksimal 4 MB. Saat mengedit, kosongkan untuk tetap memakai gambar saat ini.</div>
+                @error('event_image') <div class="form-error">{{ $message }}</div> @enderror
+            </div>
+
             {{-- Kebaktian Minggu --}}
             <label style="display:flex;align-items:center;gap:.65rem;padding:.65rem .9rem;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;">
                 <input type="checkbox" name="isSundayService" value="1" style="accent-color:var(--accent);"
@@ -176,6 +189,20 @@ span.flatpickr-weekday{color:#6b6b7b!important;background:transparent!important}
         <button type="submit" class="btn btn-primary">{{ $isEdit ? 'Save Changes' : 'Create Schedule' }} →</button>
     </div>
 </form>
+
+<script>
+(() => {
+    const type = document.querySelector('#scheduleForm [name="event_type"]');
+    const image = document.getElementById('event_image');
+    const hasImage = @json((bool) $schedule?->event_image);
+    function updateImageRequirement() {
+        image.required = type.value === 'Konser' && !hasImage;
+        document.getElementById('image-required').textContent = image.required ? '*' : '';
+    }
+    type.addEventListener('change', updateImageRequirement);
+    updateImageRequirement();
+})();
+</script>
 
 {{-- ── Google Maps Places API ── --}}
 {{--

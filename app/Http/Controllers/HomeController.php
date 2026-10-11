@@ -24,7 +24,7 @@ class HomeController extends Controller
                         ? Carbon::parse($schedule->program_date->format('Y-m-d H:i:s'), 'Asia/Jakarta') : null,
                     'location' => $schedule->location,
                     'maps_url' => $schedule->maps_url,
-                    'image_url' => $schedule->event_image ? asset('assets/images/'.$schedule->event_image) : null,
+                    'image_url' => $schedule->image_url,
                     'ticket_url' => null,
                     'is_event' => $schedule->event_type === 'Konser' || !$schedule->isSundayService,
                 ];
@@ -38,7 +38,7 @@ class HomeController extends Controller
                     'event_detail' => $event->description,
                     'program_date' => $event->starts_at->copy()->timezone('Asia/Jakarta'),
                     'location' => $event->location,
-                    'maps_url' => null,
+                    'maps_url' => $event->maps_url,
                     'image_url' => $event->thumbnail ? route('tickets.thumbnail', $event) : null,
                     'ticket_url' => route('tickets.select', $event),
                     'is_event' => true,

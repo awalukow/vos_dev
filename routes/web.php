@@ -39,6 +39,14 @@ Route::get('/', function () {
 
 Route::get('/', [HomeController::class, 'index']);
 
+Route::get('/schedule/{schedule}/image', function (\App\Models\Schedule $schedule) {
+    abort_unless($schedule->rowstatus == 1
+        && preg_match('#^schedule-images/[a-zA-Z0-9]+\.(jpg|jpeg|png|webp)$#', $schedule->event_image), 404);
+    $disk = \Illuminate\Support\Facades\Storage::disk('local');
+    abort_unless($disk->exists($schedule->event_image), 404);
+    return response()->file($disk->path($schedule->event_image));
+})->name('schedule.image');
+
 //Route::get('/verify', 'DocumentValidationController@showDocumentValidation');
 //Route::get('/verify', [DocumentValidationController::class, 'showDocumentValidation_old']);
 Route::get('/verify/{id}', [DocumentValidationController::class, 'showDocumentValidation']);

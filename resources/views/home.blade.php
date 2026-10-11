@@ -1,5 +1,11 @@
 @extends('commonTemplate')
 @include('partials.home-slideshow')
+@push('head')
+<style>
+/* Match the original 1000 x 667 event artwork without enlarging portrait posters. */
+#section-events .card-img-top { width: 100%; aspect-ratio: 1000 / 667; object-fit: contain; background: #f8f9fa; }
+</style>
+@endpush
 @section('content')
 <title>Home &mdash; Voice of Soul Choir</title>
   <body data-spy="scroll" data-target="#pb-navbar" data-offset="200">

@@ -58,6 +58,7 @@ class ScheduleController extends Controller
             'maps_url'         => ['nullable', 'string', 'max:1000'],
             'event_detail'     => ['nullable', 'string', 'max:1000'],
             'isSundayService'  => ['boolean'],
+            'event_image'      => ['required_if:event_type,Konser', 'nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
         ]);
 
         Schedule::create([
@@ -68,7 +69,7 @@ class ScheduleController extends Controller
             'location'              => $validated['location'] ?? null,
             'maps_url'              => $validated['maps_url'] ?? null,
             'event_detail'          => $validated['event_detail'] ?? '',
-            'event_image'           => '',          // required by original schema, unused by portal
+            'event_image'           => $this->storeImage($request) ?? '',
             'event_imageCaptionUrl' => '',          // required by original schema, unused by portal
             'isSundayService'       => $request->boolean('isSundayService'),
             'rowstatus'             => 1,
@@ -107,7 +108,15 @@ class ScheduleController extends Controller
             'maps_url'        => ['nullable', 'string', 'max:1000'],
             'event_detail'    => ['nullable', 'string', 'max:1000'],
             'isSundayService' => ['boolean'],
+            'event_image' => [\Illuminate\Validation\Rule::requiredIf(
+                $request->input('event_type') === 'Konser' && !$schedule->event_image
+            ), 'nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
         ]);
+
+        unset($validated['event_image']);
+        if ($request->hasFile('event_image')) {
+            $validated['event_image'] = $this->storeImage($request);
+        }
 
         $schedule->update(array_merge($validated, [
             'isSundayService' => $request->boolean('isSundayService'),
@@ -126,6 +135,18 @@ class ScheduleController extends Controller
 
         $schedule->update(['rowstatus' => 0]);
         return back()->with('success', 'Schedule removed.');
+    }
+
+    private function storeImage(Request $request): ?string
+    {
+        if (!$request->hasFile('event_image')) return null;
+        $path = $request->file('event_image')->store('schedule-images', 'local');
+        if (!$path) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'event_image' => 'Gambar gagal disimpan. Silakan coba lagi.',
+            ]);
+        }
+        return $path;
     }
 
     // ── Konfirmasi Kehadiran (per user, per schedule) ─────────────────────────

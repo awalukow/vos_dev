@@ -42,6 +42,16 @@ class Schedule extends Model
         return $this->hasMany(ScheduleAttendance::class, 'schedule_id');
     }
 
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->event_image) return null;
+        if (str_starts_with($this->event_image, 'schedule-images/')) {
+            return route('schedule.image', $this);
+        }
+        return asset(str_starts_with($this->event_image, 'assets/images/')
+            ? $this->event_image : 'assets/images/'.$this->event_image);
+    }
+
     // Attendance count by voice and status
     public function attendanceCount(string $voice, string $status = 'hadir'): int
     {

@@ -397,3 +397,15 @@ same title (ignoring case and surrounding spaces) and local start minute as a ti
 concert, the ticketing version is shown once per section. Older duplicate records
 with different titles or dates remain independent and should be removed manually
 if no longer needed. This display integration does not create attendance records.
+
+### Ticketing location selection
+
+The ticketing event form uses the same Google Places configuration as Add Schedule
+(`GOOGLE_MAPS_API_KEY`). Search in Location shown to customers and select a suggestion;
+the saved Maps link appears on the home page in both Events and Upcoming Schedule.
+Existing events can be edited to select a place. Plain-text legacy locations remain
+supported, and changing location text clears an outdated map link.
+
+Deploy the additional field with:
+
+    php artisan migrate --path=database/migrations/2026_10_11_000002_add_ticket_event_maps_url.php

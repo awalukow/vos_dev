@@ -9,7 +9,12 @@
 <div class="split"><div class="panel"><h2>The essentials</h2><div class="form-grid">
 <div class="wide"><label for="title">Concert title</label><input id="title" name="title" value="{{ old('title',$event->title) }}" required maxlength="190"></div>
 <div><label for="starts_at">Date & time (WIB / Jakarta)</label><input id="starts_at" type="datetime-local" name="starts_at" value="{{ old('starts_at',$event->starts_at?->timezone('Asia/Jakarta')->format('Y-m-d\TH:i')) }}" required></div>
-<div><label for="location">Location shown to customers</label><input id="location" name="location" value="{{ old('location',$event->location) }}" required></div>
+<div><label for="location">Location shown to customers</label><input id="location" name="location" value="{{ old('location',$event->location) }}" required autocomplete="off" placeholder="Search for a venue or address…">
+<input type="hidden" name="maps_url" id="event-maps-url" value="{{ old('maps_url',$event->maps_url) }}">
+<p class="tiny muted" id="event-maps-help">Select a Google Maps suggestion to link this location on the home page.</p>
+<a id="event-maps-preview" class="tiny" target="_blank" rel="noopener noreferrer" hidden>View selected location on Google Maps ↗</a>
+@error('maps_url')<p class="text-danger">{{ $message }}</p>@enderror
+</div>
 <div class="wide"><label for="description">About this concert</label><textarea id="description" name="description" rows="4">{{ old('description',$event->description) }}</textarea></div>
 <div><label for="seating_type">Seating type</label><select id="seating_type" name="seating_type" @if($locked) style="pointer-events:none" aria-readonly="true" @endif><option value="free" @selected(old('seating_type',$event->seating_type)==='free')>Free seating</option><option value="numbered" @selected(old('seating_type',$event->seating_type)==='numbered')>Numbered seating</option></select></div>
 <div id="venue-field"><label for="venue">Venue layout</label><select id="venue" name="ticket_venue_id"><option value="">Choose a venue</option>@foreach($venues as $venue)<option value="{{ $venue->id }}" @selected(old('ticket_venue_id',$event->ticket_venue_id)==$venue->id)>{{ $venue->name }} · {{ count($venue->layout['seats']) }} seats</option>@endforeach</select><p class="tiny muted">Class names must match the venue’s seat classes. <a href="{{ route('portal.ticketing.venues') }}">Manage venues</a></p></div>
@@ -28,6 +33,31 @@
 </aside></div></form>
 @endsection
 @push('scripts')
+<script>
+(() => {
+ const input=document.getElementById('location'), field=document.getElementById('event-maps-url'), preview=document.getElementById('event-maps-preview');
+ function showPreview(){
+  preview.hidden=!field.value.startsWith('https://');
+  if(!preview.hidden) preview.href=field.value; else preview.removeAttribute('href');
+ }
+ showPreview();
+ input.addEventListener('input',()=>{field.value='';showPreview();});
+ window.initTicketPlacesAutocomplete=()=>{
+  const autocomplete=new google.maps.places.Autocomplete(input,{
+   componentRestrictions:{country:'id'},fields:['name','formatted_address','place_id','url']
+  });
+  input.addEventListener('input',()=>input.setCustomValidity('Select a location from the Google Maps suggestions.'));
+  autocomplete.addListener('place_changed',()=>{
+   const place=autocomplete.getPlace();
+   if(!place.place_id){input.setCustomValidity('Select a location from the Google Maps suggestions.');return;}
+   input.value=place.name || place.formatted_address;
+   field.value=place.url || 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(input.value)+'&query_place_id='+encodeURIComponent(place.place_id);
+   input.setCustomValidity('');showPreview();
+  });
+ };
+})();
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places&callback=initTicketPlacesAutocomplete" async defer></script>
 <script>
 (() => {
  const field=document.getElementById('classes-json'), editor=document.getElementById('class-editor'), locked=@json($locked);

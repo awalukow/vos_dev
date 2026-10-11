@@ -18,6 +18,7 @@ class TicketingTest extends TestCase {
         Schema::create('portal_user_roles',function(Blueprint $t){$t->id();$t->unsignedBigInteger('portal_user_id');$t->unsignedBigInteger('role_id');$t->timestamps();});
         (require database_path('migrations/2026_10_07_000001_create_ticketing_tables.php'))->up();
         (require database_path('migrations/2026_10_08_000001_add_ticket_event_layout_dividers.php'))->up();
+        (require database_path('migrations/2026_10_11_000002_add_ticket_event_maps_url.php'))->up();
         Schema::create('portal_menus', function(Blueprint $t) {
             $t->id(); $t->string('key')->unique(); $t->string('label'); $t->string('icon')->nullable();
             $t->string('route_name')->nullable(); $t->string('url')->nullable();
@@ -45,6 +46,27 @@ class TicketingTest extends TestCase {
     }
     private function customer(bool $verified=true): Customer {
         return Customer::create(['name'=>'Test Listener','dob'=>'1995-01-01','email'=>uniqid().'@example.test','phone'=>'+628123456789','password'=>Hash::make('StrongPass123!'),'email_verified_at'=>$verified?now():null]);
+    }
+    public function test_event_maps_selection_is_saved_edited_and_validated(): void {
+        $this->actingAs($this->staff(),'portal');
+        $url='https://www.google.com/maps/place/?q=place_id:hall-one';
+        $data=['title'=>'Concert with map','starts_at'=>'2030-10-01T19:00','location'=>'Hall One','maps_url'=>$url,
+            'seating_type'=>'free','classes_json'=>json_encode([['name'=>'Regular','color'=>'#713cce','price'=>100000,'capacity'=>100]])];
+        $this->get(route('portal.ticketing.events.create'))->assertOk()->assertSee('initTicketPlacesAutocomplete')->assertSee('name="maps_url"',false);
+        $this->post(route('portal.ticketing.events.store'),$data)->assertSessionHasNoErrors();
+        $event=TicketEvent::where('title','Concert with map')->firstOrFail();
+        $this->assertSame($url,$event->maps_url);
+        $this->get(route('portal.ticketing.events.edit',$event))->assertOk()->assertSee($url,false);
+        $data['location']='Hall Two';$data['maps_url']='https://www.google.com/maps/place/?q=place_id:hall-two';
+        $this->post(route('portal.ticketing.events.update',$event),$data)->assertSessionHasNoErrors();
+        $this->assertSame($data['maps_url'],$event->fresh()->maps_url);
+        $this->post(route('portal.ticketing.events.update',$event),array_merge($data,['maps_url'=>'javascript:alert(1)']))->assertSessionHasErrors('maps_url');
+        unset($data['maps_url']);
+        $this->post(route('portal.ticketing.events.update',$event),$data)->assertSessionHasNoErrors();
+        $this->assertNotNull($event->fresh()->maps_url);
+        $data['location']='A new unselected location';
+        $this->post(route('portal.ticketing.events.update',$event),$data)->assertSessionHasNoErrors();
+        $this->assertNull($event->fresh()->maps_url);
     }
     public function test_universal_fees_can_be_saved_by_admins_and_pengurus_only(): void {
         foreach (['administrator','adm2','pengurus'] as $role) {
