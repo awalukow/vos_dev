@@ -325,18 +325,21 @@
             </div>
         </div>
         <div class="row">
-            <div class="card-deck">
-                @foreach($events as $event)
-                <div class="card border-0">
-                    @if($event->event_image)
-                    <img class="card-img-top" src="assets/images/{{ $event->event_image }}" alt="{{ $event->event_imageCaptionUrl }}">
+            <div class="row w-100">
+                @forelse($events as $event)
+                <div class="col-md-6 mb-4"><div class="card border-0 h-100">
+                    @if($event->image_url)
+                    <img class="card-img-top" src="{{ $event->image_url }}" alt="{{ $event->event_name }}" loading="lazy">
                     @endif
                     <div class="card-body pb_p-40">
                         <small class="text-uppercase pb_color-dark-opacity-3 font-weight-bold">
-                            {{ $event->program_date ? $event->program_date->format('M dS, Y') : 'Coming Soon' }}
+                            {{ $event->program_date ? $event->program_date->format('M dS, Y · H:i').' WIB' : 'Coming Soon' }}
                         </small>
-                        <h4 class="card-title"><a href="#" class="text-danger">{{ $event->event_name }}</a></h4>
+                        <h4 class="card-title">{{ $event->event_name }}</h4>
                         <p class="card-text">{{ $event->event_detail }}</p>
+                        @if($event->ticket_url)
+                        <p><a href="{{ $event->ticket_url }}" class="btn btn-danger">View Tickets</a></p>
+                        @endif
                         @if($event->location)
                         <p class="card-text">
                             <small>
@@ -350,8 +353,10 @@
                         </p>
                         @endif
                     </div>
-                </div>
-                @endforeach
+                </div></div>
+                @empty
+                <p class="col-12 text-center">New events will be announced here soon.</p>
+                @endforelse
             </div>
         </div>
     </div>
@@ -379,9 +384,13 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($services as $service)
+                            @forelse($services as $service)
                             <tr>
-                                <td>{{ $service->event_name }}</td>
+                                <td>{{ $service->event_name }}
+                                    @if($service->ticket_url)
+                                    <br><a href="{{ $service->ticket_url }}" class="text-danger">View Tickets</a>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($service->maps_url)
                                         <a href="{{ $service->maps_url }}" target="_blank">
@@ -393,12 +402,13 @@
                                         {{ $service->event_detail }}
                                     @endif
                                 </td>
-                                <td>{{ $service->program_date->format('M dS, Y') }}</td>
+                                <td>{{ $service->program_date->format('M dS, Y · H:i') }} WIB</td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr><td colspan="3" class="text-center">No upcoming schedules yet.</td></tr>
+                            @endforelse
                         </tbody>
                     </table>
-                    <!--{{ $services->links() }}-->
                 </div>
             </div>
         </div>

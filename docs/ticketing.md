@@ -380,3 +380,20 @@ XLSX XML/row/value checks and browser checks with synthetic fixtures for the
 slideshow, video frame cleanup and Coming Soon state. No real customer email was
 sent. Provider-hosted YouTube playback and final delivery in email clients require
 normal live-service connectivity.
+
+## Home page events and schedules
+
+Published, active ticketing concerts with a future start time are read directly by
+both home page sections. Edit the concert in Ticketing to update its title,
+description, poster, location, or date; unpublish or remove it to hide it. No
+additional Jadwal Pelayanan record or synchronization job is required for display.
+Ticket links lead to the existing ticket selection flow. Times display in WIB.
+
+Active manual Jadwal Pelayanan records remain supported. Upcoming Schedule includes
+all dated activities from today onward, including Konser without the Sunday Service
+checkbox. Events includes concerts and other non-Sunday activities. Both sections
+show all qualifying entries in date order. When a manual record has exactly the
+same title (ignoring case and surrounding spaces) and local start minute as a ticket
+concert, the ticketing version is shown once per section. Older duplicate records
+with different titles or dates remain independent and should be removed manually
+if no longer needed. This display integration does not create attendance records.

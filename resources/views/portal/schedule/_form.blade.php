@@ -69,6 +69,7 @@ span.flatpickr-weekday{color:#6b6b7b!important;background:transparent!important}
 </style>
 
 <form method="POST" action="{{ $action }}" id="scheduleForm">
+    <p class="muted">Konser yang sudah dipublikasikan di Ticketing otomatis tampil di Events dan Upcoming Schedule pada halaman utama. Tidak perlu membuat jadwal kedua untuk menampilkannya di halaman utama.</p>
     @csrf
     @if($isEdit) @method('PUT') @endif
 

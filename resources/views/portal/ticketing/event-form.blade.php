@@ -3,6 +3,7 @@
 @section('ticket-content')
 @php($locked=$event->exists && $event->orders()->withoutGlobalScope('active')->exists())
 <div class="page-head"><div class="eyebrow">Concert details</div><h1 class="admin-title">{{ $event->exists?'Edit concert':'Create a concert' }}</h1></div>
+<p class="muted">Published upcoming concerts appear automatically in Events and Upcoming Schedule on the home page. No separate Jadwal Pelayanan entry is needed for the home page.</p>
 @if($event->exists && $event->starts_at->lte(now()))<div class="panel" style="border-left:4px solid #c9a45c;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap"><div><h2>Keep the memories alive</h2><p class="muted">This concert is in Previous Concerts. Add a photo slideshow or a YouTube video.</p></div><a class="btn btn-primary" href="{{ route('portal.ticketing.events.memories',$event) }}">Manage memories →</a></div>@endif
 <form method="post" enctype="multipart/form-data" id="event-form" action="{{ $event->exists?route('portal.ticketing.events.update',$event):route('portal.ticketing.events.store') }}">@csrf
 <div class="split"><div class="panel"><h2>The essentials</h2><div class="form-grid">

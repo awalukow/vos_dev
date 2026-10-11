@@ -2,51 +2,59 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Schedule;          // ← use the portal Schedule model (same table)
 use App\Models\PastEventsModel;
+use App\Models\Schedule;
+use App\Models\TicketEvent;
 use Illuminate\Support\Carbon;
-
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Foundation\Validation\ValidatesRequests;
 
 class HomeController extends Controller
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-
     public function index()
     {
-        $today = Carbon::now();
+        // Portal dates are Jakarta wall time; ticketing stores UTC.
+        $today = Carbon::now('Asia/Jakarta')->startOfDay()->format('Y-m-d H:i:s');
+        $schedules = Schedule::where('rowstatus', 1)
+            ->where(function ($query) use ($today) {
+                $query->where('program_date', '>=', $today)->orWhereNull('program_date');
+            })->get()->map(function ($schedule) {
+                return (object) [
+                    'event_name' => $schedule->event_name,
+                    'event_detail' => $schedule->event_detail,
+                    'program_date' => $schedule->program_date
+                        ? Carbon::parse($schedule->program_date->format('Y-m-d H:i:s'), 'Asia/Jakarta') : null,
+                    'location' => $schedule->location,
+                    'maps_url' => $schedule->maps_url,
+                    'image_url' => $schedule->event_image ? asset('assets/images/'.$schedule->event_image) : null,
+                    'ticket_url' => null,
+                    'is_event' => $schedule->event_type === 'Konser' || !$schedule->isSundayService,
+                ];
+            });
 
-        // Non-Sunday events (Konser etc.) — shown as event cards
-        $events = Schedule::where(function ($query) use ($today) {
-                        $query->where('program_date', '>=', $today)
-                              ->orWhereNull('program_date');
-                    })
-                    ->where('isSundayService', false)
-                    ->where('rowstatus', '>=', 0)
-                    ->orderBy('program_date')
-                    ->take(2)
-                    ->get();
+        // Read source records directly so publication and edits need no second entry.
+        $ticketEvents = TicketEvent::where('published', true)->where('starts_at', '>', now())
+            ->get()->map(function ($event) {
+                return (object) [
+                    'event_name' => $event->title,
+                    'event_detail' => $event->description,
+                    'program_date' => $event->starts_at->copy()->timezone('Asia/Jakarta'),
+                    'location' => $event->location,
+                    'maps_url' => null,
+                    'image_url' => $event->thumbnail ? route('tickets.thumbnail', $event) : null,
+                    'ticket_url' => route('tickets.select', $event),
+                    'is_event' => true,
+                ];
+            });
 
-        // Sunday services — shown in the schedule table
-        $services = Schedule::where('program_date', '>=', $today)
-                        ->where('isSundayService', true)
-                        ->where('rowstatus', '>=', 0)
-                        ->orderBy('program_date')
-                        ->paginate(5);
-
-        $pastEvents = PastEventsModel::where('rowstatus', '>= 0')
-                            ->take(3)
-                            ->orderBy('eventDate')
-                            ->get();
+        // Prefer ticketing details for a matching manual title and start time.
+        $upcoming = $ticketEvents->concat($schedules)->unique(function ($event) {
+            return mb_strtolower(trim($event->event_name)).'|'.$event->program_date?->format('Y-m-d H:i');
+        })->sortBy(fn ($event) => $event->program_date?->timestamp ?? PHP_INT_MAX)->values();
 
         return view('home', [
-            'events'     => $events,
-            'services'   => $services,
-            'pastEvents' => $pastEvents,
+            'events' => $upcoming->where('is_event', true)->values(),
+            'services' => $upcoming->filter(fn ($event) => $event->program_date !== null)->values(),
+            'pastEvents' => PastEventsModel::where('rowstatus', '>=', 0)
+                ->orderBy('eventDate')->take(3)->get(),
         ]);
     }
 }
