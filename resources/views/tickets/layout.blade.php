@@ -12,5 +12,5 @@
 @foreach(['success','error','info'] as $kind) @if(session($kind))<div role="status" class="notice {{ $kind }}">{{ __(session($kind)) }}</div>@endif @endforeach
 @if($errors->any())<div class="notice error" role="alert"><strong>{{ __("Please check the following:") }}</strong><ul>@foreach($errors->all() as $error)<li>{{ __($error) }}</li>@endforeach</ul></div>@endif
 @yield('content')
-</main><footer>Voice of Soul Choir &nbsp; · &nbsp; {{ __('Music brings us together.') }} <a style="float:right" href="{{ route('portal.login') }}">{{ __("Staff portal") }}</a></footer>
+</main><footer>Voice of Soul Choir &nbsp; · &nbsp; &copy; 2026 - AWalukow <a style="float:right" href="{{ route('portal.login') }}">{{ __("Staff portal") }}</a></footer>
 </div>@stack('scripts')</body></html>
