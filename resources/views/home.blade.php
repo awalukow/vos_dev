@@ -41,7 +41,7 @@
 
     <section class="pb_cover_v1 text-center choir-slideshow" id="section-home" aria-label="Voice of Soul Choir photos" aria-roledescription="carousel">
       <div class="choir-slides" aria-hidden="true">
-        <img class="choir-slide is-active" src="{{ asset('assets/images/img1.JPG') }}" alt="" fetchpriority="high">
+        <img class="choir-slide is-active" src="{{ asset('assets/images/img1.jpg') }}" alt="" fetchpriority="high">
         <img class="choir-slide" src="{{ asset('assets/images/imgs/concert.jpg') }}" alt="" decoding="async">
         <img class="choir-slide" src="{{ asset('assets/images/imgs/image-3.jpg') }}" alt="" decoding="async">
       </div>
