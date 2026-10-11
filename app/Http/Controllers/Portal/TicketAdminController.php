@@ -171,7 +171,20 @@ class TicketAdminController extends Controller {
     public function methods() {
         $admin=auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2();
         $methods=TicketPaymentMethod::when(!$admin,fn($q)=>$q->where('type','midtrans'))->get();
-        return view('portal.ticketing.methods',compact('methods'));
+        $feeSettings=\App\Models\TicketFeeSetting::current();
+        return view('portal.ticketing.methods',compact('methods','feeSettings'));
+    }
+    public function fees(Request $r) {
+        $user=auth('portal')->user();
+        abort_unless($user->isAdministrator() || $user->isAdm2() || $user->hasRole('pengurus'),403);
+        $data=$r->validate([
+            'tax_percent'=>'required|numeric|min:0|max:100',
+            'platform_fee_type'=>'required|in:fixed,percent',
+            'platform_fee_value'=>'required|numeric|min:0|max:'.($r->input('platform_fee_type')==='percent'?'100':'10000000'),
+        ]);
+        \App\Models\TicketFeeSetting::current()->update($data);
+        TicketDelivery::audit('payment_fees.updated','1',$this->actor(),$data);
+        return back()->with('success','Fees saved. New bookings will use these rates.');
     }
     public function testMidtrans(TicketPaymentMethod $method, \App\Services\MidtransPayments $payments) {
         abort_unless(auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2(),403);
@@ -183,7 +196,7 @@ class TicketAdminController extends Controller {
         if ($method->type==='midtrans') {
             abort_if(!$admin && $r->hasAny(['environment','merchant_id','server_key','client_key','name','instructions']),403);
             $rules=['active'=>'nullable|boolean'];
-            foreach (['processing','platform'] as $fee) {
+            foreach (['processing'] as $fee) {
                 $rules[$fee.'_fee_type']='required|in:fixed,percent';
                 $rules[$fee.'_fee_value']='required|numeric|min:0|max:'.($r->input($fee.'_fee_type')==='percent'?'100':'10000000');
             }

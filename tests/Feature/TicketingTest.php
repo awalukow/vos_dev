@@ -41,9 +41,94 @@ class TicketingTest extends TestCase {
         (require database_path('migrations/2026_10_08_000004_create_ticket_promos.php'))->up();
         (require database_path('migrations/2026_10_09_000001_add_midtrans_payments.php'))->up();
         (require database_path('migrations/2026_10_09_000002_add_concert_memories_and_dashboard.php'))->up();
+        if ($this->getName()!=='test_fee_migration_moves_legacy_platform_fee_without_changing_submitted_payments') (require database_path('migrations/2026_10_11_000001_add_universal_ticket_fees.php'))->up();
     }
     private function customer(bool $verified=true): Customer {
         return Customer::create(['name'=>'Test Listener','dob'=>'1995-01-01','email'=>uniqid().'@example.test','phone'=>'+628123456789','password'=>Hash::make('StrongPass123!'),'email_verified_at'=>$verified?now():null]);
+    }
+    public function test_universal_fees_can_be_saved_by_admins_and_pengurus_only(): void {
+        foreach (['administrator','adm2','pengurus'] as $role) {
+            $this->actingAs($this->staff($role),'portal');
+            $this->get(route('portal.ticketing.methods'))->assertOk()->assertSeeInOrder(['Payment Method &amp; Fees','Tax (%)','Platform Fee','Ways to pay.'],false);
+            $this->post(route('portal.ticketing.fees.update'),['tax_percent'=>11.25,'platform_fee_type'=>'percent','platform_fee_value'=>2.5])->assertSessionHasNoErrors();
+            $this->assertEquals(11.25,\App\Models\TicketFeeSetting::current()->tax_percent);
+            $this->post(route('portal.ticketing.fees.update'),['tax_percent'=>-1,'platform_fee_type'=>'percent','platform_fee_value'=>101])->assertSessionHasErrors(['tax_percent','platform_fee_value']);
+            auth('portal')->logout();
+        }
+        $this->actingAs($this->staff('member'),'portal')->post(route('portal.ticketing.fees.update'),['tax_percent'=>0,'platform_fee_type'=>'fixed','platform_fee_value'=>0])->assertForbidden();
+        $this->actingAs($this->staff('ticket_operator'),'portal')->post(route('portal.ticketing.fees.update'),['tax_percent'=>0,'platform_fee_type'=>'fixed','platform_fee_value'=>0])->assertForbidden();
+    }
+
+    public function test_universal_fees_apply_to_manual_payments_and_preserve_booking_rates(): void {
+        \App\Models\TicketFeeSetting::current()->update(['tax_percent'=>11,'platform_fee_type'=>'fixed','platform_fee_value'=>5000]);
+        foreach (['transfer','qris'] as $type) {
+            $method=TicketPaymentMethod::where('type',$type)->firstOrFail();
+            $method->update(['active'=>true]);
+            $order=$this->reserve($this->event(),null,2);
+            $this->assertSame(338000,$order->total);
+            $this->actingAs($order->customer,'customer')->withSession(['ticket_locale'=>'en'])->get(route('tickets.order',$order))->assertOk()->assertSee('Tax')->assertSee('Platform Fee')->assertSee('338.000');
+            app(TicketBooking::class)->submitProof($order,$method,'proof.png');
+            $order->refresh();
+            $this->assertSame(338000,$order->total);
+            $this->assertSame(['tax'=>33000,'platform'=>5000],$order->payment_snapshot['fees']);
+            $this->assertSame('payment_review',$order->status);
+        }
+        $order=$this->reserve($this->event());
+        \App\Models\TicketFeeSetting::current()->update(['tax_percent'=>50,'platform_fee_value'=>9000]);
+        app(\App\Services\TicketPromotions::class)->apply($order,null);
+        $this->assertSame(171500,$order->fresh()->total);
+        $this->assertSame(234000,$this->reserve($this->event())->total);
+    }
+
+    public function test_percentage_fees_recalculate_after_promos_and_free_tickets_stay_free(): void {
+        \App\Models\TicketFeeSetting::current()->update(['tax_percent'=>11,'platform_fee_type'=>'percent','platform_fee_value'=>2.5]);
+        $order=$this->reserve($this->event());
+        $this->assertSame(170250,$order->total);
+        \App\Models\TicketPromo::create(['code'=>'HALF','type'=>'percent','value'=>50]);
+        $promos=app(\App\Services\TicketPromotions::class);
+        $promos->apply($order,'HALF');
+        $this->assertSame(85125,$order->fresh()->total);
+        $promos->apply($order,null);
+        $this->assertSame(170250,$order->fresh()->total);
+        \App\Models\TicketFeeSetting::current()->update(['platform_fee_type'=>'fixed','platform_fee_value'=>5000]);
+        $free=$this->reserve($this->event());
+        \App\Models\TicketPromo::create(['code'=>'FREE','type'=>'percent','value'=>100]);
+        $promos->apply($free,'FREE');
+        $this->assertSame(0,$free->fresh()->total);
+        $this->actingAs($free->customer,'customer')->withSession(['ticket_locale'=>'en'])->get(route('tickets.order',$free))->assertOk()->assertSee('Confirm free tickets')->assertDontSee('Platform Fee')->assertDontSee('Tax');
+        app(TicketBooking::class)->completeFree($free);
+        $this->assertSame('paid',$free->fresh()->status);
+        $this->assertSame(0,$free->fresh()->total);
+        $this->assertSame(['tax'=>0,'platform'=>0],$free->fresh()->payment_snapshot['fees']);
+    }
+
+    public function test_tax_zero_is_hidden_and_midtrans_adds_only_processing_to_shared_fees(): void {
+        $this->midtrans(); $this->fakeMidtrans();
+        \App\Models\TicketFeeSetting::current()->update(['tax_percent'=>11]);
+        $order=$this->reserve($this->event());
+        app(\App\Services\MidtransPayments::class)->start($order,175250);
+        $this->assertSame(175250,$order->fresh()->total);
+        $this->assertSame(['tax'=>16500,'platform'=>5000,'processing'=>3750],$order->fresh()->payment_snapshot['fees']);
+        $this->assertSame(25250,\App\Services\TicketReports::fees($order->fresh()));
+        \App\Models\TicketFeeSetting::current()->update(['tax_percent'=>0]);
+        $order=$this->reserve($this->event());
+        $this->actingAs($order->customer,'customer')->withSession(['ticket_locale'=>'en'])->get(route('tickets.order',$order))->assertOk()->assertDontSee('Tax')->assertSee('Platform Fee');
+    }
+
+    public function test_fee_migration_moves_legacy_platform_fee_without_changing_submitted_payments(): void {
+        $base=['customer_id'=>$this->customer()->id,'ticket_event_id'=>$this->event()->id,'total'=>150000,'expires_at'=>now()->addMinutes(30)];
+        $pending=TicketOrder::create($base+['reference'=>(string)\Illuminate\Support\Str::uuid(),'status'=>'awaiting_payment']);
+        $paid=TicketOrder::create($base+['reference'=>(string)\Illuminate\Support\Str::uuid(),'status'=>'paid','payment_snapshot'=>['fees'=>['platform'=>2000]]]);
+        $migration=require database_path('migrations/2026_10_11_000001_add_universal_ticket_fees.php');
+        $pengurus=$this->staff('pengurus');
+        TicketPaymentMethod::where('type','midtrans')->update(['platform_fee_type'=>'percent','platform_fee_value'=>2.5]);
+        $migration->up();
+        $this->assertSame(153750,$pending->fresh()->total);
+        $this->assertSame(['tax'=>0,'platform'=>3750],$pending->fresh()->payment_snapshot['fees']);
+        $this->assertSame(150000,$paid->fresh()->total);
+        $this->assertSame(['fees'=>['platform'=>2000]],$paid->fresh()->payment_snapshot);
+        $this->assertContains('ticketing.methods',$pengurus->accessibleMenuKeys());
+        $this->assertSame('Payment Method & Fees',DB::table('portal_menus')->where('key','ticketing.methods')->value('label'));
     }
     private function event(string $type='free',int $capacity=3): TicketEvent {
         $e=TicketEvent::create(['title'=>'A Night of Harmony','starts_at'=>now()->addDays(5),'location'=>'Jakarta','seating_type'=>$type,'published'=>true,'thumbnail'=>'ticket-media/example.png']);
@@ -164,6 +249,7 @@ class TicketingTest extends TestCase {
         $this->assertTrue(collect($message->getAttachments())->contains(fn($attachment)=>$attachment->getMediaSubtype()==='jpeg' && base64_decode($attachment->bodyToString())===file_get_contents(public_path('assets/images/vos-logo.jpg'))));
     }
     private function midtrans(): TicketPaymentMethod {
+        \App\Models\TicketFeeSetting::current()->update(['platform_fee_type'=>'fixed','platform_fee_value'=>5000]);
         $method=TicketPaymentMethod::where('type','midtrans')->firstOrFail();
         $method->update(['active'=>true,'merchant_id'=>'merchant-test','server_key'=>'SB-server-secret','client_key'=>'SB-client-secret','processing_fee_type'=>'percent','processing_fee_value'=>2.5,'platform_fee_value'=>5000]);
         return $method;
@@ -236,7 +322,7 @@ class TicketingTest extends TestCase {
         $this->assertSame('https://app.sandbox.midtrans.com/snap/v2/test-token',$url);
         $order->refresh();
         $this->assertSame(158750,$order->total);
-        $this->assertSame(['processing'=>3750,'platform'=>5000],$order->payment_snapshot['fees']);
+        $this->assertSame(['tax'=>0,'platform'=>5000,'processing'=>3750],$order->payment_snapshot['fees']);
         $this->assertSame('midtrans_pending',$order->status);
         $method->update(['active'=>false,'server_key'=>'changed']);
         $this->assertSame($url,app(\App\Services\MidtransPayments::class)->start($order,158750));
@@ -874,7 +960,7 @@ class TicketingTest extends TestCase {
     public function test_operator_sidebar_contains_payment_approvals_and_orders(): void {
         $this->actingAs($this->staff('ticket_operator'),'portal');
         $response=$this->get(route('portal.ticketing.payments'))->assertOk();
-        $response->assertSee('Payment Approvals')->assertSee('Order List')->assertSee('Payment Methods')->assertSee('id="sidebar"',false);
+        $response->assertSee('Payment Approvals')->assertSee('Order List')->assertSee('Payment Method & Fees')->assertSee('id="sidebar"',false);
         foreach (['events','venues','customers'] as $page) $response->assertDontSee(route('portal.ticketing.'.$page),false);
     }
     public function test_ticket_navigation_obeys_portal_menu_permissions(): void {

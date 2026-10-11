@@ -12,7 +12,9 @@ class TicketPromotions {
         if ($order->status!=='awaiting_payment' || !$order->expires_at || $order->expires_at->lte(now())) $this->fail('This reservation is no longer available.');
         $subtotal=(int)$order->items()->sum('price');
         if (!$code) {
-            $order->update(['ticket_promo_id'=>null,'promo_snapshot'=>null,'promo_applied_at'=>null,'discount'=>0,'total'=>$subtotal]);
+            $order->fill(['ticket_promo_id'=>null,'promo_snapshot'=>null,'promo_applied_at'=>null,'discount'=>0]);
+            $order->recalculateFees($subtotal);
+            $order->save();
             return;
         }
         $promo=TicketPromo::where('code',strtoupper(trim($code)))->lockForUpdate()->first();
@@ -43,7 +45,9 @@ class TicketPromotions {
             if (!$free) $this->fail('Select the minimum paid tickets plus the free tickets before applying this promo.');
             $discount=(int)$prices->take($free)->sum();
         }
-        $order->update(['ticket_promo_id'=>$promo->id,'promo_snapshot'=>['code'=>$promo->code,'type'=>$promo->type,'free_tickets'=>$free],'promo_applied_at'=>$applied,'discount'=>$discount,'total'=>max(0,$subtotal-$discount)]);
+        $order->fill(['ticket_promo_id'=>$promo->id,'promo_snapshot'=>['code'=>$promo->code,'type'=>$promo->type,'free_tickets'=>$free],'promo_applied_at'=>$applied,'discount'=>$discount]);
+        $order->recalculateFees(max(0,$subtotal-$discount));
+        $order->save();
     }
     public function apply(TicketOrder $order, ?string $code): void {
         DB::transaction(function() use($order,$code) {

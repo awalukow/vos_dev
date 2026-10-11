@@ -27,7 +27,7 @@ class TicketReportController extends Controller {
             ['Tingkat penjualan',$t['capacity']?round($t['paid']/$t['capacity']*100,1).'%':'0%'],
             ['Definisi lunas','Jumlah tiket pada pesanan paid, termasuk tiket gratis.'],
             ['Definisi belum lunas','Reservasi belum kedaluwarsa, payment_review, dan midtrans_pending.'],
-            ['Definisi nominal terjual','Total pembayaran pesanan lunas dikurangi biaya pemrosesan dan platform; setelah diskon.'],
+            ['Definisi nominal terjual','Total pembayaran pesanan lunas dikurangi pajak, biaya pemrosesan dan platform; setelah diskon.'],
             ['Rekonsiliasi','Nominal terjual + biaya pembayaran = total pembayaran lunas.'],
             ['Peringkat referral','Lima referral dengan kursi lunas terbanyak; jika sama, berdasarkan nominal terjual lalu kode. Tanpa referral dikecualikan.'],
         ];
@@ -48,7 +48,7 @@ class TicketReportController extends Controller {
         $orders=(function() use($query,$date) {
             foreach((clone $query)->lazyById(500) as $o) {
                 $fees=TicketReports::fees($o);
-                yield [$o->booking_code,$o->reference,$date($o->created_at),$o->event?->title,$date($o->event?->starts_at),$o->event?->location,$o->customer?->name,$o->customer?->email,$o->customer?->phone,TicketReports::status($o),$o->RowStatus,$o->event?->RowStatus,$o->items->count(),(int)$o->items->sum('price'),(int)$o->discount,$o->total-$fees,(int)($o->payment_snapshot['fees']['processing']??0),(int)($o->payment_snapshot['fees']['platform']??0),$o->total,$o->payment_snapshot['name']??$o->method?->name,$o->promo_snapshot['code']??'',$o->singer_name,$o->referral_code,$date($o->expires_at),$date($o->proof_uploaded_at),$date($o->reviewed_at),$o->review_note,$date($o->tickets_emailed_at)];
+                yield [$o->booking_code,$o->reference,$date($o->created_at),$o->event?->title,$date($o->event?->starts_at),$o->event?->location,$o->customer?->name,$o->customer?->email,$o->customer?->phone,TicketReports::status($o),$o->RowStatus,$o->event?->RowStatus,$o->items->count(),(int)$o->items->sum('price'),(int)$o->discount,$o->total-$fees,(int)($o->payment_snapshot['fees']['processing']??0),(int)($o->payment_snapshot['fees']['platform']??0),(int)($o->payment_snapshot['fees']['tax']??0),$o->total,$o->payment_snapshot['name']??$o->method?->name,$o->promo_snapshot['code']??'',$o->singer_name,$o->referral_code,$date($o->expires_at),$date($o->proof_uploaded_at),$date($o->reviewed_at),$o->review_note,$date($o->tickets_emailed_at)];
             }
         })();
         $tickets=(function() use($query) {
@@ -59,7 +59,7 @@ class TicketReportController extends Controller {
                 ['Laporan','Seluruh transaksi tiket, termasuk pesanan dan tiket yang dihapus.'],['Dibuat (WIB)',now()->timezone('Asia/Jakarta')->format('d/m/Y H:i:s')],['Pencarian',$filters['q']??'Semua'],['Status',$filters['status']??'Semua'],
                 ['RowStatus','0 = aktif; -1 = dihapus. Penghapusan bukan pengembalian dana.'],['Nilai tiket','Nilai setelah diskon, sebelum biaya. Nilai pada transaksi belum lunas bukan penerimaan.'],['Rincian tiket','Harga tiket sebelum diskon; diskon dan biaya dibukukan sekali per pesanan.'],['Keamanan','Kode QR, kredensial pembayaran, dan tautan bukti pembayaran tidak disertakan.'],
             ]],
-            ['name'=>'Transaksi','headers'=>['Kode booking','Referensi','Dibuat (WIB)','Konser','Tanggal konser (WIB)','Lokasi','Pelanggan','Email','Telepon','Status','RowStatus pesanan','RowStatus konser','Jumlah tiket','Harga awal','Diskon','Nilai tiket','Biaya pemrosesan','Biaya platform','Total tagihan','Metode pembayaran','Kode promo','Nama referral','Kode referral','Kedaluwarsa (WIB)','Bukti diunggah (WIB)','Ditinjau (WIB)','Catatan peninjauan','Email tiket (WIB)'],'rows'=>$orders,'money'=>[13,14,15,16,17,18]],
+            ['name'=>'Transaksi','headers'=>['Kode booking','Referensi','Dibuat (WIB)','Konser','Tanggal konser (WIB)','Lokasi','Pelanggan','Email','Telepon','Status','RowStatus pesanan','RowStatus konser','Jumlah tiket','Harga awal','Diskon','Nilai tiket','Biaya pemrosesan','Biaya platform','Pajak','Total tagihan','Metode pembayaran','Kode promo','Nama referral','Kode referral','Kedaluwarsa (WIB)','Bukti diunggah (WIB)','Ditinjau (WIB)','Catatan peninjauan','Email tiket (WIB)'],'rows'=>$orders,'money'=>[13,14,15,16,17,18,19]],
             ['name'=>'Rincian tiket','headers'=>['Kode booking','Referensi','ID tiket','Kelas','Kursi','Harga awal','RowStatus tiket'],'rows'=>$tickets,'money'=>[5]],
         ]);
     }

@@ -262,19 +262,25 @@ visual layout are not covered by those tests.
 
 Run `php artisan migrate --path=database/migrations/2026_10_09_000001_add_midtrans_payments.php`.
 Midtrans is seeded **deactivated**, in sandbox mode, with both fees set to zero.
-In Ticketing → Payment Methods, administrators and ADM2 configure the environment,
+In Ticketing → Payment Method & Fees, administrators and ADM2 configure the environment,
 merchant ID and API keys. Blank key inputs retain saved keys; changing environments
 requires a new server key. Keys are encrypted using APP_KEY, hidden from model JSON,
 and excluded from flashed validation inputs. Keep APP_KEY backed up.
-Ticket operators can activate/deactivate Midtrans and edit its two fees; account and
+Ticket operators can activate/deactivate Midtrans and edit its processing fee; account and
 key changes are rejected server-side. Existing manual methods remain admin-managed.
 
-Processing Fee and Platform Fee each support a fixed rupiah amount or a percentage
-(0–100%). Zero disables a fee. Both apply independently to the ticket total after
-promotions, once per booking, and round to whole rupiah. Checkout shows each charge,
-its information tooltip and the final total. Fees and credentials are snapshotted
-when starting payment; subsequent settings changes do not alter pending payments.
-Free bookings continue without gateway fees.
+Run `php artisan migrate` to install the universal fee settings. Above Ways to Pay,
+administrators, ADM2 and Pengurus can set Tax (0–100%) and Platform Fee (fixed rupiah
+or 0–100%). These apply to bank transfer, manual QRIS and Midtrans. The existing
+Midtrans platform fee is copied into the shared setting during migration; unpaid,
+unsubmitted reservations adopt it, while submitted and completed payments retain
+their original totals. New bookings snapshot the shared rates when reserved.
+Promos recalculate amounts using those saved rates, on the ticket total after discounts.
+Midtrans's Processing Fee remains specific to that method and is added once at checkout.
+All fees round to whole rupiah; a fixed platform fee applies once per booking.
+Zero tax is hidden from booking/payment details. Fully discounted or zero-price
+bookings have no fees and retain the existing free-ticket confirmation flow.
+Payment details, confirmation emails and reports include tax and platform fees.
 
 Customers choose **QRIS (Automated Check)** and continue to hosted Midtrans Snap,
 restricted to `other_qris`. Enable GoPay or ShopeePay QRIS on the merchant account.

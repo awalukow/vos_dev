@@ -42,15 +42,16 @@ class MidtransPayments {
             if (!$method->active || !$method->server_key) $this->fail('Midtrans is currently unavailable.');
             app(TicketPromotions::class)->applyLocked($order,$order->promo_snapshot['code']??null);
             if ($order->total<=0) $this->fail('Confirm your free tickets without payment.');
-            $fees=$method->fees($order->total);
-            $total=$order->total+array_sum($fees);
+            $fees=$order->quotedFees($method);
+            $subtotal=(int)$order->payment_snapshot['subtotal'];
+            $total=$subtotal+array_sum($fees);
             if ($total!==$expectedTotal) $this->fail('The total or fees have changed. Review the updated amount before paying.');
             $singer=$singerId ? PortalSinger::lockForUpdate()->find($singerId) : null;
             if ($singerId && (!$singer || !$singer->active)) $this->fail('Please select an active singer.');
             // Commit the inventory hold before contacting the provider. A timeout must
             // never release seats for a payment that may have been created remotely.
             $order->update(['status'=>'midtrans_pending','total'=>$total,'ticket_payment_method_id'=>$method->id,
-                'payment_snapshot'=>['name'=>$method->name,'type'=>'midtrans','subtotal'=>$order->total,'fees'=>$fees],
+                'payment_snapshot'=>['name'=>$method->name,'type'=>'midtrans','subtotal'=>$subtotal,'fees'=>$fees],
                 'gateway_credentials'=>['server_key'=>$method->server_key,'environment'=>$method->environment],
                 'expires_at'=>now()->addMinutes(30),'portal_singer_id'=>$singer?->id,'singer_name'=>$singer?->name,'referral_code'=>$singer?->referral_code]);
             return $order;

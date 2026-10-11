@@ -20,7 +20,7 @@ class TicketReports {
         return $order->status==='awaiting_payment' && $order->expires_at?->lte(now())?'expired':$order->status;
     }
     public static function fees(TicketOrder $order): int {
-        return (int)($order->payment_snapshot['fees']['processing']??0)+(int)($order->payment_snapshot['fees']['platform']??0);
+        return (int)array_sum($order->payment_snapshot['fees']??[]);
     }
     public function dashboard(?int $eventId=null): array {
         $events=TicketEvent::with('classes')->orderByDesc('starts_at')->get();

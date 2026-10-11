@@ -17,7 +17,7 @@
 @else
 <p class="tiny muted">Account configuration and API keys are managed by an administrator.</p>
 @endif
-@foreach(['processing'=>'Processing Fee','platform'=>'Platform Fee'] as $fee=>$label)
+@foreach(['processing'=>'Processing Fee'] as $fee=>$label)
 @php($explanation=$fee==='processing'?'The fee added for processing the payment.':'The added fee for the platform.')
 <label for="{{ $fee }}-fee-value">{{ $label }} <span tabindex="0" role="img" aria-label="{{ $explanation }}" title="{{ $explanation }}">ⓘ</span></label>
 <select name="{{ $fee }}_fee_type" aria-label="{{ $label }} type"><option value="fixed" @selected(old($fee.'_fee_type',$method->{$fee.'_fee_type'})==='fixed')>Fixed amount (Rp)</option><option value="percent" @selected(old($fee.'_fee_type',$method->{$fee.'_fee_type'})==='percent')>Percentage (%)</option></select>

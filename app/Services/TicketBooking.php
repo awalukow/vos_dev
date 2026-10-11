@@ -49,6 +49,8 @@ class TicketBooking {
             }
             $order = TicketOrder::create(['reference'=>(string)Str::uuid(),'customer_id'=>$customer->id,'ticket_event_id'=>$event->id,'status'=>'awaiting_payment','total'=>array_sum(array_column($lines,'price')),'expires_at'=>now()->addMinutes(30)]);
             foreach ($lines as $line) $order->items()->create($line+['token'=>(string)Str::uuid()]);
+            $order->recalculateFees($order->total);
+            $order->save();
             return $order;
         },3);
     }
@@ -68,7 +70,7 @@ class TicketBooking {
             app(TicketPromotions::class)->applyLocked($order,$order->promo_snapshot['code']??null);
             if ($order->total!==$expectedTotal) $this->fail('This promo has changed. Apply it again and check the updated total before paying.');
             if ($order->total===0) $this->fail('Confirm your free tickets without uploading payment proof.');
-            $order->update(['status'=>'payment_review','ticket_payment_method_id'=>$method->id,'payment_snapshot'=>['name'=>$method->name,'type'=>$method->type,'instructions'=>$method->instructions],'proof_path'=>$path,'proof_uploaded_at'=>now(),'expires_at'=>null]);
+            $order->update(['status'=>'payment_review','ticket_payment_method_id'=>$method->id,'payment_snapshot'=>array_merge($order->payment_snapshot??[],['name'=>$method->name,'type'=>$method->type,'instructions'=>$method->instructions]),'proof_path'=>$path,'proof_uploaded_at'=>now(),'expires_at'=>null]);
         },3);
     }
 

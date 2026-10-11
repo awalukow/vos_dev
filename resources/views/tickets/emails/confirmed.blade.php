@@ -4,7 +4,7 @@
 <p>Halo {{ $order->customer->name }}, pembayaran Anda telah dikonfirmasi. Terima kasih telah menjadi bagian dari konser kami.</p><h2>{{ $order->event->title }}</h2>
 <p>{{ $order->event->starts_at->copy()->locale('id')->timezone('Asia/Jakarta')->translatedFormat('d F Y, H:i') }} WIB<br>{{ $order->event->location }}</p>
 <p>Kode pemesanan: <strong>{{ $order->booking_code }}</strong><br>Referral: {{ $order->singer_name ?? 'Tanpa referral penyanyi' }} @if($order->referral_code)({{ $order->referral_code }})@endif<br>Referensi pemesanan: {{ $order->reference }}<br>Total pembayaran: Rp {{ number_format($order->total,0,',','.') }}</p>
-@foreach(['processing'=>'Biaya pemrosesan','platform'=>'Biaya platform'] as $fee=>$label)
+@foreach(['tax'=>'Pajak','platform'=>'Biaya platform','processing'=>'Biaya pemrosesan'] as $fee=>$label)
 @if(($order->payment_snapshot['fees'][$fee]??0)>0)<p>{{ $label }}: Rp {{ number_format($order->payment_snapshot['fees'][$fee],0,',','.') }}</p>@endif
 @endforeach
 <p><a href="{{ route('tickets.order',$order) }}">Lihat pemesanan dan tiket Anda</a></p>

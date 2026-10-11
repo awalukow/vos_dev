@@ -62,12 +62,15 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
     });
 });
 Route::prefix('portal/ticketing')->name('portal.ticketing.')->middleware('portal.auth')->group(function () {
+    Route::middleware(TicketStaff::class.':fees')->group(function () {
+        Route::get('/methods',[Admin::class,'methods'])->name('methods');
+        Route::post('/fees',[Admin::class,'fees'])->name('fees.update');
+        Route::post('/methods/{method}',[Admin::class,'method'])->name('methods.update');
+    });
     Route::middleware(TicketStaff::class.':review')->group(function () {
         Route::get('/dashboard',[\App\Http\Controllers\Portal\TicketReportController::class,'dashboard'])->name('dashboard');
         Route::get('/dashboard/export',[\App\Http\Controllers\Portal\TicketReportController::class,'exportDashboard'])->name('dashboard.export');
         Route::get('/orders/export',[\App\Http\Controllers\Portal\TicketReportController::class,'exportOrders'])->name('orders.export');
-        Route::get('/methods',[Admin::class,'methods'])->name('methods');
-        Route::post('/methods/{method}',[Admin::class,'method'])->name('methods.update');
         Route::get('/promos',[\App\Http\Controllers\Portal\TicketPromoController::class,'index'])->name('promos');
         Route::post('/promos',[\App\Http\Controllers\Portal\TicketPromoController::class,'save'])->name('promos.store');
         Route::post('/promos/{promo}',[\App\Http\Controllers\Portal\TicketPromoController::class,'save'])->name('promos.update');

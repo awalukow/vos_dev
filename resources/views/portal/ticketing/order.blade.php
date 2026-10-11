@@ -5,7 +5,7 @@
 <a href="{{ route('portal.ticketing.orders') }}">← Order List</a>
 <div class="page-head"><h1 class="admin-title">{{ $order->event->title }}</h1><p>{{ $order->customer->name }} · {{ $order->customer->email }}</p><p>Booking code: <strong>{{ $order->booking_code }}</strong><br>Reference: {{ $order->reference }}<br>Referral: {{ $order->singer_name ?? "—" }} @if($order->referral_code)({{ $order->referral_code }})@endif</p><span class="badge">{{ str_replace('_',' ',$order->status==='awaiting_payment' && $order->expires_at?->isPast()?'expired':$order->status) }}</span></div>
 <section class="panel"><h2>Booking details</h2>@include('tickets._booking-items')
-@foreach(['processing'=>'Processing Fee','platform'=>'Platform Fee'] as $fee=>$label)
+@foreach(['tax'=>'Tax','platform'=>'Platform Fee','processing'=>'Processing Fee'] as $fee=>$label)
 @if(($order->payment_snapshot['fees'][$fee]??0)>0)<div class="row"><span>{{ $label }}</span><strong>Rp {{ number_format($order->payment_snapshot['fees'][$fee],0,',','.') }}</strong></div>@endif
 @endforeach
 <div class="row"><strong>Total</strong><strong>Rp {{ number_format($order->total,0,',','.') }}</strong></div></section>

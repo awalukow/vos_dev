@@ -28,11 +28,12 @@
 </div>
 </fieldset>
 @foreach($methods as $method)<div class="payment-details notice" data-method="{{ $method->id }}"><strong>{{ $method->name }}</strong><p style="white-space:pre-line">{{ $method->instructions }}</p>@if($method->type==='qris' && $method->qr_image)<img class="qr-image" src="{{ route('tickets.payment-image',$method) }}" alt="{{ __('Merchant QRIS payment code') }}">@endif
-@if($method->type==='midtrans')
-@php($fees=$method->fees($order->total))
+@php($fees=$order->quotedFees($method))
+@php($quotedTotal=($order->payment_snapshot['subtotal']??$order->total)+array_sum($fees))
 <div class="quoted-fees">@include('tickets._payment-fees',['fees'=>$fees])</div>
-<p><strong>{{ __('Total including fees') }}: Rp {{ number_format($order->total+array_sum($fees),0,',','.') }}</strong></p>
-<input type="hidden" name="expected_total" value="{{ $order->total+array_sum($fees) }}">
+@if($method->type==='midtrans')
+<p><strong>{{ __('Total including fees') }}: Rp {{ number_format($quotedTotal,0,',','.') }}</strong></p>
+<input type="hidden" name="expected_total" value="{{ $quotedTotal }}">
 @else
 <p class="tiny">{{ __('Transfer exactly') }} <strong>Rp {{ number_format($order->total,0,',','.') }}</strong> {{ __('and use your booking reference where possible.') }}</p>@endif</div>@endforeach
 <div id="manual-proof"><label for="proof">{{ __("Upload payment proof") }}</label><input type="file" id="proof" name="proof" accept="image/jpeg,image/png,application/pdf" required><p class="tiny muted">{{ __("JPG, PNG or PDF, up to 5 MB. Staff verify receipt before issuing tickets.") }}</p><button class="btn">{{ __("Submit for approval →") }}</button></div><button class="btn" id="midtrans-pay" hidden>{{ __("Continue to Midtrans →") }}</button>@else<button class="btn">{{ __('Confirm free tickets') }}</button>@endif</form>
@@ -88,7 +89,7 @@ if(methods){
         document.getElementById('midtrans-pay').hidden=!automated;
         form.action=automated?@json(route('tickets.midtrans.start',$order)):manualAction;
         const selected=document.querySelector('.payment-details[data-method="'+method.value+'"]');
-        document.getElementById('summary-fees').innerHTML=automated?selected.querySelector('.quoted-fees').innerHTML:'';
+        document.getElementById('summary-fees').innerHTML=selected.querySelector('.quoted-fees').innerHTML;
         const total=automated?Number(selected.querySelector('[name="expected_total"]').value):@json($order->total);
         document.getElementById('summary-total').textContent='Rp '+new Intl.NumberFormat('id-ID').format(total);
     };
