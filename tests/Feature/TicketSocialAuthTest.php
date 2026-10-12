@@ -276,6 +276,34 @@ class TicketSocialAuthTest extends TestCase
         ]);
     }
 
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function test_social_redirects_do_not_require_the_facade_namespace(): void
+    {
+        $this->assertFalse(class_exists('Laravel\\Socialite\\Facades\\Socialite', false));
+        $blockFacade = static function ($class) {
+            if ($class === 'Laravel\\Socialite\\Facades\\Socialite') {
+                throw new \RuntimeException('Socialite facade namespace is unavailable.');
+            }
+        };
+        spl_autoload_register($blockFacade, true, true);
+        try {
+            $this->configureGoogleHosts();
+            foreach (['voiceofsoulchoir.id'=>'production-client', 'dev.voiceofsoulchoir.id'=>'development-client'] as $host=>$client) {
+                $response = $this->get('https://'.$host.'/tickets/auth/google/redirect');
+                $response->assertRedirect();
+                parse_str(parse_url($response->headers->get('Location'), PHP_URL_QUERY), $query);
+                $this->assertSame($client, $query['client_id']);
+                $this->assertSame('https://'.$host.'/tickets/auth/google/callback', $query['redirect_uri']);
+            }
+            $this->get('http://localhost/tickets/auth/apple/redirect')->assertRedirect();
+        } finally {
+            spl_autoload_unregister($blockFacade);
+        }
+    }
+
     public function test_google_credentials_follow_exact_host_without_leaking_between_requests(): void
     {
         $this->configureGoogleHosts();

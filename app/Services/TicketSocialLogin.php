@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
-use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Contracts\Factory;
 
 class TicketSocialLogin
 {
@@ -19,14 +19,16 @@ class TicketSocialLogin
 
     public function driver(string $provider)
     {
+        // Resolve the registered manager without depending on a facade namespace.
+        $socialite = app(Factory::class);
         if ($provider === 'google') {
             // Resolve per request without mutating global config or reusing a driver
             // from another host in a long-lived worker.
             abort_unless(self::enabled('google'), 404);
-            return Socialite::buildProvider(\Laravel\Socialite\Two\GoogleProvider::class, self::googleConfiguration());
+            return $socialite->buildProvider(\Laravel\Socialite\Two\GoogleProvider::class, self::googleConfiguration());
         }
         // A fresh driver avoids retaining a previous request/user in long-lived workers.
-        return Socialite::forgetDrivers()->driver($provider);
+        return $socialite->forgetDrivers()->driver($provider);
     }
 
     public static function googleConfiguration(): array
