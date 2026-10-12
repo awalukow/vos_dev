@@ -16,11 +16,28 @@ use Symfony\Component\Process\Process;
 |
 */
 
-Route::post('/system/migrate', function () {
-    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
-    return nl2br(e(\Illuminate\Support\Facades\Artisan::output()));
-})->middleware(['portal.auth', 'portal.role:administrator']);
+Route::post('/system/migrate', function (\Illuminate\Http\Request $request) {
+    $force = $request->boolean('force');
+    $output = '$ php artisan migrate' . ($force ? ' --force' : '') . PHP_EOL;
+    $successful = false;
+
+    try {
+        $exitCode = Artisan::call('migrate', ['--force' => $force, '--no-interaction' => true]);
+        $output .= Artisan::output();
+
+        if ($exitCode === 0) {
+            $output .= PHP_EOL . '$ php artisan optimize:clear' . PHP_EOL;
+            $exitCode = Artisan::call('optimize:clear');
+            $output .= Artisan::output();
+            $successful = $exitCode === 0;
+        }
+    } catch (\Throwable $exception) {
+        report($exception);
+        $output .= PHP_EOL . $exception->getMessage();
+    }
+
+    return response()->view('system.maintenance', compact('output', 'successful'), $successful ? 200 : 500);
+})->middleware(['portal.auth', 'portal.role:administrator'])->name('system.migrate');
 
 Route::middleware(['portal.auth', 'portal.role:administrator'])->group(function () {
     Route::view('/system/maintenance', 'system.maintenance')->name('system.maintenance');
