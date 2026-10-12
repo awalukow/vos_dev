@@ -8,6 +8,11 @@ use App\Http\Controllers\MidtransController;
 
 Route::post('/tickets/midtrans/notification',[MidtransController::class,'notification'])->name('tickets.midtrans.notification');
 
+Route::post('/tickets/auth/apple/callback', [\App\Http\Controllers\TicketSocialAuthController::class, 'appleRelay'])
+    // This sessionless relay is protected by state + nonce on the GET callback.
+    ->withoutMiddleware([\Illuminate\Session\Middleware\StartSession::class, \Illuminate\View\Middleware\ShareErrorsFromSession::class, \App\Http\Middleware\VerifyCsrfToken::class])
+    ->middleware('throttle:30,1')->name('tickets.social.apple-relay');
+
 Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\TicketLocale::class)->group(function () {
     Route::post('/language', function (\Illuminate\Http\Request $request) {
         $data=$request->validate(['locale'=>'required|in:id,en']);
@@ -23,6 +28,10 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
     Route::get('/assets/venue-designer.js',fn()=>response()->file(public_path('js/venue-designer.js'),['Content-Type'=>'application/javascript','Cache-Control'=>'public, max-age=300']))->name('designer');
     Route::get('/',[Tickets::class,'index'])->name('events');
     Route::get('/login',[Auth::class,'loginForm'])->name('login');
+    Route::get('/auth/complete', [\App\Http\Controllers\TicketSocialAuthController::class, 'profile'])->name('social.profile');
+    Route::post('/auth/complete', [\App\Http\Controllers\TicketSocialAuthController::class, 'complete'])->middleware('throttle:5,1')->name('social.complete');
+    Route::get('/auth/{provider}/redirect', [\App\Http\Controllers\TicketSocialAuthController::class, 'redirect'])->where('provider', 'google|apple')->middleware('throttle:15,1')->name('social.redirect');
+    Route::get('/auth/{provider}/callback', [\App\Http\Controllers\TicketSocialAuthController::class, 'callback'])->where('provider', 'google|apple')->middleware('throttle:30,1')->name('social.callback');
     Route::post('/login',[Auth::class,'login'])->name('login.submit')->middleware('throttle:6,1');
     Route::get('/register',[Auth::class,'registerForm'])->name('register');
     Route::post('/register',[Auth::class,'register'])->name('register.submit')->middleware('throttle:5,1');

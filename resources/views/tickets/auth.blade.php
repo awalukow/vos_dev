@@ -23,6 +23,7 @@
 <form method="post" action="{{ route('tickets.resend') }}">@csrf<button class="link-button" style="margin-top:18px">{{ __("Resend code") }}</button></form>
 @else
 <h2>{{ $mode==='register'?__("Make yourself at home."):__("Welcome back.") }}</h2><p class="muted">{{ $mode==='register'?__("Create your customer account to book tickets."):__("Sign in to book your next concert.") }}</p>
+@include('tickets._social-buttons')
 <form method="post" action="{{ route('tickets.'.$mode) }}">@csrf
 @if($mode==='register')
 <label for="name">{{ __("Full name") }}</label><input id="name" name="name" value="{{ old('name') }}" autocomplete="name" maxlength="120" required>

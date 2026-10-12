@@ -9,11 +9,13 @@
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
+        "laravel/socialite": "^5.0",
         "laravel/tinker": "^2.7",
         "setasign/fpdf": "^1.8",
         "setasign/fpdi": "^2.6",
         "setasign/fpdi-tcpdf": "^2.3",
         "simplesoftwareio/simple-qrcode": "^4.2",
+        "socialiteproviders/apple": "^5.8",
         "tecnickcom/tcpdf": "^6.11"
     },
     "require-dev": {
