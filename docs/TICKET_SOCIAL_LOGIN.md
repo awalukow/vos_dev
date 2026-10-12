@@ -18,12 +18,6 @@ Create a Web application OAuth client in Google Cloud, configure the consent scr
 
 Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI`.
 
-### One production Google configuration
-
-Use `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI=https://voiceofsoulchoir.id/tickets/auth/google/callback` on each server. Google development and local keys are no longer used. Clear the config cache after deployment.
-
-Google login and registration opened on development or localhost first redirect to the production sign-in route. Production then starts OAuth and receives the callback in the same browser session. Registration and sign-in finish on production, using its customer database. This requires Socialite to be installed and working on production; development can hand off without loading Socialite.
-
 Enable People API for the same project. With `GOOGLE_REQUEST_BIRTHDAY=true`, the registration button requests `https://www.googleapis.com/auth/user.birthday.read` alongside basic identity scopes. Configure the consent screen and any Google-required verification before public launch. Users may decline the birthday permission, omit their birthday, or share only month/day. API failure also falls back to manual entry. Only a valid complete date before today bypasses the DOB field. Standard login does not request the extra birthday scope; first-time users entering via login fill DOB manually.
 
 Set `GOOGLE_REQUEST_BIRTHDAY=false` to always collect DOB manually without that extra scope.

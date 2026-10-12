@@ -22,7 +22,7 @@ class TicketSocialAuthTest extends TestCase
         (require database_path('migrations/2026_10_12_000002_create_customer_social_accounts.php'))->up();
         foreach (['google','apple'] as $provider) config(['services.'.$provider=>[
             'enabled'=>true, 'client_id'=>'test-client', 'client_secret'=>'test-secret',
-            'redirect'=>'http://localhost/tickets/auth/'.$provider.'/callback', 'request_birthday'=>true,
+            'redirect'=>'https://example.test/tickets/auth/'.$provider.'/callback', 'request_birthday'=>true,
         ]]);
     }
 
@@ -40,8 +40,7 @@ class TicketSocialAuthTest extends TestCase
 
     private function flow(string $provider = 'google'): array
     {
-        return ['provider'=>$provider, 'state'=>'browser-state', 'nonce'=>'nonce.browser-state', 'birthday'=>$provider === 'google', 'expires'=>time()+900,
-            'host'=>'localhost', 'client_id'=>$provider === 'google' ? 'test-client' : null];
+        return ['provider'=>$provider, 'state'=>'browser-state', 'nonce'=>'nonce.browser-state', 'birthday'=>$provider === 'google', 'expires'=>time()+900];
     }
 
     private function fakeUser(array $raw = [], string $provider = 'google'): void
@@ -262,47 +261,5 @@ class TicketSocialAuthTest extends TestCase
             ->assertDontSee('id="apple-sign-in"', false);
         $this->get(route('tickets.social.redirect',['provider'=>'apple']))->assertNotFound();
         $this->post(route('tickets.social.apple-relay'),['state'=>'state','code'=>'code'])->assertNotFound();
-    }
-
-    public function test_development_and_local_google_flows_start_on_production_without_loading_socialite(): void
-    {
-        config(['services.google.redirect'=>'https://voiceofsoulchoir.id/tickets/auth/google/callback']);
-        $service = \Mockery::mock(TicketSocialLogin::class);
-        $service->shouldNotReceive('driver');
-        $this->app->instance(TicketSocialLogin::class, $service);
-        foreach (['https://dev.voiceofsoulchoir.id', 'http://localhost:8000'] as $origin) {
-            foreach (['login', 'register'] as $mode) {
-                $this->get($origin.'/tickets/auth/google/redirect?mode='.$mode)
-                    ->assertRedirect('https://voiceofsoulchoir.id/tickets/auth/google/redirect?mode='.$mode)
-                    ->assertSessionMissing('social_flow');
-            }
-        }
-    }
-
-    public function test_production_starts_google_with_single_configuration_and_ignores_old_dev_keys(): void
-    {
-        config(['services.google.client_id'=>'production-client',
-            'services.google.redirect'=>'https://voiceofsoulchoir.id/tickets/auth/google/callback',
-            'services.google.development'=>['client_id'=>'unused-dev-client'],
-        ]);
-        $response = $this->get('https://voiceofsoulchoir.id/tickets/auth/google/redirect?mode=register');
-        $response->assertRedirect();
-        $this->assertSame('accounts.google.com', parse_url($response->headers->get('Location'), PHP_URL_HOST));
-        parse_str(parse_url($response->headers->get('Location'), PHP_URL_QUERY), $query);
-        $this->assertSame('production-client', $query['client_id']);
-        $this->assertSame('https://voiceofsoulchoir.id/tickets/auth/google/callback', $query['redirect_uri']);
-        $this->assertSame($query['state'], session('social_flow.state'));
-        $this->assertStringContainsString('user.birthday.read', $query['scope']);
-    }
-
-    public function test_callback_cannot_use_state_from_another_host(): void
-    {
-        $service = \Mockery::mock(TicketSocialLogin::class);
-        $service->shouldNotReceive('driver');
-        $this->app->instance(TicketSocialLogin::class, $service);
-        $flow = $this->flow();
-        $flow['host'] = 'dev.voiceofsoulchoir.id';
-        $this->withSession(['social_flow'=>$flow])->get('http://localhost/tickets/auth/google/callback?state=browser-state&code=code')
-            ->assertRedirect()->assertSessionHasErrors('social')->assertSessionMissing('social_pending');
     }
 }

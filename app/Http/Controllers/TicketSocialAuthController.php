@@ -14,21 +14,6 @@ class TicketSocialAuthController extends Controller
     public function redirect(Request $request, string $provider, TicketSocialLogin $social)
     {
         abort_unless(TicketSocialLogin::enabled($provider), 404);
-        if ($provider === 'google') {
-            $callback = parse_url(TicketSocialLogin::googleConfiguration()['redirect']);
-            $scheme = $callback['scheme'] ?? '';
-            $host = $callback['host'] ?? '';
-            abort_unless(in_array($scheme, ['http', 'https'], true) && $host !== '', 404);
-            $port = $callback['port'] ?? ($scheme === 'https' ? 443 : 80);
-            if (strtolower($host) !== strtolower($request->getHost())
-                || $scheme !== $request->getScheme() || $port !== $request->getPort()) {
-                // Start OAuth on the callback origin so state stays in its session.
-                $origin = $scheme.'://'.$host.(isset($callback['port']) ? ':'.$port : '');
-                $path = route('tickets.social.redirect', ['provider'=>'google'], false);
-                $mode = $request->query('mode') === 'register' ? 'register' : 'login';
-                return redirect()->away($origin.$path.'?'.http_build_query(['mode'=>$mode]));
-            }
-        }
         $request->session()->forget(['social_pending', 'social_flow']);
         $driver = $social->driver($provider);
         $birthday = $provider === 'google' && $request->query('mode') === 'register'
@@ -40,8 +25,6 @@ class TicketSocialAuthController extends Controller
             'provider' => $provider, 'state' => $parameters['state'],
             'nonce' => $parameters['nonce'] ?? null, 'birthday' => $birthday,
             'expires' => time() + 900,
-            'host' => $request->getHost(),
-            'client_id' => $provider === 'google' ? TicketSocialLogin::googleConfiguration()['client_id'] : null,
         ]);
         return $response;
     }
@@ -77,8 +60,6 @@ class TicketSocialAuthController extends Controller
         $state = $request->input('state');
         if (!$flow || $flow['provider'] !== $provider || $flow['expires'] < time()
             || !is_string($state) || !hash_equals($flow['state'], $state)) return $this->failed();
-        if (($flow['host'] ?? null) !== $request->getHost()
-            || ($provider === 'google' && ($flow['client_id'] ?? null) !== TicketSocialLogin::googleConfiguration()['client_id'])) return $this->failed();
         if ($request->filled('error') || !$request->filled('code')) return $this->failed();
 
         try {

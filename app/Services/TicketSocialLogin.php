@@ -3,14 +3,14 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
-use Laravel\Socialite\Contracts\Factory;
+use Laravel\Socialite\Facades\Socialite;
 
 class TicketSocialLogin
 {
     public static function enabled(string $provider): bool
     {
         if (!in_array($provider, ['google', 'apple'], true)) return false;
-        $config = $provider === 'google' ? self::googleConfiguration() : config('services.'.$provider, []);
+        $config = config('services.'.$provider, []);
         if ($provider === 'apple' && empty($config['enabled'])) return false;
         return !empty($config['client_id']) && !empty($config['redirect'])
             && (!empty($config['client_secret']) || ($provider === 'apple'
@@ -19,21 +19,8 @@ class TicketSocialLogin
 
     public function driver(string $provider)
     {
-        // Resolve the registered manager without depending on a facade namespace.
-        $socialite = app(Factory::class);
-        if ($provider === 'google') {
-            // Resolve per request without mutating global config or reusing a driver
-            // from another host in a long-lived worker.
-            abort_unless(self::enabled('google'), 404);
-            return $socialite->buildProvider(\Laravel\Socialite\Two\GoogleProvider::class, self::googleConfiguration());
-        }
         // A fresh driver avoids retaining a previous request/user in long-lived workers.
-        return $socialite->forgetDrivers()->driver($provider);
-    }
-
-    public static function googleConfiguration(): array
-    {
-        return config('services.google', []);
+        return Socialite::forgetDrivers()->driver($provider);
     }
 
     public function birthday(string $token): ?string
