@@ -5,15 +5,33 @@ namespace Tests\Feature;
 use App\Models\PortalUser;
 use App\Models\Role;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class SystemMaintenanceTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['database.default' => 'sqlite', 'database.connections.sqlite.database' => ':memory:']);
+        DB::purge('sqlite');
+        foreach ([
+            '2024_01_01_000001_create_roles_table.php',
+            '2024_01_01_000002_create_portal_users_table.php',
+            '2024_01_01_000003_create_roles_menus_permissions_table.php',
+            '2024_01_01_000004_create_documents_table.php',
+            '2024_01_02_000001_create_upload_access_requests_table.php',
+            '2026_10_12_000003_add_system_maintenance_menu.php',
+        ] as $migration) {
+            (require database_path('migrations/' . $migration))->up();
+        }
+    }
+
     private function signIn(string $role): void
     {
         $user = new PortalUser(['name' => 'Maintenance user', 'is_active' => true]);
         $user->id = 1;
-        $user->setRelation('roles', collect([new Role(['name' => $role])]));
+        $user->setRelation('roles', collect([Role::where('name', $role)->firstOrFail()]));
         $this->actingAs($user, 'portal');
     }
 
@@ -42,7 +60,24 @@ class SystemMaintenanceTest extends TestCase
             ->assertSee('Run optimize:clear and dump-autoload')
             ->assertSee('Run migrations')
             ->assertSee('Use --force')
+            ->assertSee('Settings — System Maintenance')
+            ->assertSee('class="nav-child-item active"', false)
             ->assertSee('name="_token"', false);
+    }
+
+    public function test_maintenance_menu_is_under_settings_and_only_granted_to_administrators(): void
+    {
+        $menu = DB::table('portal_menus')->where('key', 'settings.system_maintenance')->first();
+        $this->assertSame('System Maintenance', $menu->label);
+        $this->assertEquals(DB::table('portal_menus')->where('key', 'settings')->value('id'), $menu->parent_id);
+        $this->assertSame('system.maintenance', $menu->route_name);
+        $roles = DB::table('role_menu_permissions')->join('roles', 'roles.id', '=', 'role_menu_permissions.role_id')
+            ->where('portal_menu_id', $menu->id)->pluck('roles.name')->all();
+        $this->assertSame(['administrator'], $roles);
+
+        (require database_path('migrations/2026_10_12_000003_add_system_maintenance_menu.php'))->down();
+        $this->assertDatabaseMissing('portal_menus', ['id' => $menu->id]);
+        $this->assertDatabaseMissing('role_menu_permissions', ['portal_menu_id' => $menu->id]);
     }
 
     public function test_failed_cache_clear_stops_before_composer_and_escapes_output(): void

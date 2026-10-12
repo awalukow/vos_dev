@@ -562,6 +562,9 @@
                         ->where('status', 'pending')->count();
     $pendingAccessRequests = (\App\Models\UploadAccessRequest::where('status', 'pending')->count());
     $currentRoute = request()->route()?->getName() ?? '';
+    if ($currentRoute === 'system.migrate') {
+        $currentRoute = 'system.maintenance';
+    }
 
     $topMenus = \App\Models\PortalMenu::whereNull('parent_id')
                     ->with('children')
