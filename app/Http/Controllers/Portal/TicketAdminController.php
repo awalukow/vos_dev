@@ -170,14 +170,13 @@ class TicketAdminController extends Controller {
         return back()->with('manual_otp',$code)->with('otp_customer',$customer->email)->with('success','Manual code generated. It expires in 10 minutes and replaces the previous code.');
     }
     public function methods() {
-        $admin=auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2();
-        $methods=TicketPaymentMethod::when(!$admin,fn($q)=>$q->where('type','midtrans'))->get();
+        $methods=TicketPaymentMethod::all();
         $feeSettings=\App\Models\TicketFeeSetting::current();
         return view('portal.ticketing.methods',compact('methods','feeSettings'));
     }
     public function fees(Request $r) {
         $user=auth('portal')->user();
-        abort_unless($user->isAdministrator() || $user->isAdm2() || $user->hasRole('pengurus'),403);
+        abort_unless($user->canManagePayments(),403);
         $data=$r->validate([
             'tax_percent'=>'required|numeric|min:0|max:100',
             'platform_fee_type'=>'required|in:fixed,percent',
@@ -193,32 +192,38 @@ class TicketAdminController extends Controller {
         return redirect()->route('portal.ticketing.methods')->with('midtrans_connection',$payments->testConnection($method));
     }
     public function method(Request $r,TicketPaymentMethod $method) {
-        $admin=auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2();
-        if ($method->type==='midtrans') {
-            abort_if(!$admin && $r->hasAny(['environment','merchant_id','server_key','client_key','name','instructions']),403);
-            $rules=['active'=>'nullable|boolean'];
-            foreach (['processing'] as $fee) {
-                $rules[$fee.'_fee_type']='required|in:fixed,percent';
-                $rules[$fee.'_fee_value']='required|numeric|min:0|max:'.($r->input($fee.'_fee_type')==='percent'?'100':'10000000');
+        return DB::transaction(function () use ($r,$method) {
+            $method=TicketPaymentMethod::lockForUpdate()->findOrFail($method->id);
+            $admin=auth('portal')->user()->isAdministrator();
+            abort_if(!$admin && ($method->parameters_locked || $r->has('parameters_locked')),403);
+            if ($admin && $r->has('parameters_locked')) {
+                $r->validate(['parameters_locked'=>'required|boolean']);
+                $method->parameters_locked=$r->boolean('parameters_locked');
             }
-            if ($admin) $rules+=['environment'=>'required|in:sandbox,production','merchant_id'=>'nullable|string|max:100','server_key'=>'nullable|string|max:255','client_key'=>'nullable|string|max:255'];
-            $data=$r->validate($rules);
-            if ($admin && $data['environment']!==$method->environment && empty($data['server_key'])) throw ValidationException::withMessages(['server_key'=>'Enter the matching server key when changing environments.']);
-            foreach (['server_key','client_key'] as $key) if (empty($data[$key])) unset($data[$key]);
-            $method->fill($data);
-            if ($r->boolean('active') && (!$method->server_key || !$method->merchant_id)) throw ValidationException::withMessages(['active'=>'An admin must configure the merchant ID and server key before enabling Midtrans.']);
-            $method->active=$r->boolean('active');
-            $method->save();
+            if ($method->type==='midtrans') {
+                $rules=['active'=>'nullable|boolean'];
+                foreach (['processing'] as $fee) {
+                    $rules[$fee.'_fee_type']='required|in:fixed,percent';
+                    $rules[$fee.'_fee_value']='required|numeric|min:0|max:'.($r->input($fee.'_fee_type')==='percent'?'100':'10000000');
+                }
+                $rules+=['environment'=>'sometimes|required|in:sandbox,production','merchant_id'=>'nullable|string|max:100','server_key'=>'nullable|string|max:255','client_key'=>'nullable|string|max:255','name'=>'sometimes|required|string|max:100','instructions'=>'sometimes|required|string|max:3000'];
+                $data=$r->validate($rules);
+                if (isset($data['environment']) && $data['environment']!==$method->environment && empty($data['server_key'])) throw ValidationException::withMessages(['server_key'=>'Enter the matching server key when changing environments.']);
+                foreach (['server_key','client_key'] as $key) if (empty($data[$key])) unset($data[$key]);
+                $method->fill($data);
+                if ($r->boolean('active') && (!$method->server_key || !$method->merchant_id)) throw ValidationException::withMessages(['active'=>'Configure the merchant ID and server key before enabling Midtrans.']);
+                $method->active=$r->boolean('active');
+                $method->save();
+                TicketDelivery::audit('payment_method.updated',(string)$method->id,$this->actor());
+                return back()->with('success','Midtrans settings updated.');
+            }
+            $data=$r->validate(['name'=>'required|string|max:100','instructions'=>'required|string|max:3000','qr_image'=>'nullable|image|mimes:png,jpg,jpeg|max:4096']);
+            unset($data['qr_image']);
+            if ($r->hasFile('qr_image')) $data['qr_image']=$r->file('qr_image')->store('ticket-media','local');
+            if ($method->type==='qris' && $r->boolean('active') && !($data['qr_image']??$method->qr_image)) throw ValidationException::withMessages(['qr_image'=>'Upload your merchant QRIS code before enabling.']);
+            $method->update($data+['active'=>$r->boolean('active')]);
             TicketDelivery::audit('payment_method.updated',(string)$method->id,$this->actor());
-            return back()->with('success','Midtrans settings updated.');
-        }
-        abort_unless($admin,403);
-        $data=$r->validate(['name'=>'required|string|max:100','instructions'=>'required|string|max:3000','qr_image'=>'nullable|image|mimes:png,jpg,jpeg|max:4096']);
-        unset($data['qr_image']);
-        if ($r->hasFile('qr_image')) $data['qr_image']=$r->file('qr_image')->store('ticket-media','local');
-        if ($method->type==='qris' && $r->boolean('active') && !($data['qr_image']??$method->qr_image)) throw ValidationException::withMessages(['qr_image'=>'Upload your merchant QRIS code before enabling.']);
-        $method->update($data+['active'=>$r->boolean('active')]);
-        TicketDelivery::audit('payment_method.updated',(string)$method->id,$this->actor());
-        return back()->with('success','Payment method updated.');
+            return back()->with('success','Payment method updated.');
+            });
     }
 }

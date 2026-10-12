@@ -262,15 +262,23 @@ visual layout are not covered by those tests.
 
 Run `php artisan migrate --path=database/migrations/2026_10_09_000001_add_midtrans_payments.php`.
 Midtrans is seeded **deactivated**, in sandbox mode, with both fees set to zero.
-In Ticketing → Payment Method & Fees, administrators and ADM2 configure the environment,
+In Ticketing → Payment Method & Fees, users with payment access configure the environment,
 merchant ID and API keys. Blank key inputs retain saved keys; changing environments
 requires a new server key. Keys are encrypted using APP_KEY, hidden from model JSON,
 and excluded from flashed validation inputs. Keep APP_KEY backed up.
-Ticket operators can activate/deactivate Midtrans and edit its processing fee; account and
-key changes are rejected server-side. Existing manual methods remain admin-managed.
+Payment access includes Administrator, ADM2, Pengurus, ticket operators, and roles granted
+the Payment Method & Fees menu. These users can edit all unlocked payment methods.
+Only the Administrator role can check or clear **Lock parameters for non-admin roles**
+on each method, then save it. A locked method remains visible but read-only for other
+roles (including ADM2), with direct updates rejected server-side. Other methods and
+shared fees are unaffected. Run `php artisan migrate` to add the per-method lock column;
+existing methods start unlocked. Saved API keys remain masked.
+
+User Management → Roles lists roles, user counts and menu access. Administrator and
+ADM2 can open it; administrators can follow its link to manage menu permissions.
 
 Run `php artisan migrate` to install the universal fee settings. Above Ways to Pay,
-administrators, ADM2 and Pengurus can set Tax (0–100%) and Platform Fee (fixed rupiah
+users with payment access can set Tax (0–100%) and Platform Fee (fixed rupiah
 or 0–100%). These apply to bank transfer, manual QRIS and Midtrans. The existing
 Midtrans platform fee is copied into the shared setting during migration; unpaid,
 unsubmitted reservations adopt it, while submitted and completed payments retain

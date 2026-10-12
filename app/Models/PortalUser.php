@@ -76,6 +76,13 @@ class PortalUser extends Authenticatable
         return $this->hasRole('adm2');
     }
 
+    public function canManagePayments(): bool
+    {
+        return $this->isAdministrator() || $this->isAdm2()
+            || $this->hasRole('ticket_operator') || $this->hasRole('pengurus')
+            || in_array('ticketing.methods', $this->accessibleMenuKeys(), true);
+    }
+
     public function maxRoleLevel(): int
     {
         return $this->roles->max('level') ?? 0;

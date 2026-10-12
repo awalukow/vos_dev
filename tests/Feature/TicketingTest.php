@@ -41,11 +41,57 @@ class TicketingTest extends TestCase {
         Storage::fake('local');
         (require database_path('migrations/2026_10_08_000004_create_ticket_promos.php'))->up();
         (require database_path('migrations/2026_10_09_000001_add_midtrans_payments.php'))->up();
+        (require database_path('migrations/2026_10_12_000001_add_payment_method_parameter_locks.php'))->up();
         (require database_path('migrations/2026_10_09_000002_add_concert_memories_and_dashboard.php'))->up();
         if ($this->getName()!=='test_fee_migration_moves_legacy_platform_fee_without_changing_submitted_payments') (require database_path('migrations/2026_10_11_000001_add_universal_ticket_fees.php'))->up();
     }
     private function customer(bool $verified=true): Customer {
         return Customer::create(['name'=>'Test Listener','dob'=>'1995-01-01','email'=>uniqid().'@example.test','phone'=>'+628123456789','password'=>Hash::make('StrongPass123!'),'email_verified_at'=>$verified?now():null]);
+    }
+    public function test_roles_menu_opens_for_user_managers_only(): void {
+        foreach (['administrator','adm2'] as $role) {
+            $this->actingAs($this->staff($role),'portal')->get(route('portal.roles.index'))->assertOk()->assertSee('Menu access');
+        }
+        $this->actingAs($this->staff('ticket_operator'),'portal')->get(route('portal.roles.index'))->assertForbidden();
+    }
+
+    public function test_menu_granted_payment_access_can_edit_fees_and_all_methods(): void {
+        $user=$this->staff('finance');
+        $user->roles->first()->menus()->attach(DB::table('portal_menus')->where('key','ticketing.methods')->value('id'));
+        $this->actingAs($user,'portal')->get(route('portal.ticketing.methods'))->assertOk()->assertSee('Merchant QRIS image')->assertSee('Merchant ID');
+        $this->post(route('portal.ticketing.fees.update'),['tax_percent'=>0,'platform_fee_type'=>'fixed','platform_fee_value'=>1234])->assertSessionHasNoErrors();
+        $this->assertEquals(1234,\App\Models\TicketFeeSetting::current()->platform_fee_value);
+        foreach (TicketPaymentMethod::all() as $method) {
+            $data=$method->type==='midtrans'
+                ? ['environment'=>'sandbox','merchant_id'=>'finance','server_key'=>'secret','processing_fee_type'=>'fixed','processing_fee_value'=>10]
+                : ['name'=>'Finance '.$method->type,'instructions'=>'Updated instructions'];
+            $this->post(route('portal.ticketing.methods.update',$method),$data)->assertRedirect()->assertSessionHasNoErrors();
+        }
+    }
+
+    public function test_method_locks_are_per_method_and_only_administrators_can_change_them(): void {
+        $admin=$this->staff();
+        $transfer=TicketPaymentMethod::where('type','transfer')->firstOrFail();
+        $qris=TicketPaymentMethod::where('type','qris')->firstOrFail();
+        $data=['name'=>'Bank details','instructions'=>'Account 123','active'=>1];
+        $this->actingAs($admin,'portal')->post(route('portal.ticketing.methods.update',$transfer),$data+['parameters_locked'=>1])->assertSessionHasNoErrors();
+        $this->assertTrue($transfer->fresh()->parameters_locked);
+        $this->assertFalse($qris->fresh()->parameters_locked);
+        foreach (['ticket_operator','adm2','pengurus'] as $role) {
+            $this->actingAs($this->staff($role),'portal')->get(route('portal.ticketing.methods'))->assertOk()->assertSee('Locked by an administrator.')->assertSee('fieldset disabled',false)->assertDontSee('name="parameters_locked"',false);
+            $this->post(route('portal.ticketing.methods.update',$transfer),$data)->assertForbidden();
+            $this->post(route('portal.ticketing.methods.update',$transfer),$data+['parameters_locked'=>0])->assertForbidden();
+            $this->post(route('portal.ticketing.methods.update',$qris),['name'=>'QRIS','instructions'=>'Scan here'])->assertSessionHasNoErrors();
+            $this->post(route('portal.ticketing.methods.update',$qris),['name'=>'QRIS','instructions'=>'Scan here','parameters_locked'=>1])->assertForbidden();
+        }
+        $this->actingAs($admin,'portal')->post(route('portal.ticketing.methods.update',$transfer),$data+['parameters_locked'=>0])->assertSessionHasNoErrors();
+        $this->assertFalse($transfer->fresh()->parameters_locked);
+        $this->actingAs($this->staff('ticket_operator'),'portal')->post(route('portal.ticketing.methods.update',$transfer),$data)->assertSessionHasNoErrors();
+        $midtrans=$this->midtrans();
+        $midtrans->update(['parameters_locked'=>true]);
+        $this->get(route('portal.ticketing.methods'))->assertOk()->assertDontSee('SB-server-secret');
+        $this->post(route('portal.ticketing.methods.update',$midtrans),['processing_fee_type'=>'fixed','processing_fee_value'=>0,'server_key'=>'override'])->assertForbidden();
+        $this->assertSame('SB-server-secret',$midtrans->fresh()->server_key);
     }
     public function test_event_maps_selection_is_saved_edited_and_validated(): void {
         $this->actingAs($this->staff(),'portal');
@@ -68,8 +114,8 @@ class TicketingTest extends TestCase {
         $this->post(route('portal.ticketing.events.update',$event),$data)->assertSessionHasNoErrors();
         $this->assertNull($event->fresh()->maps_url);
     }
-    public function test_universal_fees_can_be_saved_by_admins_and_pengurus_only(): void {
-        foreach (['administrator','adm2','pengurus'] as $role) {
+    public function test_universal_fees_can_be_saved_by_payment_roles(): void {
+        foreach (['administrator','adm2','pengurus','ticket_operator'] as $role) {
             $this->actingAs($this->staff($role),'portal');
             $this->get(route('portal.ticketing.methods'))->assertOk()->assertSeeInOrder(['Payment Method &amp; Fees','Tax (%)','Platform Fee','Ways to pay.'],false);
             $this->post(route('portal.ticketing.fees.update'),['tax_percent'=>11.25,'platform_fee_type'=>'percent','platform_fee_value'=>2.5])->assertSessionHasNoErrors();
@@ -78,7 +124,6 @@ class TicketingTest extends TestCase {
             auth('portal')->logout();
         }
         $this->actingAs($this->staff('member'),'portal')->post(route('portal.ticketing.fees.update'),['tax_percent'=>0,'platform_fee_type'=>'fixed','platform_fee_value'=>0])->assertForbidden();
-        $this->actingAs($this->staff('ticket_operator'),'portal')->post(route('portal.ticketing.fees.update'),['tax_percent'=>0,'platform_fee_type'=>'fixed','platform_fee_value'=>0])->assertForbidden();
     }
 
     public function test_universal_fees_apply_to_manual_payments_and_preserve_booking_rates(): void {
@@ -325,14 +370,14 @@ class TicketingTest extends TestCase {
         $method=TicketPaymentMethod::where('type','midtrans')->firstOrFail();
         $this->assertFalse($method->active);
         $operator=$this->staff('ticket_operator');
-        $this->actingAs($operator,'portal')->get(route('portal.ticketing.methods'))->assertOk()->assertSee('QRIS (Automated Check)')->assertDontSee('name="server_key"',false);
+        $this->actingAs($operator,'portal')->get(route('portal.ticketing.methods'))->assertOk()->assertSee('QRIS (Automated Check)')->assertSee('name="server_key"',false);
         $fees=['processing_fee_type'=>'percent','processing_fee_value'=>2.5,'platform_fee_type'=>'fixed','platform_fee_value'=>5000];
-        $this->post(route('portal.ticketing.methods.update',$method),$fees+['server_key'=>'injected'])->assertForbidden();
+        $this->post(route('portal.ticketing.methods.update',$method),$fees+['server_key'=>'replacement'])->assertSessionHasNoErrors();
         $this->post(route('portal.ticketing.methods.update',$method),$fees+['active'=>1])->assertSessionHasErrors('active');
         $method=$this->midtrans();
         $this->post(route('portal.ticketing.methods.update',$method),$fees)->assertSessionHasNoErrors();
         $this->assertFalse($method->fresh()->active);
-        $this->post(route('portal.ticketing.methods.update',TicketPaymentMethod::where('type','transfer')->first()),['name'=>'Changed'])->assertForbidden();
+        $this->post(route('portal.ticketing.methods.update',TicketPaymentMethod::where('type','transfer')->first()),['name'=>'Changed','instructions'=>'New bank details'])->assertSessionHasNoErrors();
         $this->assertNotSame('SB-server-secret',DB::table('ticket_payment_methods')->where('id',$method->id)->value('server_key'));
         $this->assertStringNotContainsString('SB-server-secret',$method->toJson());
     }
