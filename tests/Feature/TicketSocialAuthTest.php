@@ -264,138 +264,45 @@ class TicketSocialAuthTest extends TestCase
         $this->post(route('tickets.social.apple-relay'),['state'=>'state','code'=>'code'])->assertNotFound();
     }
 
-    private function configureGoogleHosts(): void
+    public function test_development_and_local_google_flows_start_on_production_without_loading_socialite(): void
     {
-        config(['services.google.local_redirect'=>'http://localhost:8000/tickets/auth/google/callback',
-            'services.google.client_id'=>'production-client', 'services.google.client_secret'=>'production-secret',
-            'services.google.redirect'=>'https://voiceofsoulchoir.id/tickets/auth/google/callback',
-            'services.google.development'=>[
-                'client_id'=>'development-client', 'client_secret'=>'development-secret',
-                'redirect'=>'https://dev.voiceofsoulchoir.id/tickets/auth/google/callback',
-            ],
-        ]);
-    }
-
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
-    public function test_social_redirects_do_not_require_the_facade_namespace(): void
-    {
-        $this->assertFalse(class_exists('Laravel\\Socialite\\Facades\\Socialite', false));
-        $blockFacade = static function ($class) {
-            if ($class === 'Laravel\\Socialite\\Facades\\Socialite') {
-                throw new \RuntimeException('Socialite facade namespace is unavailable.');
-            }
-        };
-        spl_autoload_register($blockFacade, true, true);
-        try {
-            $this->configureGoogleHosts();
-            foreach (['voiceofsoulchoir.id'=>'production-client', 'dev.voiceofsoulchoir.id'=>'development-client'] as $host=>$client) {
-                $response = $this->get('https://'.$host.'/tickets/auth/google/redirect');
-                $response->assertRedirect();
-                parse_str(parse_url($response->headers->get('Location'), PHP_URL_QUERY), $query);
-                $this->assertSame($client, $query['client_id']);
-                $this->assertSame('https://'.$host.'/tickets/auth/google/callback', $query['redirect_uri']);
-            }
-            $this->get('http://localhost/tickets/auth/apple/redirect')->assertRedirect();
-        } finally {
-            spl_autoload_unregister($blockFacade);
-        }
-    }
-
-    public function test_google_credentials_follow_exact_host_without_leaking_between_requests(): void
-    {
-        $this->configureGoogleHosts();
-        foreach (['voiceofsoulchoir.id'=>'production-client','dev.voiceofsoulchoir.id'=>'development-client','VOICEOFSOULCHOIR.ID'=>'production-client'] as $host=>$client) {
-            $response = $this->get('https://'.$host.'/tickets/auth/google/redirect');
-            $response->assertRedirect();
-            parse_str(parse_url($response->headers->get('Location'), PHP_URL_QUERY),$query);
-            $this->assertSame($client,$query['client_id']);
-            $this->assertSame('https://'.strtolower($host).'/tickets/auth/google/callback',$query['redirect_uri']);
-        }
-        $this->assertSame('production-client',config('services.google.client_id'));
-        foreach (['localhost','dev.voiceofsoulchoir.id.attacker.test','preview.voiceofsoulchoir.id'] as $host) {
-            $this->get('https://'.$host.'/tickets/auth/google/redirect')->assertNotFound();
-            $this->get('https://'.$host.'/tickets/login')->assertOk()->assertDontSee('/tickets/auth/google/redirect',false);
-        }
-    }
-
-    public function test_missing_development_secret_does_not_fall_back_to_production(): void
-    {
-        $this->configureGoogleHosts();
-        config(['services.google.development.client_secret'=>null]);
-        $this->get('https://dev.voiceofsoulchoir.id/tickets/auth/google/redirect')->assertNotFound();
-        $this->get('https://voiceofsoulchoir.id/tickets/auth/google/redirect')->assertRedirect();
-    }
-
-    public function test_google_button_is_present_on_both_hosts_login_and_registration_pages(): void
-    {
-        $this->configureGoogleHosts();
-        config(['services.apple.enabled'=>false]);
-        foreach (['voiceofsoulchoir.id','dev.voiceofsoulchoir.id'] as $host) {
-            foreach (['login','register'] as $mode) {
-                $this->get('https://'.$host.'/tickets/'.$mode)->assertOk()
-                    ->assertSee('https://'.$host.'/tickets/auth/google/redirect?mode='.$mode,false)
-                    ->assertDontSee('id="apple-sign-in"',false);
-            }
-        }
-    }
-
-    public function test_google_callback_rejects_flow_started_on_another_host(): void
-    {
-        $this->configureGoogleHosts();
-        $this->get('https://voiceofsoulchoir.id/tickets/auth/google/redirect')->assertRedirect();
-        $state = session('social_flow.state');
+        config(['services.google.redirect'=>'https://voiceofsoulchoir.id/tickets/auth/google/callback']);
         $service = \Mockery::mock(TicketSocialLogin::class);
         $service->shouldNotReceive('driver');
-        $this->app->instance(TicketSocialLogin::class,$service);
-        $this->get('https://dev.voiceofsoulchoir.id/tickets/auth/google/callback?'.http_build_query(['state'=>$state,'code'=>'code']))
-            ->assertRedirect()->assertSessionHasErrors('social')->assertSessionMissing('social_pending');
-    }
-
-    public function test_local_php_server_displays_google_and_returns_to_local_callback(): void
-    {
-        $this->configureGoogleHosts();
-        foreach (['login','register'] as $mode) {
-            $this->get('http://localhost:8000/tickets/'.$mode)->assertOk()
-                ->assertSee('/tickets/auth/google/redirect?mode='.$mode,false);
+        $this->app->instance(TicketSocialLogin::class, $service);
+        foreach (['https://dev.voiceofsoulchoir.id', 'http://localhost:8000'] as $origin) {
+            foreach (['login', 'register'] as $mode) {
+                $this->get($origin.'/tickets/auth/google/redirect?mode='.$mode)
+                    ->assertRedirect('https://voiceofsoulchoir.id/tickets/auth/google/redirect?mode='.$mode)
+                    ->assertSessionMissing('social_flow');
+            }
         }
-        $response = $this->get('http://localhost:8000/tickets/auth/google/redirect');
-        $response->assertRedirect();
-        parse_str(parse_url($response->headers->get('Location'),PHP_URL_QUERY),$query);
-        $this->assertSame('development-client',$query['client_id']);
-        $this->assertSame('http://localhost:8000/tickets/auth/google/callback',$query['redirect_uri']);
-        $state = session('social_flow.state');
-        $handler = HandlerStack::create(new MockHandler([
-            new Response(200,[],json_encode(['access_token'=>'local-token','token_type'=>'Bearer'])),
-            new Response(200,[],json_encode(['sub'=>'local-user','name'=>'Local Listener','email'=>'local@example.test','email_verified'=>true])),
-        ]));
-        config(['services.google.development.guzzle'=>['handler'=>$handler]]);
-        $this->get('http://localhost:8000/tickets/auth/google/callback?'.http_build_query(['state'=>$state,'code'=>'code']))
-            ->assertRedirect('http://localhost:8000/tickets/auth/complete')->assertSessionHas('social_pending.email','local@example.test');
-        $this->get('http://localhost:8001/tickets/auth/google/redirect')->assertNotFound();
-        config(['services.google.development.client_secret'=>null]);
-        $this->get('http://localhost:8000/tickets/auth/google/redirect')->assertNotFound();
     }
 
-    public function test_development_callback_exchanges_code_using_development_secret(): void
+    public function test_production_starts_google_with_single_configuration_and_ignores_old_dev_keys(): void
     {
-        $this->configureGoogleHosts();
-        $this->get('https://dev.voiceofsoulchoir.id/tickets/auth/google/redirect')->assertRedirect();
-        $state = session('social_flow.state');
-        $history = [];
-        $handler = HandlerStack::create(new MockHandler([
-            new Response(200,[],json_encode(['access_token'=>'test-token','token_type'=>'Bearer'])),
-            new Response(200,[],json_encode(['sub'=>'dev-user','name'=>'Dev Listener','email'=>'dev@example.test','email_verified'=>true])),
-        ]));
-        $handler->push(\GuzzleHttp\Middleware::history($history));
-        config(['services.google.development.guzzle'=>['handler'=>$handler]]);
-        $this->get('https://dev.voiceofsoulchoir.id/tickets/auth/google/callback?'.http_build_query(['state'=>$state,'code'=>'test-code']))
-            ->assertRedirect()->assertSessionHas('social_pending.email','dev@example.test');
-        parse_str((string)$history[0]['request']->getBody(),$tokenRequest);
-        $this->assertSame('development-client',$tokenRequest['client_id']);
-        $this->assertSame('development-secret',$tokenRequest['client_secret']);
-        $this->assertSame('https://dev.voiceofsoulchoir.id/tickets/auth/google/callback',$tokenRequest['redirect_uri']);
+        config(['services.google.client_id'=>'production-client',
+            'services.google.redirect'=>'https://voiceofsoulchoir.id/tickets/auth/google/callback',
+            'services.google.development'=>['client_id'=>'unused-dev-client'],
+        ]);
+        $response = $this->get('https://voiceofsoulchoir.id/tickets/auth/google/redirect?mode=register');
+        $response->assertRedirect();
+        $this->assertSame('accounts.google.com', parse_url($response->headers->get('Location'), PHP_URL_HOST));
+        parse_str(parse_url($response->headers->get('Location'), PHP_URL_QUERY), $query);
+        $this->assertSame('production-client', $query['client_id']);
+        $this->assertSame('https://voiceofsoulchoir.id/tickets/auth/google/callback', $query['redirect_uri']);
+        $this->assertSame($query['state'], session('social_flow.state'));
+        $this->assertStringContainsString('user.birthday.read', $query['scope']);
+    }
+
+    public function test_callback_cannot_use_state_from_another_host(): void
+    {
+        $service = \Mockery::mock(TicketSocialLogin::class);
+        $service->shouldNotReceive('driver');
+        $this->app->instance(TicketSocialLogin::class, $service);
+        $flow = $this->flow();
+        $flow['host'] = 'dev.voiceofsoulchoir.id';
+        $this->withSession(['social_flow'=>$flow])->get('http://localhost/tickets/auth/google/callback?state=browser-state&code=code')
+            ->assertRedirect()->assertSessionHasErrors('social')->assertSessionMissing('social_pending');
     }
 }

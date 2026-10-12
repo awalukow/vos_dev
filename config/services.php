@@ -7,12 +7,6 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
         'request_birthday' => env('GOOGLE_REQUEST_BIRTHDAY', true),
-        'local_redirect' => env('GOOGLE_LOCAL_REDIRECT_URI', 'http://localhost:8000/tickets/auth/google/callback'),
-        'development' => [
-            'client_id' => env('GOOGLE_DEV_CLIENT_ID'),
-            'client_secret' => env('GOOGLE_DEV_CLIENT_SECRET'),
-            'redirect' => env('GOOGLE_DEV_REDIRECT_URI'),
-        ],
     ],
 
     'apple' => [

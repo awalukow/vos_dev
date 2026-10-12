@@ -18,20 +18,11 @@ Create a Web application OAuth client in Google Cloud, configure the consent scr
 
 Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI`.
 
-### Production and development URLs
+### One production Google configuration
 
-The app chooses Google's client credentials on each request by matching the current hostname exactly to the hostname in a configured callback URL:
+Use `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI=https://voiceofsoulchoir.id/tickets/auth/google/callback` on each server. Google development and local keys are no longer used. Clear the config cache after deployment.
 
-- `voiceofsoulchoir.id`: use `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI=https://voiceofsoulchoir.id/tickets/auth/google/callback`.
-- `dev.voiceofsoulchoir.id`: use `GOOGLE_DEV_CLIENT_ID`, `GOOGLE_DEV_CLIENT_SECRET`, and `GOOGLE_DEV_REDIRECT_URI=https://dev.voiceofsoulchoir.id/tickets/auth/google/callback`.
-
-Populate the credentials in the server's `.env` (local `.env` files are not deployed through Git), then clear or rebuild Laravel's config cache. Both client configurations can coexist in the same deployment. Selection uses the request host, not `APP_ENV` or `APP_URL`, and does not change shared configuration. Both the authorization redirect and token exchange use the selected client; the flow also records the initiating host and client ID to prevent switching midway.
-
-Local PHP development uses the development credentials and `GOOGLE_LOCAL_REDIRECT_URI`, defaulting to `http://localhost:8000/tickets/auth/google/callback`. Add that exact URL to the development OAuth client's authorized redirect URIs in Google Cloud, alongside the public development callback. The local scheme, hostname and port must match this setting; use it to configure another loopback address/port if needed. A local login returns to the local session, not the public dev server.
-
-Google sign-in is unavailable on other unconfigured hosts. To support another development host, register its exact callback with Google and configure the corresponding development callback URI. An incomplete development configuration never falls back to the production client. The callback URI always comes from server configuration, never from an arbitrary request Host header.
-
-If buttons are missing after publishing, check the `.env` on **each server**, not just this checkout: production needs the three `GOOGLE_*` credential/callback values, and the public development server needs the three `GOOGLE_DEV_*` values. Then run `php artisan config:clear`. Deploying tracked files does not deploy `.env`. Never commit the client secrets to fix a missing button.
+Google login and registration opened on development or localhost first redirect to the production sign-in route. Production then starts OAuth and receives the callback in the same browser session. Registration and sign-in finish on production, using its customer database. This requires Socialite to be installed and working on production; development can hand off without loading Socialite.
 
 Enable People API for the same project. With `GOOGLE_REQUEST_BIRTHDAY=true`, the registration button requests `https://www.googleapis.com/auth/user.birthday.read` alongside basic identity scopes. Configure the consent screen and any Google-required verification before public launch. Users may decline the birthday permission, omit their birthday, or share only month/day. API failure also falls back to manual entry. Only a valid complete date before today bypasses the DOB field. Standard login does not request the extra birthday scope; first-time users entering via login fill DOB manually.
 

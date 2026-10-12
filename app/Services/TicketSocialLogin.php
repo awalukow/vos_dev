@@ -33,29 +33,7 @@ class TicketSocialLogin
 
     public static function googleConfiguration(): array
     {
-        $production = config('services.google', []);
-        $development = $production['development'] ?? [];
-        $localRedirect = $production['local_redirect'] ?? null;
-        unset($production['development'], $production['local_redirect']);
-        $host = strtolower(request()->getHost());
-        foreach ([$development, $production] as $candidate) {
-            $redirectHost = parse_url($candidate['redirect'] ?? '', PHP_URL_HOST);
-            if (is_string($redirectHost) && strtolower($redirectHost) === $host) {
-                // Never build callbacks from an arbitrary Host header, nor fall
-                // back to production credentials when development is incomplete.
-                return $candidate;
-            }
-        }
-        // Local PHP development uses the development client, but must return to
-        // the local session, never to the public development server.
-        $localHost = parse_url($localRedirect ?? '', PHP_URL_HOST);
-        $localScheme = parse_url($localRedirect ?? '', PHP_URL_SCHEME);
-        $localPort = parse_url($localRedirect ?? '', PHP_URL_PORT) ?: ($localScheme === 'https' ? 443 : 80);
-        if (in_array($localHost, ['localhost', '127.0.0.1', '[::1]'], true)
-            && $host === $localHost && request()->getPort() === $localPort && request()->getScheme() === $localScheme) {
-            return array_replace($development, ['redirect' => $localRedirect]);
-        }
-        return [];
+        return config('services.google', []);
     }
 
     public function birthday(string $token): ?string
