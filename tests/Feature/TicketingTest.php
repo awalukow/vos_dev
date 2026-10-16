@@ -211,6 +211,22 @@ class TicketingTest extends TestCase {
     private function reserve(TicketEvent $event,?Customer $customer=null,int $qty=1): TicketOrder {
         return app(TicketBooking::class)->reserve($customer??$this->customer(),$event,['quantities'=>[$event->classes->first()->id=>$qty]]);
     }
+    public function test_ticket_list_hides_counts_until_ten_and_marks_last_ten_percent_as_urgent(): void {
+        $event=$this->event('free',20);
+        $this->withSession(['ticket_locale'=>'en'])->get(route('tickets.events'))->assertOk()->assertDontSee('tickets left')->assertDontSee('Almost Sold out');
+        $this->reserve($event,null,10);
+        $this->get(route('tickets.events'))->assertOk()->assertSee('10 tickets left')->assertDontSee('Almost Sold out');
+        $this->reserve($event,null,7);
+        $this->get(route('tickets.events'))->assertOk()->assertSee('3 tickets left')->assertDontSee('Almost Sold out');
+        $this->reserve($event,null,1);
+        $this->get(route('tickets.events'))->assertOk()->assertSee('2 tickets left')->assertSee('class="badge urgent"',false)->assertSee('Almost Sold out');
+        $this->withSession(['ticket_locale'=>'id'])->get(route('tickets.events'))->assertOk()->assertSee('Tersisa 2 tiket')->assertSee('Hampir Habis Terjual');
+        $this->reserve($event,null,1);
+        $this->get(route('tickets.events'))->assertOk()->assertSee('Tersisa 1 tiket')->assertSee('Hampir Habis Terjual');
+        $this->reserve($event,null,1);
+        $this->get(route('tickets.events'))->assertOk()->assertSee('Habis terjual')->assertDontSee('Hampir Habis Terjual')->assertDontSee('Tersisa 0 tiket');
+    }
+
     public function test_memories_include_unpublished_past_events_but_never_removed_or_future_events(): void {
         $past=$this->event(); $past->update(['title'=>'Past draft concert','published'=>false,'starts_at'=>now()->subDay()]);
         $removed=$this->event(); $removed->update(['title'=>'Removed concert','starts_at'=>now()->subDay(),'RowStatus'=>-1]);

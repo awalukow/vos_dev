@@ -20,6 +20,7 @@ class TicketEvent extends Model {
     public function availability(): array {
         $capacity = $this->classes->sum('capacity');
         $used = $this->reservedItems()->count();
-        return ['capacity'=>$capacity,'used'=>$used,'remaining'=>max(0,$capacity-$used),'almost'=>$capacity > 0 && $used / $capacity > .8];
+        $remaining = max(0,$capacity-$used);
+        return ['capacity'=>$capacity,'used'=>$used,'remaining'=>$remaining,'almost'=>$capacity > 0 && $remaining > 0 && $remaining <= $capacity * .1];
     }
 }

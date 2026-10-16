@@ -19,6 +19,8 @@
 @keyframes promo-fade-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.ticket-app .promo-form .promo-feedback{animation:none}}
 
+.ticket-app .badge.urgent{background:#a52a45;color:#fff}
+
 /* Dedicated booking cards keep the shared form-row styles out of this list. */
 .ticket-app .brand-logo{width:76px;height:76px;display:block;flex-shrink:0}
 .ticket-app .brand-logo img{display:block;width:100%;height:100%;object-fit:contain}
