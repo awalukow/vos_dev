@@ -9,7 +9,7 @@
 @if($methods->isEmpty() && $order->total>0)<div class="notice error">{{ __("No payment methods are currently available. Please contact the organizer.") }}</div>
 @else
 <form id="payment-form" method="post" action="{{ $order->total===0?route('tickets.free',$order):route('tickets.proof',$order) }}" enctype="multipart/form-data">@csrf
-<label for="singer-id">{{ __('Singer name') }}</label><select name="singer_id" id="singer-id"><option value="">{{ __('No singer referral') }}</option>@foreach($singers as $singer)<option value="{{ $singer->id }}" @selected((string)old('singer_id',$order->portal_singer_id)===(string)$singer->id)>{{ $singer->name }}</option>@endforeach</select>
+<label for="singer-id">{{ __('Singer name') }}</label><select name="singer_id" id="singer-id"><option value="">{{ __('No singer referral') }}</option>@foreach($singers as $singer)<option value="{{ $singer->id }}" data-referral-code="{{ $singer->referral_code }}" @selected((string)old('singer_id',$order->portal_singer_id)===(string)$singer->id)>{{ $singer->name }}</option>@endforeach</select>
 @if($order->total>0)
 @php($selectedMethod=$methods->firstWhere('id',old('method'))?->id ?? $methods->first()->id)
 <fieldset class="payment-methods" id="payment-methods">
@@ -56,7 +56,7 @@
 </div><aside class="panel summary"><div class="eyebrow">{{ __("Booking details") }}</div><h3>{{ $order->event->title }}</h3><p class="muted tiny">{{ $order->event->location }}<br>{{ $order->event->starts_at->timezone('Asia/Jakarta')->translatedFormat('d M Y · H:i') }} WIB</p>
 @include('tickets._booking-items')
 <div id="summary-fees">@include('tickets._payment-fees',['fees'=>$order->payment_snapshot['fees']??[]])</div>
-<div class="row"><strong>{{ __("Total") }}</strong><strong id="summary-total">Rp {{ number_format($order->total,0,',','.') }}</strong></div><p>{{ __("Booking code") }}: <strong>{{ $order->booking_code }}</strong><br>{{ __("Referral") }}: {{ $order->singer_name ?? __("No singer referral") }} @if($order->referral_code)({{ $order->referral_code }})@endif</p>@if($order->discount)<div class="notice success">{{ __('Promo Code') }}: <strong>{{ $order->promo_snapshot['code'] }}</strong><br>{{ __('Discount') }}: −Rp {{ number_format($order->discount,0,',','.') }}@if($order->promo_snapshot['free_tickets']??0)<br>{{ __('Free tickets') }}: {{ $order->promo_snapshot['free_tickets'] }}@endif</div>@endif
+<div class="row"><strong>{{ __("Total") }}</strong><strong id="summary-total">Rp {{ number_format($order->total,0,',','.') }}</strong></div><p>{{ __("Booking code") }}: <strong>{{ $order->booking_code }}</strong><br>{{ __("Referral") }}: <span id="summary-singer" aria-live="polite">{{ $order->singer_name ?? __("No singer referral") }} @if($order->referral_code)({{ $order->referral_code }})@endif</span></p>@if($order->discount)<div class="notice success">{{ __('Promo Code') }}: <strong>{{ $order->promo_snapshot['code'] }}</strong><br>{{ __('Discount') }}: −Rp {{ number_format($order->discount,0,',','.') }}@if($order->promo_snapshot['free_tickets']??0)<br>{{ __('Free tickets') }}: {{ $order->promo_snapshot['free_tickets'] }}@endif</div>@endif
 @if($order->status==='awaiting_payment' && !$expired)
 <form class="promo-form" method="post" action="{{ route('tickets.promo',$order) }}">@csrf
 <label for="promo-code">{{ __('Promo Code') }}</label>
@@ -75,6 +75,17 @@
 @endsection
 @push('scripts')
 <script>
+const singerSelect=document.getElementById('singer-id');
+if(singerSelect){
+    const showSinger=()=>{
+        const selected=singerSelect.selectedOptions[0];
+        const code=selected.dataset.referralCode;
+        document.getElementById('summary-singer').textContent=selected.textContent+(code?' ('+code+')':'');
+    };
+    singerSelect.addEventListener('change',showSinger);
+    window.addEventListener('pageshow',showSinger);
+    showSinger();
+}
 const methods=document.getElementById('payment-methods');
 if(methods){
     const form=document.getElementById('payment-form');
