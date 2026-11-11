@@ -9,6 +9,9 @@
 @else<a class="btn dark" href="{{ route('tickets.login') }}">{{ __("Sign in") }}</a>@endauth
 </div></nav>
 <main>
+@if(auth('customer')->user()?->email_issue_at)
+<div class="notice error" role="alert">We're unable to confirm your email. Please change email by clicking <a href="{{ route('tickets.email.edit') }}">here</a></div>
+@endif
 @foreach(['success','error','info'] as $kind) @if(session($kind))<div role="status" class="notice {{ $kind }}">{{ __(session($kind)) }}</div>@endif @endforeach
 @if($errors->any())<div class="notice error" role="alert"><strong>{{ __("Please check the following:") }}</strong><ul>@foreach($errors->all() as $error)<li>{{ __($error) }}</li>@endforeach</ul></div>@endif
 @yield('content')

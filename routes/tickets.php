@@ -35,6 +35,9 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
     Route::post('/login',[Auth::class,'login'])->name('login.submit')->middleware('throttle:6,1');
     Route::get('/register',[Auth::class,'registerForm'])->name('register');
     Route::post('/register',[Auth::class,'register'])->name('register.submit')->middleware('throttle:5,1');
+    Route::get('/email',[\App\Http\Controllers\TicketEmailController::class,'edit'])->name('email.edit');
+    Route::post('/email',[\App\Http\Controllers\TicketEmailController::class,'send'])->middleware('throttle:3,1')->name('email.send');
+    Route::post('/email/confirm',[\App\Http\Controllers\TicketEmailController::class,'confirm'])->middleware('throttle:6,1')->name('email.confirm');
     Route::get('/verify-email',[Auth::class,'verifyForm'])->name('verify');
     Route::post('/verify-email',[Auth::class,'verify'])->name('verify.submit')->middleware('throttle:6,1');
     Route::post('/resend-otp',[Auth::class,'resend'])->middleware('throttle:3,1')->name('resend');
@@ -84,6 +87,7 @@ Route::prefix('portal/ticketing')->name('portal.ticketing.')->middleware('portal
         Route::post('/promos',[\App\Http\Controllers\Portal\TicketPromoController::class,'save'])->name('promos.store');
         Route::post('/promos/{promo}',[\App\Http\Controllers\Portal\TicketPromoController::class,'save'])->name('promos.update');
         Route::get('/orders',[Admin::class,'orders'])->name('orders');
+        Route::post('/orders/{order}/referral',[Admin::class,'addReferral'])->name('orders.referral');
         Route::get('/orders/{order}',[Admin::class,'order'])->name('orders.show');
         Route::get('/orders/{order}/qr',[Admin::class,'bookingQr'])->name('orders.qr');
         Route::get('/orders/{order}/tickets/{item}/qr',[Admin::class,'ticketQr'])->name('orders.ticket-qr');

@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('tickets:import-bounces')->everyFiveMinutes()->withoutOverlapping();
         $schedule->command('tickets:sync-midtrans')->everyMinute()->withoutOverlapping();
     }
 

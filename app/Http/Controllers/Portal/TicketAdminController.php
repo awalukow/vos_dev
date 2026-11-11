@@ -116,11 +116,25 @@ class TicketAdminController extends Controller {
     }
     public function orders(Request $r) {
         $data=$r->validate(['q'=>'nullable|string|max:190','status'=>'nullable|in:awaiting_payment,payment_review,midtrans_pending,paid,rejected,cancelled,expired']);
-        $orders=app(\App\Services\TicketReports::class)->orders($data)->with(['customer','event'])->latest()->paginate(20)->withQueryString();
-        return view('portal.ticketing.orders',compact('orders'));
+        $orders=app(\App\Services\TicketReports::class)->orders($data)->with(['customer'=>fn($q)=>$q->when(auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2(),fn($q)=>$q->with('emailFailures')),'event'])->latest()->paginate(20)->withQueryString();
+        $singers=\App\Models\PortalSinger::where('active',true)->orderBy('name')->get();
+        return view('portal.ticketing.orders',compact('orders','singers'));
+    }
+    public function addReferral(Request $r,TicketOrder $order) {
+        $data=$r->validate(['singer_id'=>'required|integer']);
+        DB::transaction(function () use ($data,$order) {
+            $locked=TicketOrder::lockForUpdate()->findOrFail($order->id);
+            if ($locked->hasReferral()) throw ValidationException::withMessages(['singer_id'=>'This booking already has a referral.']);
+            $singer=\App\Models\PortalSinger::lockForUpdate()->find($data['singer_id']);
+            if (!$singer || !$singer->active) throw ValidationException::withMessages(['singer_id'=>'Please select an active singer.']);
+            $details=['portal_singer_id'=>$singer->id,'singer_name'=>$singer->name,'referral_code'=>$singer->referral_code];
+            $locked->update($details);
+            TicketDelivery::audit('booking.referral_added',$locked->reference,$this->actor(),$details);
+        },3);
+        return back()->with('success','Referral added.');
     }
     public function order(TicketOrder $order) {
-        $order->load(['customer','event','items']);
+        $order->load(['customer'=>fn($q)=>$q->when(auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2(),fn($q)=>$q->with('emailFailures')),'event','items']);
         return response()->view('portal.ticketing.order',compact('order'))->header('Cache-Control','private, no-store');
     }
     public function bookingQr(TicketOrder $order,TicketDelivery $delivery) {
@@ -132,8 +146,8 @@ class TicketAdminController extends Controller {
         return response($delivery->qr(route('tickets.validate',$item->token),$item->booking_label))->header('Content-Type','image/png')->header('Cache-Control','private, no-store');
     }
     public function payments() {
-        $orders=TicketOrder::with(['customer','event','items'])->where('status','payment_review')->oldest('proof_uploaded_at')->paginate(20);
-        $recent=TicketOrder::with(['customer','event'])->whereIn('status',['paid','rejected'])->latest('reviewed_at')->take(20)->get();
+        $orders=TicketOrder::with(['customer'=>fn($q)=>$q->when(auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2(),fn($q)=>$q->with('emailFailures')),'event','items','latestEmailDelivery'])->where('status','payment_review')->oldest('proof_uploaded_at')->paginate(20);
+        $recent=TicketOrder::with(['customer'=>fn($q)=>$q->when(auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2(),fn($q)=>$q->with('emailFailures')),'event','latestEmailDelivery'])->whereIn('status',['paid','rejected'])->latest('reviewed_at')->take(20)->get();
         return view('portal.ticketing.payments',compact('orders','recent'));
     }
     public function proof(TicketOrder $order) {
@@ -145,16 +159,16 @@ class TicketAdminController extends Controller {
         $approved=$r->decision==='approve';
         $booking->review($order,$this->actor(),$approved,$r->note);
         if ($approved && !$delivery->tickets($order)) return back()->with('error','Payment approved and tickets issued, but email failed. Use Resend tickets. The customer can also open My tickets.');
-        return back()->with('success',$approved?'Payment approved. QR tickets emailed.':'Payment rejected and inventory released.');
+        return back()->with('success',$approved?'Payment approved. Ticket email submitted to the mail server; delivery is not confirmed.':'Payment rejected and inventory released.');
     }
     public function resend(TicketOrder $order,TicketDelivery $delivery) {
         abort_unless($order->status==='paid',422);
         $sent=$delivery->tickets($order);
         TicketDelivery::audit('tickets.resent',$order->reference,$this->actor(),['sent'=>$sent]);
-        return back()->with($sent?'success':'error',$sent?'Tickets emailed.':'Email failed. Check mail configuration.');
+        return back()->with($sent?'success':'error',$sent?'Ticket email submitted to the mail server; delivery is not confirmed.':'Email failed. Check mail configuration.');
     }
     public function customers(Request $r) {
-        $customers=Customer::when($r->q,fn($q)=>$q->where(function ($q) use ($r) { $q->where('email','like','%'.$r->q.'%')->orWhere('name','like','%'.$r->q.'%'); }))->latest()->paginate(20)->withQueryString();
+        $customers=Customer::with('emailFailures')->when($r->q,fn($q)=>$q->where(function ($q) use ($r) { $q->where('email','like','%'.$r->q.'%')->orWhere('name','like','%'.$r->q.'%'); }))->latest()->paginate(20)->withQueryString();
         return view('portal.ticketing.customers',compact('customers'));
     }
     public function customer(Request $r,Customer $customer) {

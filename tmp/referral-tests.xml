@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Tests\Feature\TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" tests="116" assertions="1247" errors="1" warnings="0" failures="4" skipped="0" time="24.327149">
+    <testcase name="test_email_bounce_is_correlated_deduplicated_and_does_not_change_orders" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="49" assertions="9" time="0.811510"/>
+    <testcase name="test_payment_email_status_does_not_claim_delivery_after_a_bounce" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="68" assertions="17" time="0.378308"/>
+    <testcase name="test_resend_confirmation_describes_submission_only" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="88" assertions="2" time="0.166442"/>
+    <testcase name="test_late_bounce_for_previous_address_does_not_reopen_issue" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="97" assertions="2" time="0.118880"/>
+    <testcase name="test_smtp_failure_records_customer_issue" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="106" assertions="4" time="0.129440"/>
+    <testcase name="test_email_failure_details_are_only_rendered_for_admin_roles" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="114" assertions="9" time="0.170611"/>
+    <testcase name="test_change_email_requires_verification_and_preserves_history" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="132" assertions="14" time="0.202246"/>
+    <testcase name="test_email_change_rejects_guests_duplicates_expiry_and_exhausted_codes" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="155" assertions="8" time="0.146757"/>
+    <testcase name="test_encoded_bounce_parts_and_multiple_recipients_are_isolated" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="166" assertions="3" time="0.115804"/>
+    <testcase name="test_bounced_orders_show_correct_role_messages" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="176" assertions="17" time="0.268719"/>
+    <testcase name="test_roles_menu_opens_for_user_managers_only" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="196" assertions="5" time="0.139228"/>
+    <testcase name="test_menu_granted_payment_access_can_edit_fees_and_all_methods" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="203" assertions="11" time="0.138590"/>
+    <testcase name="test_method_locks_are_per_method_and_only_administrators_can_change_them" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="217" assertions="34" time="0.342870"/>
+    <testcase name="test_event_maps_selection_is_saved_edited_and_validated" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="241" assertions="15" time="0.176312"/>
+    <testcase name="test_universal_fees_can_be_saved_by_payment_roles" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="262" assertions="29" time="0.233445"/>
+    <testcase name="test_universal_fees_apply_to_manual_payments_and_preserve_booking_rates" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="274" assertions="18" time="0.216403"/>
+    <testcase name="test_percentage_fees_recalculate_after_promos_and_free_tickets_stay_free" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="295" assertions="11" time="0.214508"/>
+    <testcase name="test_tax_zero_is_hidden_and_midtrans_adds_only_processing_to_shared_fees" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="317" assertions="6" time="0.253257"/>
+    <testcase name="test_fee_migration_moves_legacy_platform_fee_without_changing_submitted_payments" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="330" assertions="6" time="0.133773"/>
+    <testcase name="test_ticket_list_hides_counts_until_ten_and_marks_last_ten_percent_as_urgent" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="359" assertions="23" time="0.233038"/>
+    <testcase name="test_memories_include_unpublished_past_events_but_never_removed_or_future_events" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="375" assertions="13" time="0.171374"/>
+    <testcase name="test_memory_upload_video_validation_removal_and_public_access" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="385" assertions="9" time="0.650121">
+      <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\TicketingTest::test_memory_upload_video_validation_removal_and_public_access
+Expected response status code [200] but received 500.
+Failed asserting that 200 is identical to 500.&#13;
+&#13;
+The following exception occurred during the last request:
+
+Symfony\Component\HttpFoundation\File\Exception\FileException: File must be readable. in C:\Users\awalukow\Documents\git\vos_dev\vendor\symfony\http-foundation\BinaryFileResponse.php:77
+Stack trace:
+#0 C:\Users\awalukow\Documents\git\vos_dev\vendor\symfony\http-foundation\BinaryFileResponse.php(52): Symfony\Component\HttpFoundation\BinaryFileResponse-&gt;setFile(Object(Symfony\Component\HttpFoundation\File\File), NULL, false, true)
+#1 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\ResponseFactory.php(204): Symfony\Component\HttpFoundation\BinaryFileResponse-&gt;__construct('C:\\Users\\awaluk...', 200, Array)
+#2 C:\Users\awalukow\Documents\git\vos_dev\routes\tickets.php(55): Illuminate\Routing\ResponseFactory-&gt;file('C:\\Users\\awaluk...', Array)
+#3 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\CallableDispatcher.php(40): Illuminate\Routing\RouteFileRegistrar-&gt;{closure}(Object(App\Models\TicketEvent), 0)
+#4 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Route.php(237): Illuminate\Routing\CallableDispatcher-&gt;dispatch(Object(Illuminate\Routing\Route), Object(Closure))
+#5 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Route.php(208): Illuminate\Routing\Route-&gt;runCallable()
+#6 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(798): Illuminate\Routing\Route-&gt;run()
+#7 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(141): Illuminate\Routing\Router-&gt;Illuminate\Routing\{closure}(Object(Illuminate\Http\Request))
+#8 C:\Users\awalukow\Documents\git\vos_dev\app\Http\Middleware\TicketLocale.php(11): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#9 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): App\Http\Middleware\TicketLocale-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#10 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Middleware\SubstituteBindings.php(50): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#11 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Routing\Middleware\SubstituteBindings-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#12 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken.php(78): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#13 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\VerifyCsrfToken-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#14 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\View\Middleware\ShareErrorsFromSession.php(49): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#15 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\View\Middleware\ShareErrorsFromSession-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#16 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php(121): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#17 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php(64): Illuminate\Session\Middleware\StartSession-&gt;handleStatefulRequest(Object(Illuminate\Http\Request), Object(Illuminate\Session\Store), Object(Closure))
+#18 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Session\Middleware\StartSession-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#19 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse.php(37): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#20 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#21 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Cookie\Middleware\EncryptCookies.php(67): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#22 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Cookie\Middleware\EncryptCookies-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#23 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(116): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#24 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(799): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#25 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(776): Illuminate\Routing\Router-&gt;runRouteWithinStack(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request))
+#26 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(740): Illuminate\Routing\Router-&gt;runRoute(Object(Illuminate\Http\Request), Object(Illuminate\Routing\Route))
+#27 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(729): Illuminate\Routing\Router-&gt;dispatchToRoute(Object(Illuminate\Http\Request))
+#28 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(190): Illuminate\Routing\Router-&gt;dispatch(Object(Illuminate\Http\Request))
+#29 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(141): Illuminate\Foundation\Http\Kernel-&gt;Illuminate\Foundation\Http\{closure}(Object(Illuminate\Http\Request))
+#30 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#31 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull.php(31): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#32 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#33 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#34 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TrimStrings.php(40): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#35 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\TrimStrings-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#36 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ValidatePostSize.php(27): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#37 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\ValidatePostSize-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#38 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance.php(86): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#39 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#40 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Http\Middleware\HandleCors.php(49): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#41 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Http\Middleware\HandleCors-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#42 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Http\Middleware\TrustProxies.php(39): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#43 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Http\Middleware\TrustProxies-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#44 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(116): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#45 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(165): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#46 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(134): Illuminate\Foundation\Http\Kernel-&gt;sendRequestThroughRouter(Object(Illuminate\Http\Request))
+#47 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\MakesHttpRequests.php(557): Illuminate\Foundation\Http\Kernel-&gt;handle(Object(Illuminate\Http\Request))
+#48 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\MakesHttpRequests.php(324): Illuminate\Foundation\Testing\TestCase-&gt;call('GET', 'http://localhos...', Array, Array, Array, Array)
+#49 C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php(395): Illuminate\Foundation\Testing\TestCase-&gt;get('http://localhos...')
+#50 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(1617): Tests\Feature\TicketingTest-&gt;test_memory_upload_video_validation_removal_and_public_access()
+#51 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(1223): PHPUnit\Framework\TestCase-&gt;runTest()
+#52 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestResult.php(729): PHPUnit\Framework\TestCase-&gt;runBare()
+#53 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(973): PHPUnit\Framework\TestResult-&gt;run(Object(Tests\Feature\TicketingTest))
+#54 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestSuite.php(685): PHPUnit\Framework\TestCase-&gt;run(Object(PHPUnit\Framework\TestResult))
+#55 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\TestRunner.php(651): PHPUnit\Framework\TestSuite-&gt;run(Object(PHPUnit\Framework\TestResult))
+#56 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\Command.php(146): PHPUnit\TextUI\TestRunner-&gt;run(Object(PHPUnit\Framework\TestSuite), Array, Array, true)
+#57 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\Command.php(99): PHPUnit\TextUI\Command-&gt;run(Array, true)
+#58 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\phpunit(107): PHPUnit\TextUI\Command::main()
+#59 {main}
+
+----------------------------------------------------------------------------------
+
+File must be readable.
+
+C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:123
+C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php:395</failure>
+    </testcase>
+    <testcase name="test_dashboard_reconciles_inventory_fees_expired_and_removed_orders" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="403" assertions="15" time="0.272821"/>
+    <testcase name="test_dashboard_top_five_referrals_rank_by_paid_seats" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="421" assertions="1" time="0.235314"/>
+    <testcase name="test_empty_dashboard_and_first_menu_are_available_to_ticket_staff" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="428" assertions="7" time="0.167142"/>
+    <testcase name="test_reports_and_memory_editing_enforce_staff_permissions" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="434" assertions="11" time="0.185090"/>
+    <testcase name="test_export_sheets_and_order_status_columns_follow_admin_roles" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="442" assertions="1" time="0.561405">
+      <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\TicketingTest::test_export_sheets_and_order_status_columns_follow_admin_roles
+Expected response status code [200] but received 500.
+Failed asserting that 200 is identical to 500.&#13;
+&#13;
+The following exception occurred during the last request:
+
+ErrorException: ZipArchive::close(): Renaming temporary file failed: Permission denied in C:\Users\awalukow\Documents\git\vos_dev\app\Services\TicketWorkbook.php:47
+Stack trace:
+#0 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Bootstrap\HandleExceptions.php(270): Illuminate\Foundation\Bootstrap\HandleExceptions-&gt;handleError(2, 'ZipArchive::clo...', 'C:\\Users\\awaluk...', 47)
+#1 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions-&gt;Illuminate\Foundation\Bootstrap\{closure}(2, 'ZipArchive::clo...', 'C:\\Users\\awaluk...', 47)
+#2 C:\Users\awalukow\Documents\git\vos_dev\app\Services\TicketWorkbook.php(47): ZipArchive-&gt;close()
+#3 C:\Users\awalukow\Documents\git\vos_dev\app\Http\Controllers\Portal\TicketReportController.php(51): App\Services\TicketWorkbook-&gt;download('laporan-kinerja...', Array)
+#4 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Controller.php(54): App\Http\Controllers\Portal\TicketReportController-&gt;exportDashboard(Object(Illuminate\Http\Request), Object(App\Services\TicketReports), Object(App\Services\TicketWorkbook))
+#5 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\ControllerDispatcher.php(43): Illuminate\Routing\Controller-&gt;callAction('exportDashboard', Array)
+#6 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Route.php(260): Illuminate\Routing\ControllerDispatcher-&gt;dispatch(Object(Illuminate\Routing\Route), Object(App\Http\Controllers\Portal\TicketReportController), 'exportDashboard')
+#7 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Route.php(205): Illuminate\Routing\Route-&gt;runController()
+#8 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(798): Illuminate\Routing\Route-&gt;run()
+#9 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(141): Illuminate\Routing\Router-&gt;Illuminate\Routing\{closure}(Object(Illuminate\Http\Request))
+#10 C:\Users\awalukow\Documents\git\vos_dev\app\Http\Middleware\TicketStaff.php(9): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#11 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): App\Http\Middleware\TicketStaff-&gt;handle(Object(Illuminate\Http\Request), Object(Closure), 'review')
+#12 C:\Users\awalukow\Documents\git\vos_dev\app\Http\Middleware\PortalAuthenticate.php(39): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#13 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): App\Http\Middleware\PortalAuthenticate-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#14 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Middleware\SubstituteBindings.php(50): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#15 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Routing\Middleware\SubstituteBindings-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#16 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken.php(78): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#17 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\VerifyCsrfToken-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#18 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\View\Middleware\ShareErrorsFromSession.php(49): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#19 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\View\Middleware\ShareErrorsFromSession-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#20 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php(121): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#21 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php(64): Illuminate\Session\Middleware\StartSession-&gt;handleStatefulRequest(Object(Illuminate\Http\Request), Object(Illuminate\Session\Store), Object(Closure))
+#22 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Session\Middleware\StartSession-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#23 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse.php(37): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#24 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#25 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Cookie\Middleware\EncryptCookies.php(67): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#26 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Cookie\Middleware\EncryptCookies-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#27 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(116): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#28 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(799): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#29 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(776): Illuminate\Routing\Router-&gt;runRouteWithinStack(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request))
+#30 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(740): Illuminate\Routing\Router-&gt;runRoute(Object(Illuminate\Http\Request), Object(Illuminate\Routing\Route))
+#31 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(729): Illuminate\Routing\Router-&gt;dispatchToRoute(Object(Illuminate\Http\Request))
+#32 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(190): Illuminate\Routing\Router-&gt;dispatch(Object(Illuminate\Http\Request))
+#33 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(141): Illuminate\Foundation\Http\Kernel-&gt;Illuminate\Foundation\Http\{closure}(Object(Illuminate\Http\Request))
+#34 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#35 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull.php(31): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#36 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#37 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#38 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TrimStrings.php(40): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#39 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\TrimStrings-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#40 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ValidatePostSize.php(27): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#41 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\ValidatePostSize-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#42 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance.php(86): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#43 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#44 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Http\Middleware\HandleCors.php(49): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#45 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Http\Middleware\HandleCors-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#46 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Http\Middleware\TrustProxies.php(39): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#47 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Http\Middleware\TrustProxies-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#48 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(116): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#49 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(165): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#50 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(134): Illuminate\Foundation\Http\Kernel-&gt;sendRequestThroughRouter(Object(Illuminate\Http\Request))
+#51 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\MakesHttpRequests.php(557): Illuminate\Foundation\Http\Kernel-&gt;handle(Object(Illuminate\Http\Request))
+#52 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\MakesHttpRequests.php(324): Illuminate\Foundation\Testing\TestCase-&gt;call('GET', 'http://localhos...', Array, Array, Array, Array)
+#53 C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php(448): Illuminate\Foundation\Testing\TestCase-&gt;get('http://localhos...')
+#54 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(1617): Tests\Feature\TicketingTest-&gt;test_export_sheets_and_order_status_columns_follow_admin_roles()
+#55 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(1223): PHPUnit\Framework\TestCase-&gt;runTest()
+#56 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestResult.php(729): PHPUnit\Framework\TestCase-&gt;runBare()
+#57 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(973): PHPUnit\Framework\TestResult-&gt;run(Object(Tests\Feature\TicketingTest))
+#58 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestSuite.php(685): PHPUnit\Framework\TestCase-&gt;run(Object(PHPUnit\Framework\TestResult))
+#59 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\TestRunner.php(651): PHPUnit\Framework\TestSuite-&gt;run(Object(PHPUnit\Framework\TestResult))
+#60 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\Command.php(146): PHPUnit\TextUI\TestRunner-&gt;run(Object(PHPUnit\Framework\TestSuite), Array, Array, true)
+#61 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\Command.php(99): PHPUnit\TextUI\Command-&gt;run(Array, true)
+#62 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\phpunit(107): PHPUnit\TextUI\Command::main()
+#63 {main}
+
+----------------------------------------------------------------------------------
+
+ZipArchive::close(): Renaming temporary file failed: Permission denied
+
+C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:123
+C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php:448</failure>
+    </testcase>
+    <testcase name="test_xlsx_reports_contain_all_rows_numeric_amounts_and_literal_customer_text" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="483" assertions="1" time="0.718001">
+      <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\TicketingTest::test_xlsx_reports_contain_all_rows_numeric_amounts_and_literal_customer_text
+Expected response status code [200] but received 500.
+Failed asserting that 200 is identical to 500.&#13;
+&#13;
+The following exception occurred during the last request:
+
+ErrorException: ZipArchive::close(): Renaming temporary file failed: Permission denied in C:\Users\awalukow\Documents\git\vos_dev\app\Services\TicketWorkbook.php:47
+Stack trace:
+#0 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Bootstrap\HandleExceptions.php(270): Illuminate\Foundation\Bootstrap\HandleExceptions-&gt;handleError(2, 'ZipArchive::clo...', 'C:\\Users\\awaluk...', 47)
+#1 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions-&gt;Illuminate\Foundation\Bootstrap\{closure}(2, 'ZipArchive::clo...', 'C:\\Users\\awaluk...', 47)
+#2 C:\Users\awalukow\Documents\git\vos_dev\app\Services\TicketWorkbook.php(47): ZipArchive-&gt;close()
+#3 C:\Users\awalukow\Documents\git\vos_dev\app\Http\Controllers\Portal\TicketReportController.php(68): App\Services\TicketWorkbook-&gt;download('transaksi-tiket...', Array)
+#4 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Controller.php(54): App\Http\Controllers\Portal\TicketReportController-&gt;exportOrders(Object(Illuminate\Http\Request), Object(App\Services\TicketReports), Object(App\Services\TicketWorkbook))
+#5 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\ControllerDispatcher.php(43): Illuminate\Routing\Controller-&gt;callAction('exportOrders', Array)
+#6 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Route.php(260): Illuminate\Routing\ControllerDispatcher-&gt;dispatch(Object(Illuminate\Routing\Route), Object(App\Http\Controllers\Portal\TicketReportController), 'exportOrders')
+#7 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Route.php(205): Illuminate\Routing\Route-&gt;runController()
+#8 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(798): Illuminate\Routing\Route-&gt;run()
+#9 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(141): Illuminate\Routing\Router-&gt;Illuminate\Routing\{closure}(Object(Illuminate\Http\Request))
+#10 C:\Users\awalukow\Documents\git\vos_dev\app\Http\Middleware\TicketStaff.php(9): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#11 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): App\Http\Middleware\TicketStaff-&gt;handle(Object(Illuminate\Http\Request), Object(Closure), 'review')
+#12 C:\Users\awalukow\Documents\git\vos_dev\app\Http\Middleware\PortalAuthenticate.php(39): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#13 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): App\Http\Middleware\PortalAuthenticate-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#14 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Middleware\SubstituteBindings.php(50): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#15 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Routing\Middleware\SubstituteBindings-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#16 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken.php(78): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#17 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\VerifyCsrfToken-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#18 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\View\Middleware\ShareErrorsFromSession.php(49): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#19 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\View\Middleware\ShareErrorsFromSession-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#20 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php(121): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#21 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php(64): Illuminate\Session\Middleware\StartSession-&gt;handleStatefulRequest(Object(Illuminate\Http\Request), Object(Illuminate\Session\Store), Object(Closure))
+#22 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Session\Middleware\StartSession-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#23 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse.php(37): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#24 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#25 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Cookie\Middleware\EncryptCookies.php(67): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#26 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Cookie\Middleware\EncryptCookies-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#27 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(116): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#28 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(799): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#29 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(776): Illuminate\Routing\Router-&gt;runRouteWithinStack(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request))
+#30 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(740): Illuminate\Routing\Router-&gt;runRoute(Object(Illuminate\Http\Request), Object(Illuminate\Routing\Route))
+#31 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(729): Illuminate\Routing\Router-&gt;dispatchToRoute(Object(Illuminate\Http\Request))
+#32 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(190): Illuminate\Routing\Router-&gt;dispatch(Object(Illuminate\Http\Request))
+#33 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(141): Illuminate\Foundation\Http\Kernel-&gt;Illuminate\Foundation\Http\{closure}(Object(Illuminate\Http\Request))
+#34 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#35 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull.php(31): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#36 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#37 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#38 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TrimStrings.php(40): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#39 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\TrimStrings-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#40 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ValidatePostSize.php(27): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#41 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\ValidatePostSize-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#42 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance.php(86): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#43 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#44 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Http\Middleware\HandleCors.php(49): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#45 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Http\Middleware\HandleCors-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#46 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Http\Middleware\TrustProxies.php(39): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#47 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Http\Middleware\TrustProxies-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#48 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(116): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#49 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(165): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#50 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(134): Illuminate\Foundation\Http\Kernel-&gt;sendRequestThroughRouter(Object(Illuminate\Http\Request))
+#51 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\MakesHttpRequests.php(557): Illuminate\Foundation\Http\Kernel-&gt;handle(Object(Illuminate\Http\Request))
+#52 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\MakesHttpRequests.php(324): Illuminate\Foundation\Testing\TestCase-&gt;call('GET', 'http://localhos...', Array, Array, Array, Array)
+#53 C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php(489): Illuminate\Foundation\Testing\TestCase-&gt;get('http://localhos...')
+#54 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(1617): Tests\Feature\TicketingTest-&gt;test_xlsx_reports_contain_all_rows_numeric_amounts_and_literal_customer_text()
+#55 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(1223): PHPUnit\Framework\TestCase-&gt;runTest()
+#56 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestResult.php(729): PHPUnit\Framework\TestCase-&gt;runBare()
+#57 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(973): PHPUnit\Framework\TestResult-&gt;run(Object(Tests\Feature\TicketingTest))
+#58 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestSuite.php(685): PHPUnit\Framework\TestCase-&gt;run(Object(PHPUnit\Framework\TestResult))
+#59 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\TestRunner.php(651): PHPUnit\Framework\TestSuite-&gt;run(Object(PHPUnit\Framework\TestResult))
+#60 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\Command.php(146): PHPUnit\TextUI\TestRunner-&gt;run(Object(PHPUnit\Framework\TestSuite), Array, Array, true)
+#61 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\Command.php(99): PHPUnit\TextUI\Command-&gt;run(Array, true)
+#62 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\phpunit(107): PHPUnit\TextUI\Command::main()
+#63 {main}
+
+----------------------------------------------------------------------------------
+
+ZipArchive::close(): Renaming temporary file failed: Permission denied
+
+C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:123
+C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php:489</failure>
+    </testcase>
+    <testcase name="test_confirmation_email_is_indonesian_with_original_embedded_logo" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="509" assertions="5" time="0.300365">
+      <error type="Symfony\Component\Mime\Exception\InvalidArgumentException">Tests\Feature\TicketingTest::test_confirmation_email_is_indonesian_with_original_embedded_logo
+Symfony\Component\Mime\Exception\InvalidArgumentException: Path "C:\Users\awalukow\Documents\git\vos_dev\public\assets/images/vos-logo.jpg" is not readable.
+
+C:\Users\awalukow\Documents\git\vos_dev\vendor\symfony\mime\Part\DataPart.php:65
+C:\Users\awalukow\Documents\git\vos_dev\vendor\symfony\mime\Email.php:536
+C:\Users\awalukow\Documents\git\vos_dev\vendor\symfony\mime\Email.php:396
+C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php:518</error>
+    </testcase>
+    <testsuite name="Tests\Feature\TicketingTest::test_midtrans_connection_reports_provider_results" tests="7" assertions="70" errors="0" warnings="0" failures="0" skipped="0" time="1.008218">
+      <testcase name="test_midtrans_connection_reports_provider_results with data set &quot;application not found&quot;" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="530" assertions="10" time="0.167840"/>
+      <testcase name="test_midtrans_connection_reports_provider_results with data set &quot;http not found&quot;" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="530" assertions="10" time="0.152527"/>
+      <testcase name="test_midtrans_connection_reports_provider_results with data set &quot;bad credentials&quot;" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="530" assertions="10" time="0.153299"/>
+      <testcase name="test_midtrans_connection_reports_provider_results with data set &quot;application auth failure&quot;" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="530" assertions="10" time="0.132283"/>
+      <testcase name="test_midtrans_connection_reports_provider_results with data set &quot;generic not found&quot;" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="530" assertions="10" time="0.112299"/>
+      <testcase name="test_midtrans_connection_reports_provider_results with data set &quot;provider outage&quot;" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="530" assertions="10" time="0.148241"/>
+      <testcase name="test_midtrans_connection_reports_provider_results with data set &quot;malformed response&quot;" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="530" assertions="10" time="0.141728"/>
+    </testsuite>
+    <testcase name="test_midtrans_connection_requires_admin_and_a_saved_key" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="552" assertions="6" time="0.177186"/>
+    <testcase name="test_midtrans_connection_handles_timeout_and_production_environment" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="561" assertions="3" time="0.146371"/>
+    <testcase name="test_midtrans_defaults_disabled_and_operator_permissions_are_enforced" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="571" assertions="12" time="0.129517"/>
+    <testcase name="test_midtrans_checkout_snapshots_fees_and_is_idempotent" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="586" assertions="14" time="0.146257"/>
+    <testcase name="test_midtrans_rejects_changed_quotes_and_foreign_customers" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="603" assertions="5" time="0.111670"/>
+    <testcase name="test_midtrans_dashboard_probe_requires_valid_signature_and_does_not_create_payments" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="610" assertions="9" time="0.100913"/>
+    <testcase name="test_midtrans_webhook_confirms_once_using_current_provider_status" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="628" assertions="6" time="0.110033"/>
+    <testcase name="test_midtrans_json_refresh_confirms_payment_without_webhook" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="642" assertions="7" time="0.148038"/>
+    <testcase name="test_midtrans_json_refresh_retries_after_network_failure_without_releasing_booking" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="655" assertions="6" time="0.160419"/>
+    <testcase name="test_midtrans_holds_inventory_until_verified_terminal_status" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="670" assertions="5" time="0.165289"/>
+    <testcase name="test_midtrans_amount_mismatch_does_not_issue_tickets" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="681" assertions="2" time="0.519077"/>
+    <testcase name="test_midtrans_admin_can_save_keys_without_exposing_or_flashing_them" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="688" assertions="9" time="0.125288"/>
+    <testcase name="test_midtrans_timeout_keeps_inventory_and_abandoned_checkout_expires_safely" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="698" assertions="8" time="0.440335"/>
+    <testcase name="test_midtrans_fees_apply_after_discounts_and_manual_proof_is_rejected" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="712" assertions="3" time="0.178647"/>
+    <testcase name="test_login_returns_to_concert_list_instead_of_saved_payment_page" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="723" assertions="8" time="0.137931"/>
+    <testcase name="test_registration_verification_returns_to_concert_list" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="730" assertions="9" time="0.168853"/>
+    <testcase name="test_unverified_login_returns_to_concert_list_after_otp" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="743" assertions="7" time="0.142528"/>
+    <testcase name="test_event_removal_hides_event_and_preserves_existing_bookings" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="752" assertions="16" time="0.211736"/>
+    <testcase name="test_qr_verification_is_private_to_owner_and_active_ticket_staff" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="770" assertions="24" time="0.242354"/>
+    <testcase name="test_all_promo_types_calculate_on_selected_tickets_and_never_add_inventory" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="788" assertions="17" time="0.170948"/>
+    <testcase name="test_promo_eligibility_expiry_and_minimum_are_enforced" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="802" assertions="22" time="0.277172"/>
+    <testcase name="test_single_use_and_daily_limits_hold_and_release_usage" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="823" assertions="6" time="0.186069"/>
+    <testcase name="test_promo_is_revalidated_when_submitting_payment_and_cannot_change_paid_order" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="839" assertions="8" time="0.186793"/>
+    <testcase name="test_promo_portal_permissions_bulk_customers_and_validation" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="853" assertions="15" time="0.233214"/>
+    <testcase name="test_daily_limit_resets_at_jakarta_midnight_and_deleted_paid_orders_still_count_for_single_use" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="866" assertions="3" time="0.193149"/>
+    <testcase name="test_numbered_promo_keeps_selected_seats_and_owner_only_mutations" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="883" assertions="9" time="0.183737"/>
+    <testcase name="test_promo_migration_grants_portal_menu_to_authorized_roles" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="895" assertions="6" time="0.151327"/>
+    <testcase name="test_removed_paid_booking_preserves_history_and_releases_numbered_seat" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="903" assertions="21" time="0.246629"/>
+    <testcase name="test_only_admins_can_remove_events_and_bookings" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="927" assertions="8" time="0.210990"/>
+    <testcase name="test_customer_cancellation_soft_removes_booking_and_keeps_event_inventory_locked" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="937" assertions="9" time="0.160871"/>
+    <testcase name="test_row_status_migration_defaults_existing_records_to_active" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="948" assertions="3" time="0.102024"/>
+    <testcase name="test_storefront_lists_both_seating_types_until_their_start_time" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="959" assertions="14" time="0.172626"/>
+    <testcase name="test_customer_guard_and_verification_are_separate_from_portal" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="979" assertions="6" time="0.144010"/>
+    <testcase name="test_registration_hashes_password_and_requires_email_otp" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="985" assertions="6" time="0.131127"/>
+    <testcase name="test_otp_is_hashed_limited_and_single_use" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="992" assertions="10" time="0.151786"/>
+    <testcase name="test_expired_otp_fails" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1000" assertions="1" time="0.166606"/>
+    <testcase name="test_free_inventory_cannot_be_oversold" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1004" assertions="3" time="0.133347"/>
+    <testcase name="test_numbered_seat_cannot_be_reserved_twice_or_from_another_event" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1009" assertions="1" time="0.151958"/>
+    <testcase name="test_expired_holds_release_inventory_and_reject_late_proof" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1016" assertions="3" time="0.155491"/>
+    <testcase name="test_review_keeps_inventory_then_rejection_releases_it" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1022" assertions="2" time="0.155588"/>
+    <testcase name="test_approval_is_single_use_and_qr_png_is_real" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1028" assertions="4" time="0.247015"/>
+    <testcase name="test_customer_cannot_read_another_booking_or_its_qr" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1035" assertions="2" time="0.111885"/>
+    <testcase name="test_ticket_operator_can_review_but_cannot_manage_configuration_or_otp" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1039" assertions="3" time="0.130476"/>
+    <testcase name="test_proof_upload_and_approval_http_flow" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1045" assertions="12" time="0.276011"/>
+    <testcase name="test_disabled_payment_method_cannot_accept_proof" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1054" assertions="1" time="0.141064"/>
+    <testcase name="test_layout_rejects_overlapping_seats" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1058" assertions="1" time="0.157858"/>
+    <testcase name="test_removing_used_venue_disables_events_but_preserves_bookings" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1062" assertions="18" time="0.194347"/>
+    <testcase name="test_gereja_layout_geometry_and_divider_round_trip" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1084" assertions="111" time="1.103146"/>
+    <testcase name="test_layout_rejects_divider_overlapping_a_seat" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1109" assertions="1" time="0.094856"/>
+    <testcase name="test_admin_event_creation_snapshots_venue_and_prices" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1113" assertions="7" time="0.162212"/>
+    <testcase name="test_all_customer_and_admin_pages_render" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1121" assertions="14" time="0.326039"/>
+    <testcase name="test_almost_sold_and_sold_out_badges_follow_inventory" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1131" assertions="3" time="0.186593"/>
+    <testcase name="test_forged_prices_use_server_prices" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1136" assertions="3" time="0.099450"/>
+    <testcase name="test_cancellation_releases_inventory" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1140" assertions="1" time="0.094613"/>
+    <testcase name="test_booked_event_changes_sale_price_but_keeps_inventory_and_order_prices" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1144" assertions="7" time="0.131409"/>
+    <testcase name="test_numbered_paid_tickets_keep_their_price_and_seat_after_price_changes" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1154" assertions="5" time="0.160500"/>
+    <testcase name="test_booked_event_rejects_invalid_prices_and_foreign_classes_atomically" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1168" assertions="16" time="0.159345"/>
+    <testcase name="test_deactivated_customer_cannot_access_tickets" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1178" assertions="2" time="0.125410"/>
+    <testcase name="test_venue_import_export_and_default_class_json" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1182" assertions="7" time="0.137841"/>
+    <testcase name="test_otp_cooldown_and_manual_generator" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1194" assertions="2" time="0.102148"/>
+    <testcase name="test_qris_requires_image_before_activation" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1199" assertions="3" time="0.093424"/>
+    <testcase name="test_asset_routes_support_root_front_controller" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1204" assertions="1" time="0.439263">
+      <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\TicketingTest::test_asset_routes_support_root_front_controller
+Expected response status code [200] but received 500.
+Failed asserting that 200 is identical to 500.&#13;
+&#13;
+The following exception occurred during the last request:
+
+Symfony\Component\HttpFoundation\File\Exception\FileException: File must be readable. in C:\Users\awalukow\Documents\git\vos_dev\vendor\symfony\http-foundation\BinaryFileResponse.php:77
+Stack trace:
+#0 C:\Users\awalukow\Documents\git\vos_dev\vendor\symfony\http-foundation\BinaryFileResponse.php(52): Symfony\Component\HttpFoundation\BinaryFileResponse-&gt;setFile(Object(Symfony\Component\HttpFoundation\File\File), NULL, false, true)
+#1 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\ResponseFactory.php(204): Symfony\Component\HttpFoundation\BinaryFileResponse-&gt;__construct('C:\\Users\\awaluk...', 200, Array)
+#2 C:\Users\awalukow\Documents\git\vos_dev\routes\tickets.php(27): Illuminate\Routing\ResponseFactory-&gt;file('C:\\Users\\awaluk...', Array)
+#3 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\CallableDispatcher.php(40): Illuminate\Routing\RouteFileRegistrar-&gt;{closure}()
+#4 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Route.php(237): Illuminate\Routing\CallableDispatcher-&gt;dispatch(Object(Illuminate\Routing\Route), Object(Closure))
+#5 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Route.php(208): Illuminate\Routing\Route-&gt;runCallable()
+#6 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(798): Illuminate\Routing\Route-&gt;run()
+#7 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(141): Illuminate\Routing\Router-&gt;Illuminate\Routing\{closure}(Object(Illuminate\Http\Request))
+#8 C:\Users\awalukow\Documents\git\vos_dev\app\Http\Middleware\TicketLocale.php(11): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#9 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): App\Http\Middleware\TicketLocale-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#10 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Middleware\SubstituteBindings.php(50): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#11 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Routing\Middleware\SubstituteBindings-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#12 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken.php(78): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#13 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\VerifyCsrfToken-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#14 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\View\Middleware\ShareErrorsFromSession.php(49): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#15 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\View\Middleware\ShareErrorsFromSession-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#16 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php(121): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#17 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php(64): Illuminate\Session\Middleware\StartSession-&gt;handleStatefulRequest(Object(Illuminate\Http\Request), Object(Illuminate\Session\Store), Object(Closure))
+#18 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Session\Middleware\StartSession-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#19 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse.php(37): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#20 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#21 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Cookie\Middleware\EncryptCookies.php(67): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#22 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Cookie\Middleware\EncryptCookies-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#23 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(116): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#24 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(799): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#25 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(776): Illuminate\Routing\Router-&gt;runRouteWithinStack(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request))
+#26 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(740): Illuminate\Routing\Router-&gt;runRoute(Object(Illuminate\Http\Request), Object(Illuminate\Routing\Route))
+#27 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Routing\Router.php(729): Illuminate\Routing\Router-&gt;dispatchToRoute(Object(Illuminate\Http\Request))
+#28 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(190): Illuminate\Routing\Router-&gt;dispatch(Object(Illuminate\Http\Request))
+#29 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(141): Illuminate\Foundation\Http\Kernel-&gt;Illuminate\Foundation\Http\{closure}(Object(Illuminate\Http\Request))
+#30 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#31 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull.php(31): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#32 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#33 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#34 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TrimStrings.php(40): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#35 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\TrimStrings-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#36 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ValidatePostSize.php(27): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#37 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\ValidatePostSize-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#38 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance.php(86): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#39 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#40 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Http\Middleware\HandleCors.php(49): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#41 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Http\Middleware\HandleCors-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#42 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Http\Middleware\TrustProxies.php(39): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#43 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Http\Middleware\TrustProxies-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#44 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(116): Illuminate\Pipeline\Pipeline-&gt;Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#45 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(165): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#46 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(134): Illuminate\Foundation\Http\Kernel-&gt;sendRequestThroughRouter(Object(Illuminate\Http\Request))
+#47 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\MakesHttpRequests.php(557): Illuminate\Foundation\Http\Kernel-&gt;handle(Object(Illuminate\Http\Request))
+#48 C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\MakesHttpRequests.php(324): Illuminate\Foundation\Testing\TestCase-&gt;call('GET', 'http://localhos...', Array, Array, Array, Array)
+#49 C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php(1205): Illuminate\Foundation\Testing\TestCase-&gt;get('http://localhos...')
+#50 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(1617): Tests\Feature\TicketingTest-&gt;test_asset_routes_support_root_front_controller()
+#51 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(1223): PHPUnit\Framework\TestCase-&gt;runTest()
+#52 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestResult.php(729): PHPUnit\Framework\TestCase-&gt;runBare()
+#53 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestCase.php(973): PHPUnit\Framework\TestResult-&gt;run(Object(Tests\Feature\TicketingTest))
+#54 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\Framework\TestSuite.php(685): PHPUnit\Framework\TestCase-&gt;run(Object(PHPUnit\Framework\TestResult))
+#55 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\TestRunner.php(651): PHPUnit\Framework\TestSuite-&gt;run(Object(PHPUnit\Framework\TestResult))
+#56 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\Command.php(146): PHPUnit\TextUI\TestRunner-&gt;run(Object(PHPUnit\Framework\TestSuite), Array, Array, true)
+#57 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\src\TextUI\Command.php(99): PHPUnit\TextUI\Command-&gt;run(Array, true)
+#58 C:\Users\awalukow\Documents\git\vos_dev\vendor\phpunit\phpunit\phpunit(107): PHPUnit\TextUI\Command::main()
+#59 {main}
+
+----------------------------------------------------------------------------------
+
+File must be readable.
+
+C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:123
+C:\Users\awalukow\Documents\git\vos_dev\vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php:1205</failure>
+    </testcase>
+    <testcase name="test_legacy_migration_endpoint_requires_admin_post" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1208" assertions="4" time="0.452109"/>
+    <testcase name="test_ticket_admin_uses_shared_portal_shell_and_sidebar" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1213" assertions="106" time="0.229087"/>
+    <testcase name="test_operator_sidebar_contains_payment_approvals_and_orders" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1229" assertions="8" time="0.104973"/>
+    <testcase name="test_ticket_navigation_obeys_portal_menu_permissions" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1235" assertions="2" time="0.130791"/>
+    <testcase name="test_language_defaults_to_indonesian_and_remembers_english" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1242" assertions="15" time="0.154920"/>
+    <testcase name="test_registration_stores_day_first_date_and_normalizes_phone" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1250" assertions="9" time="0.129640"/>
+    <testcase name="test_birth_date_rejects_invalid_iso_and_future_dates" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1259" assertions="7" time="0.131963"/>
+    <testcase name="test_portal_customer_edit_uses_day_first_date_and_normalized_phone" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1265" assertions="5" time="0.161049"/>
+    <testcase name="test_booking_summary_groups_classes_and_only_shows_assigned_seats" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1272" assertions="9" time="0.182485"/>
+    <testcase name="test_portal_orders_expose_paid_barcodes_only_to_authorized_staff" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1281" assertions="26" time="0.256231"/>
+    <testcase name="test_singer_management_permissions_menu_and_validation" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1301" assertions="14" time="0.182717"/>
+    <testcase name="test_staff_can_add_referrals_once_from_order_list" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1313" assertions="43" time="0.273310"/>
+    <testcase name="test_add_referral_rejects_invalid_singers_existing_snapshots_and_unauthorized_staff" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1333" assertions="21" time="0.180237"/>
+    <testcase name="test_staff_added_referral_survives_payment_submission" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1354" assertions="2" time="0.113888"/>
+    <testcase name="test_checkout_snapshots_referral_and_displays_it_in_orders" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1362" assertions="13" time="0.179649"/>
+    <testcase name="test_invalid_and_inactive_referrals_reject_proof_without_storing_files" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1376" assertions="9" time="0.178748"/>
+    <testcase name="test_booking_codes_and_ticket_labels_survive_payment_and_are_in_qr_views" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1388" assertions="17" time="0.399759"/>
+    <testcase name="test_booking_code_migration_backfills_existing_orders_without_changing_references" class="Tests\Feature\TicketingTest" classname="Tests.Feature.TicketingTest" file="C:\Users\awalukow\Documents\git\vos_dev\tests\Feature\TicketingTest.php" line="1406" assertions="5" time="0.122793"/>
+  </testsuite>
+</testsuites>

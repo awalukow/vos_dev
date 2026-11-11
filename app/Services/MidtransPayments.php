@@ -53,7 +53,7 @@ class MidtransPayments {
             $order->update(['status'=>'midtrans_pending','total'=>$total,'ticket_payment_method_id'=>$method->id,
                 'payment_snapshot'=>['name'=>$method->name,'type'=>'midtrans','subtotal'=>$subtotal,'fees'=>$fees],
                 'gateway_credentials'=>['server_key'=>$method->server_key,'environment'=>$method->environment],
-                'expires_at'=>now()->addMinutes(30),'portal_singer_id'=>$singer?->id,'singer_name'=>$singer?->name,'referral_code'=>$singer?->referral_code]);
+                'expires_at'=>now()->addMinutes(30),'portal_singer_id'=>$order->hasReferral()?$order->portal_singer_id:$singer?->id,'singer_name'=>$order->hasReferral()?$order->singer_name:$singer?->name,'referral_code'=>$order->hasReferral()?$order->referral_code:$singer?->referral_code]);
             return $order;
         },3);
         if ($order->gateway_url) return $order->gateway_url;

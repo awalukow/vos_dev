@@ -19,6 +19,7 @@ class TicketSocialAuthTest extends TestCase
         config(['database.default'=>'sqlite', 'database.connections.sqlite.database'=>':memory:', 'cache.default'=>'array', 'session.driver'=>'array']);
         DB::purge('sqlite');
         (require database_path('migrations/2026_10_07_000001_create_ticketing_tables.php'))->up();
+        (require database_path('migrations/2026_10_19_000001_track_ticket_email_delivery.php'))->up();
         (require database_path('migrations/2026_10_12_000002_create_customer_social_accounts.php'))->up();
         foreach (['google','apple'] as $provider) config(['services.'.$provider=>[
             'enabled'=>true, 'client_id'=>'test-client', 'client_secret'=>'test-secret',

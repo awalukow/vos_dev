@@ -19,12 +19,18 @@ class TicketDelivery {
             return $code;
         });
     }
-    public function emailOtp(Customer $customer,string $code): bool {
+    public function emailOtp(Customer $customer,string $code,?string $recipient=null): bool {
+        $status=app(TicketEmailStatus::class);
+        $delivery=$status->start($customer,'verification',null,$recipient);
         try {
-            Mail::raw("Hello {$customer->name},\n\nYour VOS Tickets verification code is {$code}.\nIt expires in 10 minutes. Never share this code except on the VOS verification page.",fn($m)=>$m->to($customer->email)->subject('Verify your VOS Tickets email'));
+            Mail::raw("Hello {$customer->name},\n\nYour VOS Tickets verification code is {$code}.\nIt expires in 10 minutes. Never share this code except on the VOS verification page.",function ($m) use ($delivery) {
+                $m->to($delivery->recipient)->subject('Verify your VOS Tickets email');
+                $m->getSymfonyMessage()->getHeaders()->addIdHeader('Message-ID',$delivery->message_id);
+                if ($address=config('ticket_email.bounce_address')) $m->returnPath($address);
+            });
             return true;
         } catch (\Throwable $e) {
-            report($e); return false;
+            report($e); $status->fail($delivery,$e->getMessage()); return false;
         }
     }
     public function verifyOtp(Customer $customer,string $code): bool {
@@ -55,8 +61,12 @@ class TicketDelivery {
     public function tickets(TicketOrder $order): bool {
         $order->refresh()->load(['items','event','customer']);
         if ($order->RowStatus !== 0 || $order->status !== 'paid') return false;
+        $status=app(TicketEmailStatus::class);
+        $delivery=$status->start($order->customer,'tickets',$order->id);
         try {
-            Mail::send('tickets.emails.confirmed',['order'=>$order],function ($m) use ($order) {
+            Mail::send('tickets.emails.confirmed',['order'=>$order],function ($m) use ($order,$delivery) {
+                $m->getSymfonyMessage()->getHeaders()->addIdHeader('Message-ID',$delivery->message_id);
+                if ($address=config('ticket_email.bounce_address')) $m->returnPath($address);
                 $m->to($order->customer->email)->subject('Tiket Anda · '.$order->event->title);
                 $m->attachData($this->qr(route('tickets.receipt',$order->reference),$order->booking_code),'booking-qr.png',['mime'=>'image/png']);
                 foreach ($order->items as $index=>$item) {
@@ -65,6 +75,6 @@ class TicketDelivery {
             });
             $order->update(['tickets_emailed_at'=>now()]);
             return true;
-        } catch (\Throwable $e) { report($e); return false; }
+        } catch (\Throwable $e) { report($e); $status->fail($delivery,$e->getMessage()); return false; }
     }
 }

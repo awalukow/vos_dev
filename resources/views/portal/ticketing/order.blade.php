@@ -2,6 +2,7 @@
 @section('ticket-page-title','Order Details')
 @section('ticket-content')
 @include('tickets._promo-summary')
+@include('portal.ticketing._email-issue',['customer'=>$order->customer])
 <a href="{{ route('portal.ticketing.orders') }}">← Order List</a>
 <div class="page-head"><h1 class="admin-title">{{ $order->event->title }}</h1><p>{{ $order->customer->name }} · {{ $order->customer->email }}</p><p>Booking code: <strong>{{ $order->booking_code }}</strong><br>Reference: {{ $order->reference }}<br>Referral: {{ $order->singer_name ?? "—" }} @if($order->referral_code)({{ $order->referral_code }})@endif</p><span class="badge">{{ str_replace('_',' ',$order->status==='awaiting_payment' && $order->expires_at?->isPast()?'expired':$order->status) }}</span></div>
 <section class="panel"><h2>Booking details</h2>@include('tickets._booking-items')

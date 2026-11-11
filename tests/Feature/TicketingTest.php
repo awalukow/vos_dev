@@ -17,6 +17,7 @@ class TicketingTest extends TestCase {
         Schema::create('portal_users',function(Blueprint $t){$t->id();$t->string('name');$t->string('username');$t->string('email');$t->string('password');$t->boolean('is_active')->default(true);$t->boolean('is_password_flushed')->default(false);$t->rememberToken();$t->softDeletes();$t->timestamps();});
         Schema::create('portal_user_roles',function(Blueprint $t){$t->id();$t->unsignedBigInteger('portal_user_id');$t->unsignedBigInteger('role_id');$t->timestamps();});
         (require database_path('migrations/2026_10_07_000001_create_ticketing_tables.php'))->up();
+        (require database_path('migrations/2026_10_19_000001_track_ticket_email_delivery.php'))->up();
         (require database_path('migrations/2026_10_08_000001_add_ticket_event_layout_dividers.php'))->up();
         (require database_path('migrations/2026_10_11_000002_add_ticket_event_maps_url.php'))->up();
         Schema::create('portal_menus', function(Blueprint $t) {
@@ -45,6 +46,150 @@ class TicketingTest extends TestCase {
         (require database_path('migrations/2026_10_09_000002_add_concert_memories_and_dashboard.php'))->up();
         if ($this->getName()!=='test_fee_migration_moves_legacy_platform_fee_without_changing_submitted_payments') (require database_path('migrations/2026_10_11_000001_add_universal_ticket_fees.php'))->up();
     }
+    public function test_email_bounce_is_correlated_deduplicated_and_does_not_change_orders(): void {
+        $customer=$this->customer();
+        $order=$this->reserve($this->event(),$customer); $order->update(['status'=>'paid']);
+        $status=app(\App\Services\TicketEmailStatus::class);
+        $delivery=$status->start($customer,'verification');
+        $raw="Content-Type: multipart/report; boundary=report\r\n\r\n--report\r\nContent-Type: text/plain\r\n\r\nFailed\r\n--report\r\nContent-Type: message/delivery-status\r\n\r\nReporting-MTA: dns; example.test\r\n\r\nFinal-Recipient: rfc822; {$customer->email}\r\nAction: failed\r\nStatus: 5.7.1\r\nDiagnostic-Code: smtp; 550 IP blocked S3150\r\n continued detail\r\n\r\n--report\r\nContent-Type: text/rfc822-headers\r\n\r\nMessage-ID: <{$delivery->message_id}>\r\n\r\n--report--\r\n";
+        $this->assertSame(1,$status->ingest($raw));
+        $this->assertNotNull($customer->fresh()->email_issue_at);
+        $this->assertSame('paid',$order->fresh()->status);
+        $this->assertStringContainsString('550 IP blocked S3150 continued detail',$delivery->fresh()->error_detail);
+        $status->resolve($customer->fresh());
+        $status->ingest($raw);
+        $this->assertNull($customer->fresh()->email_issue_at);
+        $this->assertSame(1,\App\Models\TicketEmailDelivery::count());
+        $this->assertSame(0,$status->ingest(str_replace($delivery->message_id,'unknown@example.test',$raw)));
+        $this->assertSame(0,$status->ingest(str_replace($customer->email,'someone@example.test',$raw)));
+        $this->assertSame(0,$status->ingest(str_replace('Action: failed','Action: delivered',$raw)));
+    }
+
+    public function test_payment_email_status_does_not_claim_delivery_after_a_bounce(): void {
+        $customer=$this->customer(); $order=$this->reserve($this->event(),$customer);
+        $order->update(['status'=>'paid','reviewed_at'=>now(),'tickets_emailed_at'=>now()]);
+        $status=app(\App\Services\TicketEmailStatus::class);
+        $delivery=$status->start($customer,'tickets',$order->id);
+        $this->assertSame('Submitted to mail server — delivery unconfirmed',$order->fresh()->email_delivery_status);
+        $status->fail($delivery,'550 S3150 blocked');
+        foreach (['administrator','adm2','ticket_operator'] as $role) {
+            $this->actingAs($this->staff($role),'portal')->get(route('portal.ticketing.payments'))->assertOk()
+                ->assertSee('Email issue')->assertDontSee('<div class="tiny">Sent</div>',false)
+                ->assertDontSee('Submitted to mail server');
+        }
+        $status->resolve($customer->fresh());
+        $this->assertSame('Delivery failed — resend needed',$order->fresh()->email_delivery_status);
+        $status->start($customer,'tickets',$order->id);
+        $this->assertSame('Submitted to mail server — delivery unconfirmed',$order->fresh()->email_delivery_status);
+        $this->assertNotNull($order->fresh()->tickets_emailed_at);
+        $this->assertSame('paid',$order->fresh()->status);
+    }
+
+    public function test_resend_confirmation_describes_submission_only(): void {
+        $order=$this->reserve($this->event()); $order->update(['status'=>'paid']);
+        $delivery=\Mockery::mock(TicketDelivery::class);
+        $delivery->shouldReceive('tickets')->once()->andReturn(true);
+        $this->app->instance(TicketDelivery::class,$delivery);
+        $this->actingAs($this->staff(),'portal')->post(route('portal.ticketing.resend',$order))
+            ->assertSessionHas('success','Ticket email submitted to the mail server; delivery is not confirmed.');
+    }
+
+    public function test_late_bounce_for_previous_address_does_not_reopen_issue(): void {
+        $customer=$this->customer(); $status=app(\App\Services\TicketEmailStatus::class);
+        $delivery=$status->start($customer,'verification');
+        $customer->update(['email'=>'replacement@example.test']);
+        $status->fail($delivery,'Late failure for old address');
+        $this->assertNull($customer->fresh()->email_issue_at);
+        $this->assertNotNull($delivery->fresh()->resolved_at);
+    }
+
+    public function test_smtp_failure_records_customer_issue(): void {
+        $customer=$this->customer();
+        Mail::shouldReceive('raw')->once()->andThrow(new \RuntimeException('550 blocked S3150'));
+        $this->assertFalse(app(TicketDelivery::class)->emailOtp($customer,'123456'));
+        $this->assertNotNull($customer->fresh()->email_issue_at);
+        $this->assertSame('550 blocked S3150',$customer->emailFailures()->first()->error_detail);
+    }
+
+    public function test_email_failure_details_are_only_rendered_for_admin_roles(): void {
+        $customer=$this->customer(); $status=app(\App\Services\TicketEmailStatus::class);
+        $status->fail($status->start($customer,'verification'),'<script>alert(1)</script> PRIVATE SMTP DETAIL');
+        foreach (['administrator','adm2','ticket_operator'] as $role) {
+            $this->actingAs($this->staff($role),'portal');
+            $html=view('portal.ticketing._email-issue',['customer'=>$customer->fresh()])->render();
+            if ($role==='ticket_operator') {
+                $this->assertStringContainsString('Email Issue, ask user to confirm a new email and notify administrator',$html);
+                $this->assertStringNotContainsString('PRIVATE SMTP DETAIL',$html);
+            } else {
+                $this->assertStringContainsString('PRIVATE SMTP DETAIL',$html);
+                $this->assertStringNotContainsString('<script>alert(1)</script>',$html);
+            }
+        }
+        $this->actingAs($customer->fresh(),'customer')->get(route('tickets.email.edit'))
+            ->assertOk()->assertSee("We're unable to confirm your email.",false)->assertDontSee('PRIVATE SMTP DETAIL');
+    }
+
+    public function test_change_email_requires_verification_and_preserves_history(): void {
+        $customer=$this->customer(false); $old=$customer->email;
+        $status=app(\App\Services\TicketEmailStatus::class);
+        $failure=$status->start($customer,'verification'); $status->fail($failure,'550 blocked');
+        $code=null;
+        Mail::shouldReceive('raw')->once()->andReturnUsing(function ($body,$callback) use (&$code) {
+            preg_match('/code is (\d{6})/',$body,$m); $code=$m[1];
+            $message=new \Illuminate\Mail\Message(new \Symfony\Component\Mime\Email());
+            $callback($message);
+            $this->assertSame('new@example.test',$message->getSymfonyMessage()->getTo()[0]->getAddress());
+            $this->assertNotNull($message->getSymfonyMessage()->getHeaders()->get('Message-ID'));
+        });
+        $this->actingAs($customer,'customer')->post(route('tickets.email.send'),['email'=>'NEW@example.test'])->assertSessionHasNoErrors();
+        $this->assertSame($old,$customer->fresh()->email);
+        $this->assertNotNull($customer->fresh()->email_issue_at);
+        $this->post(route('tickets.email.confirm'),['otp'=>$code])->assertRedirect(route('tickets.orders'));
+        $this->assertSame('new@example.test',$customer->fresh()->email);
+        $this->assertNotNull($customer->fresh()->email_verified_at);
+        $this->assertNull($customer->fresh()->email_issue_at);
+        $this->assertNotNull($failure->fresh()->resolved_at);
+        $this->post(route('tickets.email.confirm'),['otp'=>$code])->assertSessionHasErrors('otp');
+    }
+
+    public function test_email_change_rejects_guests_duplicates_expiry_and_exhausted_codes(): void {
+        $this->get(route('tickets.email.edit'))->assertForbidden();
+        $customer=$this->customer(); $other=$this->customer();
+        $this->actingAs($customer,'customer')->post(route('tickets.email.send'),['email'=>$other->email])->assertSessionHasErrors('email');
+        $customer->update(['pending_email'=>'new@example.test','pending_email_otp_hash'=>Hash::make('123456'),'pending_email_otp_expires_at'=>now()->subMinute()]);
+        $this->post(route('tickets.email.confirm'),['otp'=>'123456'])->assertSessionHasErrors('otp');
+        $customer->update(['pending_email_otp_expires_at'=>now()->addMinutes(10),'pending_email_otp_attempts'=>5]);
+        $this->post(route('tickets.email.confirm'),['otp'=>'123456'])->assertSessionHasErrors('otp');
+        $this->assertNotSame('new@example.test',$customer->fresh()->email);
+    }
+
+    public function test_encoded_bounce_parts_and_multiple_recipients_are_isolated(): void {
+        $customer=$this->customer(); $status=app(\App\Services\TicketEmailStatus::class);
+        $delivery=$status->start($customer,'verification');
+        $report="Final-Recipient: rfc822; unrelated@example.test\r\nAction: failed\r\nStatus: 5.1.1\r\n\r\nFinal-Recipient: rfc822; {$customer->email}\r\nAction: delayed\r\nStatus: 4.7.1\r\nDiagnostic-Code: smtp; 451 temporary failure";
+        $raw="Content-Type: multipart/report;\r\n boundary=\"report\"\r\n\r\n--report\r\nContent-Type: message/delivery-status\r\nContent-Transfer-Encoding: base64\r\n\r\n".base64_encode($report)."\r\n--report\r\nContent-Type: message/rfc822\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n".quoted_printable_encode("Message-ID: <{$delivery->message_id}>\r\n\r\nOriginal message")."\r\n--report--\r\n";
+        $this->assertSame(1,$status->ingest($raw));
+        $this->assertStringContainsString('451 temporary failure',$delivery->fresh()->error_detail);
+        $this->assertStringNotContainsString('unrelated@example.test',$delivery->fresh()->error_detail);
+    }
+
+    public function test_bounced_orders_show_correct_role_messages(): void {
+        $customer=$this->customer(); $order=$this->reserve($this->event(),$customer);
+        $status=app(\App\Services\TicketEmailStatus::class);
+        $status->fail($status->start($customer,'tickets',$order->id),'PRIVATE ERROR S3150');
+        foreach (['administrator','adm2','ticket_operator'] as $role) {
+            $this->actingAs($this->staff($role),'portal');
+            foreach (['portal.ticketing.orders'=>[],'portal.ticketing.orders.show'=>[$order]] as $route=>$params) {
+                $response=$this->get(route($route,$params))->assertOk();
+                if ($role==='ticket_operator') $response->assertSee('Email Issue, ask user to confirm a new email and notify administrator')->assertDontSee('PRIVATE ERROR S3150');
+                else $response->assertSee('PRIVATE ERROR S3150');
+            }
+        }
+        $this->actingAs($customer->fresh(),'customer')->get(route('tickets.order',$order))->assertOk()
+            ->assertSee("We're unable to confirm your email.",false)->assertDontSee('PRIVATE ERROR S3150');
+    }
+
+
     private function customer(bool $verified=true): Customer {
         return Customer::create(['name'=>'Test Listener','dob'=>'1995-01-01','email'=>uniqid().'@example.test','phone'=>'+628123456789','password'=>Hash::make('StrongPass123!'),'email_verified_at'=>$verified?now():null]);
     }
@@ -293,6 +438,47 @@ class TicketingTest extends TestCase {
         $past=$this->event(); $past->update(['starts_at'=>now()->subDay()]);
         $this->actingAs($this->staff('ticket_operator'),'portal')->post(route('portal.ticketing.events.memories.save',$past),[])->assertForbidden();
         $this->get(route('portal.ticketing.events.memories',$past))->assertForbidden();
+    }
+    public function test_export_sheets_and_order_status_columns_follow_admin_roles(): void {
+        $event=$this->event();
+        $order=$this->reserve($event);
+        foreach (['administrator','adm2','ticket_operator'] as $role) {
+            $isAdmin=$role!=='ticket_operator';
+            $this->actingAs($this->staff($role),'portal');
+            $response=$this->get(route('portal.ticketing.dashboard.export'))->assertOk()->assertDownload();
+            $path=$response->baseResponse->getFile()->getPathname();
+            $zip=new \ZipArchive;
+            $this->assertTrue($zip->open($path));
+            try {
+                $workbook=simplexml_load_string($zip->getFromName('xl/workbook.xml'));
+                $names=[];
+                foreach ($workbook->sheets->sheet as $sheet) $names[]=(string)$sheet['name'];
+                $this->assertSame($isAdmin?['Ringkasan laporan','Kinerja konser','Top 5 referral','Status pesanan']:['Report','Top 5 referral'],$names);
+            } finally { $zip->close(); unlink($path); }
+
+            $response=$this->get(route('portal.ticketing.orders.export'))->assertOk()->assertDownload();
+            $path=$response->baseResponse->getFile()->getPathname();
+            $this->assertTrue($zip->open($path));
+            try {
+                $xml=simplexml_load_string($zip->getFromName('xl/worksheets/sheet2.xml'));
+                $headers=[];
+                foreach ($xml->sheetData->row[0]->c as $cell) $headers[]=(string)$cell->is->t;
+                $this->assertSame($isAdmin,in_array('RowStatus pesanan',$headers,true));
+                $this->assertSame($isAdmin,in_array('RowStatus konser',$headers,true));
+                $this->assertCount($isAdmin?29:27,$headers);
+                $cells=$xml->sheetData->row[1]->c;
+                $this->assertCount(count($headers),$cells);
+                $this->assertSame($order->booking_code,(string)$cells[0]->is->t);
+                $this->assertSame('1',(string)$cells[array_search('Jumlah tiket',$headers,true)]->v);
+                foreach (['Harga awal','Diskon','Nilai tiket','Biaya pemrosesan','Biaya platform','Pajak','Total tagihan'] as $header) {
+                    $cell=$cells[array_search($header,$headers,true)];
+                    $this->assertSame('2',(string)$cell['s']);
+                    $this->assertSame('n',(string)$cell['t']);
+                }
+                $this->assertSame((string)$order->total,(string)$cells[array_search('Total tagihan',$headers,true)]->v);
+                $this->assertSame('0',(string)$cells[array_search('Jumlah tiket',$headers,true)]['s']);
+            } finally { $zip->close(); unlink($path); }
+        }
     }
     public function test_xlsx_reports_contain_all_rows_numeric_amounts_and_literal_customer_text(): void {
         $event=$this->event('free',40); $event->update(['title'=>'=Untrusted <concert>']);
@@ -1124,6 +1310,55 @@ class TicketingTest extends TestCase {
         $this->assertFalse($singer->fresh()->active);
         $this->get(route('portal.singers.index'))->assertOk()->assertSee('Maya Updated');
     }
+    public function test_staff_can_add_referrals_once_from_order_list(): void {
+        $singer=\App\Models\PortalSinger::create(['name'=>'Maya','referral_code'=>'MAYA01','active'=>true]);
+        foreach (['administrator','adm2','ticket_operator'] as $role) {
+            $order=$this->reserve($this->event());
+            $order->update(['status'=>'paid']);
+            $before=$order->fresh()->getAttributes();
+            $staff=$this->staff($role);
+            $this->actingAs($staff,'portal')->get(route('portal.ticketing.orders',['q'=>$order->reference]))->assertOk()
+                ->assertSee('Add Referral')->assertSee(route('portal.ticketing.orders.referral',$order),false);
+            $this->post(route('portal.ticketing.orders.referral',$order),['singer_id'=>$singer->id])->assertSessionHasNoErrors()->assertRedirect();
+            $this->assertDatabaseHas('ticket_orders',['id'=>$order->id,'portal_singer_id'=>$singer->id,'singer_name'=>'Maya','referral_code'=>'MAYA01']);
+            $this->assertDatabaseHas('ticket_audit_logs',['action'=>'booking.referral_added','subject'=>$order->reference,'actor_id'=>$staff->id]);
+            foreach (['total','status','payment_snapshot'] as $field) $this->assertSame($before[$field],$order->fresh()->getAttributes()[$field]);
+            $this->get(route('portal.ticketing.orders',['q'=>$order->reference]))->assertSee('disabled style="opacity:.5;cursor:not-allowed" title="This booking already has a referral."',false)
+                ->assertDontSee(route('portal.ticketing.orders.referral',$order),false);
+            $this->post(route('portal.ticketing.orders.referral',$order),['singer_id'=>$singer->id])->assertSessionHasErrors('singer_id');
+        }
+        $this->assertSame(3,DB::table('ticket_audit_logs')->where('action','booking.referral_added')->count());
+    }
+
+    public function test_add_referral_rejects_invalid_singers_existing_snapshots_and_unauthorized_staff(): void {
+        $order=$this->reserve($this->event());
+        $singer=\App\Models\PortalSinger::create(['name'=>'Inactive','referral_code'=>'OFF','active'=>false]);
+        $this->actingAs($this->staff('ticket_operator'),'portal');
+        foreach ([null,'invalid',9999,$singer->id] as $id) {
+            $this->post(route('portal.ticketing.orders.referral',$order),['singer_id'=>$id])->assertSessionHasErrors('singer_id');
+            $this->assertFalse($order->fresh()->hasReferral());
+        }
+        $singer->update(['active'=>true]);
+        foreach ([['referral_code'=>'OLD'],['singer_name'=>'Former Singer'],['portal_singer_id'=>$singer->id]] as $snapshot) {
+            $order->update(['referral_code'=>null,'singer_name'=>null,'portal_singer_id'=>null]);
+            $order->update($snapshot);
+            $this->post(route('portal.ticketing.orders.referral',$order),['singer_id'=>$singer->id])->assertSessionHasErrors('singer_id');
+        }
+        $order->update(['referral_code'=>null,'singer_name'=>null,'portal_singer_id'=>null]);
+        $this->actingAs($this->staff('pengurus'),'portal')->post(route('portal.ticketing.orders.referral',$order),['singer_id'=>$singer->id])->assertForbidden();
+        $this->assertFalse($order->fresh()->hasReferral());
+        $order->update(['RowStatus'=>-1]);
+        $this->actingAs($this->staff(),'portal')->post(route('portal.ticketing.orders.referral',$order),['singer_id'=>$singer->id])->assertNotFound();
+    }
+
+    public function test_staff_added_referral_survives_payment_submission(): void {
+        $order=$this->reserve($this->event());
+        $singer=\App\Models\PortalSinger::create(['name'=>'Maya','referral_code'=>'MAYA01','active'=>true]);
+        $this->actingAs($this->staff('ticket_operator'),'portal')->post(route('portal.ticketing.orders.referral',$order),['singer_id'=>$singer->id])->assertSessionHasNoErrors();
+        app(TicketBooking::class)->submitProof($order,TicketPaymentMethod::where('type','transfer')->first(),'proof.jpg');
+        $this->assertDatabaseHas('ticket_orders',['id'=>$order->id,'status'=>'payment_review','portal_singer_id'=>$singer->id,'singer_name'=>'Maya','referral_code'=>'MAYA01']);
+    }
+
     public function test_checkout_snapshots_referral_and_displays_it_in_orders(): void {
         $singer=\App\Models\PortalSinger::create(['name'=>'Maya','referral_code'=>'MAYA01','active'=>true]);
         $c=$this->customer(); $order=$this->reserve($this->event(),$c);

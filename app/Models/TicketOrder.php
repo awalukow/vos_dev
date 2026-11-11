@@ -24,8 +24,17 @@ class TicketOrder extends Model {
     protected $casts = ['customer_id'=>'integer','ticket_event_id'=>'integer','total'=>'integer','discount'=>'integer','fee_settings'=>'array','promo_snapshot'=>'array','promo_applied_at'=>'datetime','expires_at'=>'datetime','proof_uploaded_at'=>'datetime','reviewed_at'=>'datetime','tickets_emailed_at'=>'datetime','payment_snapshot'=>'array'];
     public function getRouteKeyName() { return 'reference'; }
     public function customer() { return $this->belongsTo(Customer::class); }
+    public function latestEmailDelivery() { return $this->hasOne(TicketEmailDelivery::class,'ticket_order_id')->latestOfMany(); }
+    public function getEmailDeliveryStatusAttribute(): string {
+        if ($this->customer?->email_issue_at) return 'Email issue';
+        if ($this->latestEmailDelivery?->failed_at) return 'Delivery failed — resend needed';
+        return $this->tickets_emailed_at ? 'Submitted to mail server — delivery unconfirmed' : 'Not submitted';
+    }
     public function event() { return $this->belongsTo(TicketEvent::class,'ticket_event_id')->withoutGlobalScope('active'); }
     public function items() { return $this->hasMany(TicketOrderItem::class)->orderBy('id'); }
     public function singer() { return $this->belongsTo(PortalSinger::class,'portal_singer_id'); }
+    public function hasReferral(): bool {
+        return $this->portal_singer_id !== null || filled($this->singer_name) || filled($this->referral_code);
+    }
     public function method() { return $this->belongsTo(TicketPaymentMethod::class,'ticket_payment_method_id'); }
 }

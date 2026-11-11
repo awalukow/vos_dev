@@ -65,7 +65,7 @@ class TicketBooking {
             if ($order->status !== 'awaiting_payment' || !$order->expires_at || $order->expires_at->isPast()) $this->fail('This reservation is no longer available. Please make a new booking.');
             $singer=$singerId ? PortalSinger::lockForUpdate()->find($singerId) : null;
             if ($singerId && (!$singer || !$singer->active)) throw ValidationException::withMessages(['singer_id'=>__('Please select an active singer.')]);
-            $order->fill(['portal_singer_id'=>$singer?->id,'referral_code'=>$singer?->referral_code,'singer_name'=>$singer?->name]);
+            $order->fill(['portal_singer_id'=>$order->hasReferral()?$order->portal_singer_id:$singer?->id,'referral_code'=>$order->hasReferral()?$order->referral_code:$singer?->referral_code,'singer_name'=>$order->hasReferral()?$order->singer_name:$singer?->name]);
             $expectedTotal=$order->total;
             app(TicketPromotions::class)->applyLocked($order,$order->promo_snapshot['code']??null);
             if ($order->total!==$expectedTotal) $this->fail('This promo has changed. Apply it again and check the updated total before paying.');
@@ -82,7 +82,7 @@ class TicketBooking {
             if ($order->total!==0) $this->fail('This booking requires payment.');
             $singer=$singerId ? PortalSinger::lockForUpdate()->find($singerId) : null;
             if ($singerId && (!$singer || !$singer->active)) $this->fail('Please select an active singer.');
-            $order->update(['status'=>'paid','expires_at'=>null,'reviewed_at'=>now(),'portal_singer_id'=>$singer?->id,'referral_code'=>$singer?->referral_code,'singer_name'=>$singer?->name]);
+            $order->update(['status'=>'paid','expires_at'=>null,'reviewed_at'=>now(),'portal_singer_id'=>$order->hasReferral()?$order->portal_singer_id:$singer?->id,'referral_code'=>$order->hasReferral()?$order->referral_code:$singer?->referral_code,'singer_name'=>$order->hasReferral()?$order->singer_name:$singer?->name]);
             TicketDelivery::audit('booking.free_confirmed',$order->reference,null,['customer_id'=>$order->customer_id]);
         },3);
     }
