@@ -171,6 +171,7 @@
     const canvasContext = canvas.getContext('2d', {willReadFrequently:true});
     let stream = null, detector = null, decoderMode = '', scanning = false, facing = 'environment', busy = false;
     let resultTimer = null, resultResetTimer = null, resultAnimationTimer = null, lastDetectedToken = '', lastDetectedAt = 0;
+    const recentCameraScans = new Map();
 
     function loadFallbackDecoder() {
         if (window.jsQR) return Promise.resolve();
@@ -383,7 +384,19 @@
                         lastDetectedAt = Date.now();
                         if (token !== lastDetectedToken) {
                             lastDetectedToken = token;
-                            await check(token);
+                            const lastScanAt = recentCameraScans.get(token) || 0;
+                            if (lastDetectedAt - lastScanAt >= 5000) {
+                                recentCameraScans.set(token, lastDetectedAt);
+                                if (recentCameraScans.size > 256) {
+                                    for (const [seenToken, seenAt] of recentCameraScans) {
+                                        if (lastDetectedAt - seenAt >= 30000) recentCameraScans.delete(seenToken);
+                                    }
+                                    while (recentCameraScans.size > 256) {
+                                        recentCameraScans.delete(recentCameraScans.keys().next().value);
+                                    }
+                                }
+                                await check(token);
+                            }
                         }
                     }
                 }
