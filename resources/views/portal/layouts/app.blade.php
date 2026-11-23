@@ -170,7 +170,7 @@
             transition: max-height .3s ease;
         }
 
-        .nav-children.open { max-height: 300px; }
+        .nav-children.open { max-height: 500px; }
 
         .nav-child-item {
             display: flex;

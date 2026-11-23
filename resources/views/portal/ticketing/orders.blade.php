@@ -7,7 +7,7 @@
 <thead><tr><th>Status</th><th>Event</th><th>Customer</th><th>Email</th><th>Booking code</th><th>Reference</th><th>Total</th><th>Referral</th><th>Open order</th></tr></thead>
 <tbody>@forelse($orders as $order)
 <tr><td><span class="badge">{{ str_replace('_',' ',$order->status==='awaiting_payment' && $order->expires_at?->isPast()?'expired':$order->status) }}</span></td><td>{{ $order->event->title }}</td><td>{{ $order->customer->name }}</td><td>{{ $order->customer->email }}@include('portal.ticketing._email-issue',['customer'=>$order->customer])</td><td><strong>{{ $order->booking_code }}</strong></td><td><code>{{ $order->reference }}</code></td><td>Rp {{ number_format($order->total,0,',','.') }}</td><td>{{ $order->singer_name ?? '—' }}@if($order->referral_code)<br><code>{{ $order->referral_code }}</code>@endif</td><td><a class="btn btn-secondary" href="{{ route('portal.ticketing.orders.show',$order) }}">Open order / tickets</a>
-@if(!$order->hasReferral() && $singers->isNotEmpty())
+@if(!$order->referralHasExpired() && !$order->hasReferral() && $singers->isNotEmpty())
 <form method="post" action="{{ route('portal.ticketing.orders.referral',$order) }}">
 @csrf
 <label class="tiny" for="referral-{{ $order->id }}">Singer referral</label>
@@ -18,7 +18,7 @@
 <button class="btn btn-secondary" type="submit">Add Referral</button>
 </form>
 @else
-<button class="btn btn-secondary" type="button" disabled style="opacity:.5;cursor:not-allowed" title="{{ $order->hasReferral() ? 'This booking already has a referral.' : 'No active singers available.' }}">Add Referral</button>
+<button class="btn btn-secondary" type="button" disabled style="opacity:.5;cursor:not-allowed" title="{{ $order->referralHasExpired() ? 'Expired bookings cannot receive a referral.' : ($order->hasReferral() ? 'This booking already has a referral.' : 'No active singers available.') }}">Add Referral</button>
 @endif
 @if(auth('portal')->user()->isAdministrator() || auth('portal')->user()->isAdm2())<form method="post" action="{{ route('portal.ticketing.orders.destroy',$order) }}" onsubmit="return confirm('Delete this booking? Its tickets will stop working and seats will be released. Payment history is preserved; this does not issue a refund.')">@csrf @method('DELETE')<button class="btn btn-danger" type="submit">Delete booking</button></form>@endif</td></tr>
 @empty<tr><td colspan="9">No orders found.</td></tr>@endforelse</tbody>

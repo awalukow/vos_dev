@@ -26,6 +26,7 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
     Route::get('/assets/Mitr-SemiBold.ttf',fn()=>response()->file(public_path('assets/fonts/mitr/Mitr-SemiBold.ttf'),['Content-Type'=>'font/ttf','Cache-Control'=>'public, max-age=31536000']))->name('brand-font');
     Route::get('/assets/tickets.css',fn()=>response()->file(public_path('css/tickets.css'),['Content-Type'=>'text/css','Cache-Control'=>'public, max-age=300']))->name('styles');
     Route::get('/assets/venue-designer.js',fn()=>response()->file(public_path('js/venue-designer.js'),['Content-Type'=>'application/javascript','Cache-Control'=>'public, max-age=300']))->name('designer');
+    Route::get('/assets/jsqr.js',fn()=>response()->file(public_path('js/vendor/jsQR.js'),['Content-Type'=>'application/javascript','Cache-Control'=>'public, max-age=86400']))->name('jsqr');
     Route::get('/',[Tickets::class,'index'])->name('events');
     Route::get('/login',[Auth::class,'loginForm'])->name('login');
     Route::get('/auth/complete', [\App\Http\Controllers\TicketSocialAuthController::class, 'profile'])->name('social.profile');
@@ -74,6 +75,8 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
     });
 });
 Route::prefix('portal/ticketing')->name('portal.ticketing.')->middleware('portal.auth')->group(function () {
+    Route::get('/checkin', [\App\Http\Controllers\Portal\TicketCheckinController::class, 'index'])->name('checkin');
+    Route::post('/checkin/scan', [\App\Http\Controllers\Portal\TicketCheckinController::class, 'scan'])->middleware('throttle:120,1')->name('checkin.scan');
     Route::middleware(TicketStaff::class.':fees')->group(function () {
         Route::get('/methods',[Admin::class,'methods'])->name('methods');
         Route::post('/fees',[Admin::class,'fees'])->name('fees.update');

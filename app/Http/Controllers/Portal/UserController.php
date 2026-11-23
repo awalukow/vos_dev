@@ -18,7 +18,7 @@ class UserController extends Controller
         if ($user->isAdministrator()) {
             return Role::orderByDesc('level')->pluck('name')->toArray();
         }
-        return ['pengurus', 'timker', 'singers'];
+        return ['pengurus', 'timker', 'singers', 'checkin_officer'];
     }
 
     public function index(Request $request)

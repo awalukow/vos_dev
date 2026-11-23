@@ -124,6 +124,7 @@ class TicketAdminController extends Controller {
         $data=$r->validate(['singer_id'=>'required|integer']);
         DB::transaction(function () use ($data,$order) {
             $locked=TicketOrder::lockForUpdate()->findOrFail($order->id);
+            if ($locked->referralHasExpired()) throw ValidationException::withMessages(['singer_id'=>'Expired bookings cannot receive a referral.']);
             if ($locked->hasReferral()) throw ValidationException::withMessages(['singer_id'=>'This booking already has a referral.']);
             $singer=\App\Models\PortalSinger::lockForUpdate()->find($data['singer_id']);
             if (!$singer || !$singer->active) throw ValidationException::withMessages(['singer_id'=>'Please select an active singer.']);

@@ -36,5 +36,10 @@ class TicketOrder extends Model {
     public function hasReferral(): bool {
         return $this->portal_singer_id !== null || filled($this->singer_name) || filled($this->referral_code);
     }
+    public function referralHasExpired(): bool {
+        return $this->status === 'expired'
+            || (in_array($this->status, ['awaiting_payment','midtrans_pending'], true)
+                && $this->expires_at && $this->expires_at->lessThanOrEqualTo(now()));
+    }
     public function method() { return $this->belongsTo(TicketPaymentMethod::class,'ticket_payment_method_id'); }
 }

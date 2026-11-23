@@ -1359,6 +1359,21 @@ class TicketingTest extends TestCase {
         $this->assertDatabaseHas('ticket_orders',['id'=>$order->id,'status'=>'payment_review','portal_singer_id'=>$singer->id,'singer_name'=>'Maya','referral_code'=>'MAYA01']);
     }
 
+    public function test_expired_bookings_cannot_receive_referrals(): void {
+        $singer=\App\Models\PortalSinger::create(['name'=>'Maya','referral_code'=>'MAYA01','active'=>true]);
+        $this->actingAs($this->staff('ticket_operator'),'portal');
+        foreach (['expired','awaiting_payment','midtrans_pending'] as $status) {
+            $order=$this->reserve($this->event());
+            $order->update(['status'=>$status,'expires_at'=>$status==='expired'?null:now()->subMinute()]);
+            $this->get(route('portal.ticketing.orders',['q'=>$order->reference]))->assertOk()
+                ->assertSee('disabled style="opacity:.5;cursor:not-allowed" title="Expired bookings cannot receive a referral."',false)
+                ->assertDontSee(route('portal.ticketing.orders.referral',$order),false);
+            $this->post(route('portal.ticketing.orders.referral',$order),['singer_id'=>$singer->id])->assertSessionHasErrors('singer_id');
+            $this->assertFalse($order->fresh()->hasReferral());
+        }
+        $this->assertSame(0,DB::table('ticket_audit_logs')->where('action','booking.referral_added')->count());
+    }
+
     public function test_checkout_snapshots_referral_and_displays_it_in_orders(): void {
         $singer=\App\Models\PortalSinger::create(['name'=>'Maya','referral_code'=>'MAYA01','active'=>true]);
         $c=$this->customer(); $order=$this->reserve($this->event(),$c);
