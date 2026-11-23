@@ -77,6 +77,7 @@ Route::prefix('tickets')->name('tickets.')->middleware(\App\Http\Middleware\Tick
 Route::prefix('portal/ticketing')->name('portal.ticketing.')->middleware('portal.auth')->group(function () {
     Route::get('/checkin', [\App\Http\Controllers\Portal\TicketCheckinController::class, 'index'])->name('checkin');
     Route::post('/checkin/scan', [\App\Http\Controllers\Portal\TicketCheckinController::class, 'scan'])->middleware('throttle:120,1')->name('checkin.scan');
+    Route::get('/checkin/log', [\App\Http\Controllers\Portal\TicketCheckinController::class, 'log'])->middleware('portal.role:administrator,ticket_operator')->name('checkin.log');
     Route::middleware(TicketStaff::class.':fees')->group(function () {
         Route::get('/methods',[Admin::class,'methods'])->name('methods');
         Route::post('/fees',[Admin::class,'fees'])->name('fees.update');

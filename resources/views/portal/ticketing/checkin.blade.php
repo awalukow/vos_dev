@@ -2,7 +2,7 @@
 @section('ticket-page-title', 'Check In')
 
 @section('ticket-content')
-<div class="checkin-page">
+<div class="checkin-page {{ $showLiveLog ? 'has-live-log' : '' }}">
     <div class="checkin-heading">
         <div><div class="eyebrow">Ticketing / Entrance</div><h1 class="admin-title">Ticket Check In</h1><p class="muted">Scan each guest’s ticket QR code. Valid tickets are checked in instantly.</p></div>
         <span class="connection-state" id="connection-state"><i></i><span>Ready to scan</span></span>
@@ -45,6 +45,15 @@
             <div class="result-footer" id="result-footer">Camera stays ready for the next guest.</div>
         </section>
     </div>
+
+    @if($showLiveLog)
+    <section class="checkin-log" aria-label="Recent ticket check ins">
+        <div class="checkin-log-heading"><strong>Recent check ins</strong><span>Live · refreshes automatically</span></div>
+        <div class="checkin-log-list" id="checkin-log-list" aria-live="polite" aria-relevant="additions text">
+            <div class="checkin-log-empty">Loading recent check ins…</div>
+        </div>
+    </section>
+    @endif
 </div>
 
 <style>
@@ -102,6 +111,19 @@
 .ticket-details dd { text-align:right;font-weight:600; }
 .ticket-class-badge { display:inline-flex;align-items:center;max-width:100%;padding:.18rem .55rem;border:1px solid rgba(200,169,110,.4);border-radius:999px;background:rgba(200,169,110,.12);color:var(--accent2);font-size:.82rem;line-height:1.25; }
 .result-footer { color:var(--text-dim);font-size:.76rem;margin-top:1.2rem; }
+.checkin-log { margin-top:1rem;padding:.8rem 1rem;border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface); }
+.checkin-log-heading { display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.4rem; }
+.checkin-log-heading strong { font-family:'Syne',sans-serif;font-size:.9rem; }
+.checkin-log-heading span,.checkin-log-empty { color:var(--text-muted);font-size:.72rem; }
+.checkin-log-list { display:grid;gap:.3rem; }
+.checkin-log-row { display:grid;grid-template-columns:minmax(120px,1fr) auto minmax(120px,1fr) auto;align-items:center;gap:.65rem;min-width:0;padding:.35rem .5rem;border-radius:6px;background:rgba(255,255,255,.025);font-size:.78rem; }
+.checkin-log-row.is-new { animation:checkin-log-arrive .6s ease-out; }
+.checkin-log-guest,.checkin-log-event { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.checkin-log-guest { font-weight:600; }
+.checkin-log-event { color:var(--text-muted); }
+.checkin-log-time { color:var(--text-muted);font-variant-numeric:tabular-nums; }
+.checkin-log-ticket { display:inline-flex;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:.12rem .45rem;border:1px solid rgba(200,169,110,.4);border-radius:999px;background:rgba(200,169,110,.12);color:var(--accent2);font-size:.7rem; }
+@keyframes checkin-log-arrive { from { background:rgba(34,197,94,.2);transform:translateY(-3px); } to { background:rgba(255,255,255,.025);transform:translateY(0); } }
 @media(max-width:800px) { .checkin-grid { grid-template-columns:1fr; } .result-panel { min-height:300px; } }
 @media(max-width:600px) {
     body:has(.checkin-page) { height:100vh; overflow:hidden; }
@@ -142,6 +164,16 @@
     .ticket-class-badge { padding:.12rem .4rem;font-size:.7rem; }
     .result-footer { display:none; }
     .result-panel:has(.ticket-details:not([hidden])) { align-content:center; }
+    .checkin-log { flex:0 0 92px;margin:0;padding:.4rem .5rem;overflow:hidden; }
+    .checkin-log-heading { margin-bottom:.25rem; }
+    .checkin-log-heading strong { font-size:.76rem; }
+    .checkin-log-heading span { font-size:.63rem; }
+    .checkin-log-list { gap:.18rem; }
+    .checkin-log-row { grid-template-columns:minmax(0,1fr) auto auto;gap:.35rem;padding:.16rem .3rem;font-size:.69rem; }
+    .checkin-log-event,.checkin-log-row:nth-child(n+4) { display:none; }
+    .checkin-log-ticket { max-width:90px;font-size:.62rem;padding:.07rem .3rem; }
+    .checkin-log-time { font-size:.64rem; }
+    .checkin-log-empty { font-size:.66rem; }
 }
 @media(max-width:600px) and (max-height:700px) {
     .camera-box { height:clamp(118px,20vh,155px); height:clamp(118px,20svh,155px); }
