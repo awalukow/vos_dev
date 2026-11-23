@@ -22,13 +22,13 @@
             </div>
             <p class="tiny muted camera-note">Camera access requires HTTPS and your permission. Keep this page open while scanning.</p>
 
-            <div class="manual-entry">
-                <label for="ticket-code">Enter a ticket code</label>
+            <details class="manual-entry">
+                <summary>Enter code manually</summary>
                 <form id="manual-form" class="manual-row">
                     <input id="ticket-code" name="token" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste a ticket QR link or code">
                     <button class="btn btn-secondary" type="submit">Check ticket</button>
                 </form>
-            </div>
+            </details>
         </section>
 
         <section class="result-panel" id="result-panel" data-kind="ready" aria-live="assertive" aria-atomic="true">
@@ -81,6 +81,13 @@
 .result-panel[data-kind="success"] { background:linear-gradient(145deg,rgba(34,197,94,.18),var(--surface) 65%);border-color:rgba(34,197,94,.55); }
 .result-panel[data-kind="used"] { background:linear-gradient(145deg,rgba(245,158,11,.17),var(--surface) 65%);border-color:rgba(245,158,11,.55); }
 .result-panel[data-kind="invalid"],.result-panel[data-kind="error"] { background:linear-gradient(145deg,rgba(239,68,68,.16),var(--surface) 65%);border-color:rgba(239,68,68,.5); }
+.result-panel.scan-update { animation: checkin-result-arrive .55s cubic-bezier(.2,.8,.2,1); }
+.result-panel.scan-update .result-symbol { animation: checkin-symbol-pop .55s cubic-bezier(.2,.8,.2,1); }
+.result-panel.result-clearing { animation: checkin-result-clear .2s ease-in forwards; }
+@keyframes checkin-result-arrive { 0% { transform:scale(.965); box-shadow:0 0 0 0 rgba(200,169,110,.42); } 55% { transform:scale(1.012); box-shadow:0 0 0 7px rgba(200,169,110,.16); } 100% { transform:scale(1); box-shadow:0 0 0 0 rgba(200,169,110,0); } }
+@keyframes checkin-symbol-pop { 0% { transform:scale(.72); } 70% { transform:scale(1.12); } 100% { transform:scale(1); } }
+@keyframes checkin-result-clear { to { opacity:0; transform:translateY(5px) scale(.99); } }
+@media(prefers-reduced-motion:reduce) { .result-panel.scan-update,.result-panel.scan-update .result-symbol,.result-panel.result-clearing { animation:none; } }
 .result-symbol { width:74px;height:74px;display:grid;place-items:center;border-radius:50%;font-size:2.5rem;color:var(--text-muted);background:var(--surface2);margin-bottom:1rem; }
 .result-panel[data-kind="success"] .result-symbol { color:#08150c;background:var(--success); }
 .result-panel[data-kind="used"] .result-symbol { color:#211606;background:var(--warning); }
@@ -95,7 +102,55 @@
 .ticket-details dd { text-align:right;font-weight:600; }
 .result-footer { color:var(--text-dim);font-size:.76rem;margin-top:1.2rem; }
 @media(max-width:800px) { .checkin-grid { grid-template-columns:1fr; } .result-panel { min-height:300px; } }
-@media(max-width:520px) { .checkin-heading { align-items:flex-start;flex-direction:column; } .camera-box { min-height:240px; } .manual-row { flex-direction:column; } .manual-row .btn { width:100%; } }
+@media(max-width:600px) {
+    body:has(.checkin-page) { height:100vh; overflow:hidden; }
+    .main-wrap:has(.checkin-page) { height:100%; min-height:0; }
+    body:has(.checkin-page) .page-content { flex:1 1 auto; min-height:0; overflow:hidden; padding:.45rem; }
+    .checkin-page { height:calc(100vh - var(--topbar-h) - .9rem); max-width:none; display:flex; flex-direction:column; gap:.45rem; }
+    @supports(height:100dvh) {
+        body:has(.checkin-page) { height:100dvh; }
+        .checkin-page { height:calc(100dvh - var(--topbar-h) - .9rem); }
+    }
+    .checkin-heading { flex:0 0 auto; align-items:center; flex-direction:row; gap:.5rem; margin:0; min-height:2.35rem; }
+    .checkin-heading .eyebrow,.checkin-heading p { display:none; }
+    .checkin-heading .admin-title { font-size:1.15rem; margin:0; }
+    .connection-state { padding:.35rem .6rem; font-size:.72rem; }
+    .checkin-grid { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:.45rem; }
+    .scanner-panel { flex:0 0 auto; padding:.55rem; }
+    .camera-box { min-height:0; height:clamp(132px,24vh,205px); height:clamp(132px,24svh,205px); aspect-ratio:auto; }
+    .camera-placeholder { gap:.25rem; padding:.7rem; font-size:.75rem; }
+    .camera-icon { font-size:1.8rem; }
+    .camera-placeholder strong { font-size:.85rem; }
+    .camera-actions { gap:.45rem; margin-top:.45rem; }
+    .camera-actions .btn { min-height:38px; flex:1; justify-content:center; padding:.4rem .6rem; }
+    .camera-note { display:none; }
+    .manual-entry { border:0; padding:0; margin:.35rem 0 0; }
+    .manual-entry summary { color:var(--text-muted); font-size:.75rem; padding:.25rem 0; cursor:pointer; }
+    .manual-row { display:flex; gap:.35rem; margin-top:.3rem; }
+    .manual-row input { min-width:0; padding:.5rem; font-size:.8rem; }
+    .manual-row .btn { padding:.45rem .55rem; font-size:.75rem; }
+    .result-panel { flex:1 1 auto; min-height:100px; padding:.65rem; display:grid; grid-template-columns:46px minmax(0,1fr); grid-template-rows:auto auto auto; column-gap:.6rem; row-gap:.1rem; align-content:center; justify-content:initial; text-align:left; }
+    .result-symbol { grid-column:1; grid-row:1 / span 3; width:44px; height:44px; font-size:1.55rem; margin:0; align-self:center; }
+    .result-kicker { grid-column:2; font-size:.61rem; letter-spacing:.1em; }
+    .result-panel h2 { grid-column:2; font-size:1.18rem; line-height:1.15; margin:0; }
+    .result-panel p { display:none; }
+    .ticket-details { grid-column:1 / -1; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.25rem .4rem; margin:.5rem 0 0; max-width:none; }
+    .ticket-details div { min-width:0; display:block; padding:.3rem .4rem; }
+    .ticket-details dt { font-size:.62rem; }
+    .ticket-details dd { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; font-size:.75rem; }
+    .result-footer { display:none; }
+    .result-panel:has(.ticket-details:not([hidden])) { align-content:center; }
+}
+@media(max-width:600px) and (max-height:700px) {
+    .camera-box { height:clamp(118px,20vh,155px); height:clamp(118px,20svh,155px); }
+    .scanner-panel { padding:.45rem; }
+    .result-panel { padding:.5rem; }
+}
+@media(max-width:380px) {
+    .connection-state { padding:.3rem .45rem; }
+    .checkin-heading .admin-title { font-size:1.05rem; }
+    .camera-box { height:clamp(118px,22vh,165px); height:clamp(118px,22svh,165px); }
+}
 </style>
 
 <script>
@@ -114,7 +169,8 @@
     const csrf = document.querySelector('meta[name="csrf-token"]').content;
     const canvas = document.createElement('canvas');
     const canvasContext = canvas.getContext('2d', {willReadFrequently:true});
-    let stream = null, detector = null, decoderMode = '', scanning = false, facing = 'environment', busy = false, lastAccepted = '';
+    let stream = null, detector = null, decoderMode = '', scanning = false, facing = 'environment', busy = false;
+    let resultTimer = null, resultResetTimer = null, resultAnimationTimer = null, lastDetectedToken = '', lastDetectedAt = 0;
 
     function loadFallbackDecoder() {
         if (window.jsQR) return Promise.resolve();
@@ -146,10 +202,35 @@
         document.getElementById('result-description').textContent = description;
         document.getElementById('result-footer').textContent = footer;
     }
+    function resetResult() {
+        clearTimeout(resultResetTimer);
+        clearTimeout(resultAnimationTimer);
+        resultResetTimer = null;
+        result.classList.remove('scan-update', 'result-clearing');
+        details.hidden = true;
+        show('ready','⌗','Waiting for a ticket','Ready when you are','The guest’s check in result will appear here.','Camera stays ready for the next guest.');
+    }
+    function showScanResult(kind, symbol, kicker, title, description, footer) {
+        clearTimeout(resultTimer);
+        clearTimeout(resultResetTimer);
+        clearTimeout(resultAnimationTimer);
+        if (!['success', 'used'].includes(kind)) details.hidden = true;
+        result.classList.remove('result-clearing', 'scan-update');
+        show(kind, symbol, kicker, title, description, footer);
+        void result.offsetWidth;
+        result.classList.add('scan-update');
+        resultAnimationTimer = setTimeout(() => result.classList.remove('scan-update'), 650);
+        resultTimer = setTimeout(() => {
+            result.classList.add('result-clearing');
+            resultResetTimer = setTimeout(resetResult, 220);
+        }, 5000);
+    }
     function stopCamera() {
         scanning = false;
         if (stream) stream.getTracks().forEach(track => track.stop());
         stream = null;
+        lastDetectedToken = '';
+        lastDetectedAt = 0;
         video.srcObject = null;
         box.classList.remove('is-live');
         placeholder.hidden = false;
@@ -170,12 +251,11 @@
     }
     async function check(value) {
         const token = extractToken(value);
-        if (!token) { show('invalid','×','Invalid code','Ticket code not recognized','Scan an individual ticket QR code, not the booking QR.','Ready for another scan.'); return; }
-        if (busy || token === lastAccepted) return;
+        if (!token) { showScanResult('invalid','×','Invalid code','Ticket code not recognized','Scan an individual ticket QR code, not the booking QR.','Ready for another scan.'); return; }
+        if (busy) return;
         busy = true;
         setState('checking','Checking ticket…');
         message.textContent = 'Checking ticket…';
-        details.hidden = true;
         try {
             const response = await fetch(@json(route('portal.ticketing.checkin.scan')), {
                 method:'POST', credentials:'same-origin', cache:'no-store',
@@ -186,23 +266,21 @@
             if (!response.ok) throw new Error('Could not reach the ticket service. Check your connection and scan again.');
             const data = await response.json();
             if (data.result === 'checked_in') {
-                lastAccepted = token;
                 fillDetails(data);
-                show('success','✓','Valid ticket','CHECKED IN',data.guest + ' is checked in.','Keep scanning; the camera is ready for the next guest.');
+                showScanResult('success','✓','Valid ticket','CHECKED IN',data.guest + ' is checked in.','Keep scanning; the camera is ready for the next guest.');
                 if (navigator.vibrate) navigator.vibrate(90);
             } else if (data.result === 'already_checked_in') {
-                lastAccepted = token;
                 fillDetails(data);
-                show('used','!','Ticket already used','ALREADY CHECKED IN',data.guest + ' was checked in at ' + data.checked_in_at + '.','This ticket cannot be checked in twice.');
+                showScanResult('used','!','Ticket already used','ALREADY CHECKED IN',data.guest + ' was checked in at ' + data.checked_in_at + '.','This ticket cannot be checked in twice.');
                 if (navigator.vibrate) navigator.vibrate([60,50,60]);
             } else {
-                show('invalid','×','Ticket rejected','NOT A VALID TICKET','This ticket is unpaid, invalid, or has been cancelled.','Ready for another scan.');
+                showScanResult('invalid','×','Ticket rejected','NOT A VALID TICKET','This ticket is unpaid, invalid, or has been cancelled.','Ready for another scan.');
                 if (navigator.vibrate) navigator.vibrate([120,50,120]);
             }
             setState(scanning ? 'scanning' : '', scanning ? 'Camera ready' : 'Ready to scan');
             message.textContent = '';
         } catch (error) {
-            show('error','!','Connection issue','Could not check ticket',error.message,'Check the connection, then scan again.');
+            showScanResult('error','!','Connection issue','Could not check ticket',error.message,'Check the connection, then scan again.');
             setState('', 'Connection issue');
             message.textContent = 'Connection issue';
         } finally {
@@ -301,7 +379,16 @@
                 }
                 if (rawValue) {
                     const token = extractToken(rawValue);
-                    if (token && token !== lastAccepted) await check(token);
+                    if (token) {
+                        lastDetectedAt = Date.now();
+                        if (token !== lastDetectedToken) {
+                            lastDetectedToken = token;
+                            await check(token);
+                        }
+                    }
+                }
+                if (Date.now() - lastDetectedAt > 900) {
+                    lastDetectedToken = '';
                 }
             } catch (_) { /* Wait for the next camera frame. */ }
         }
