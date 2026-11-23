@@ -38,7 +38,7 @@
             <p id="result-description">The guest’s check in result will appear here.</p>
             <dl class="ticket-details" id="ticket-details" hidden>
                 <div><dt>Guest</dt><dd id="guest-name"></dd></div>
-                <div><dt>Ticket</dt><dd id="ticket-class"></dd></div>
+                <div><dt>Ticket</dt><dd><span class="ticket-class-badge" id="ticket-class"></span></dd></div>
                 <div><dt>Event</dt><dd id="event-title"></dd></div>
                 <div><dt>Time</dt><dd id="checkin-time"></dd></div>
             </dl>
@@ -100,6 +100,7 @@
 .ticket-details div { display:flex;justify-content:space-between;gap:1rem;padding:.55rem .7rem;background:rgba(255,255,255,.035);border-radius:6px; }
 .ticket-details dt { color:var(--text-muted);font-size:.78rem; }
 .ticket-details dd { text-align:right;font-weight:600; }
+.ticket-class-badge { display:inline-flex;align-items:center;max-width:100%;padding:.18rem .55rem;border:1px solid rgba(200,169,110,.4);border-radius:999px;background:rgba(200,169,110,.12);color:var(--accent2);font-size:.82rem;line-height:1.25; }
 .result-footer { color:var(--text-dim);font-size:.76rem;margin-top:1.2rem; }
 @media(max-width:800px) { .checkin-grid { grid-template-columns:1fr; } .result-panel { min-height:300px; } }
 @media(max-width:600px) {
@@ -138,6 +139,7 @@
     .ticket-details div { min-width:0; display:block; padding:.3rem .4rem; }
     .ticket-details dt { font-size:.62rem; }
     .ticket-details dd { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; font-size:.75rem; }
+    .ticket-class-badge { padding:.12rem .4rem;font-size:.7rem; }
     .result-footer { display:none; }
     .result-panel:has(.ticket-details:not([hidden])) { align-content:center; }
 }
@@ -245,7 +247,12 @@
     }
     function fillDetails(data) {
         document.getElementById('guest-name').textContent = data.guest || '';
-        document.getElementById('ticket-class').textContent = data.ticket || '';
+        const ticketBadge = document.getElementById('ticket-class');
+        ticketBadge.textContent = data.ticket || '';
+        const classColor = /^#[0-9a-f]{6}$/i.test(data.ticket_color || '') ? data.ticket_color : '';
+        ticketBadge.style.color = classColor || '';
+        ticketBadge.style.backgroundColor = classColor ? classColor + '22' : '';
+        ticketBadge.style.borderColor = classColor ? classColor + '88' : '';
         document.getElementById('event-title').textContent = data.event || '';
         document.getElementById('checkin-time').textContent = data.checked_in_at || '';
         details.hidden = false;

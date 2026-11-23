@@ -9,5 +9,6 @@ class TicketOrderItem extends Model {
         $number = $this->seat_label ?? $this->order->items()->withoutGlobalScope('active')->where('id','<=',$this->id)->count();
         return $this->order->booking_code.'/'.$number;
     }
+    public function ticketClass() { return $this->belongsTo(TicketClass::class, 'ticket_class_id'); }
     public function order() { return $this->belongsTo(TicketOrder::class,'ticket_order_id'); }
 }

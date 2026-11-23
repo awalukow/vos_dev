@@ -23,7 +23,7 @@ class TicketCheckinController extends Controller
             $item = TicketOrderItem::query()
                 ->where('token', $data['token'])
                 ->lockForUpdate()
-                ->with(['order.customer', 'order.event'])
+                ->with(['order.customer', 'order.event', 'ticketClass'])
                 ->first();
 
             if (!$item || !$item->order || $item->order->RowStatus !== 0 || $item->order->status !== 'paid') {
@@ -36,6 +36,7 @@ class TicketCheckinController extends Controller
                     'checked_in_at' => $item->checked_in_at->timezone('Asia/Jakarta')->format('H:i:s'),
                     'guest' => $item->order->customer->name,
                     'ticket' => $item->class_name,
+                    'ticket_color' => $item->ticketClass?->color,
                     'event' => $item->order->event->title,
                 ];
             }
@@ -49,6 +50,7 @@ class TicketCheckinController extends Controller
                 'checked_in_at' => $item->checked_in_at->timezone('Asia/Jakarta')->format('H:i:s'),
                 'guest' => $item->order->customer->name,
                 'ticket' => $item->class_name,
+                'ticket_color' => $item->ticketClass?->color,
                 'event' => $item->order->event->title,
             ];
         }, 3);
